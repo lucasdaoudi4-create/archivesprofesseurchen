@@ -26,6 +26,14 @@
   </head>
   <body class="bg-lab-950 text-lab-50 antialiased">
     <div id="root"></div>
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="subject" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="object" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

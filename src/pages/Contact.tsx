@@ -11,14 +11,53 @@ const SUBJECTS: { key: Subject; label: string; icon: string }[] = [
   { key: "autre", label: "Autre", icon: "✉" },
 ];
 
+const SUBJECT_LABELS: Record<Subject, string> = Object.fromEntries(
+  SUBJECTS.map((s) => [s.key, s.label]),
+) as Record<Subject, string>;
+
+type Status = "idle" | "sending" | "ok" | "error";
+
+function encodeForm(data: Record<string, string>): string {
+  return Object.entries(data)
+    .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+    .join("&");
+}
+
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState<string>("");
   const [subject, setSubject] = useState<Subject>("formation");
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO : connecter à Netlify Forms / Supabase / FormSpree / etc.
-    setSubmitted(true);
+    setStatus("sending");
+    setErrorMsg("");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const payload: Record<string, string> = {
+      "form-name": "contact",
+      subject: SUBJECT_LABELS[subject],
+    };
+    formData.forEach((value, key) => {
+      if (typeof value === "string") payload[key] = value;
+    });
+
+    try {
+      const res = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encodeForm(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setStatus("ok");
+      form.reset();
+      setSubject("formation");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Erreur inconnue");
+    }
   };
 
   return (
@@ -35,7 +74,7 @@ export default function Contact() {
       <section className="section pt-0">
         <div className="container-narrow grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 card !p-8">
-            {submitted ? (
+            {status === "ok" ? (
               <div className="text-center py-12 space-y-4">
                 <div className="text-5xl">📬</div>
                 <h3 className="font-display text-2xl text-white">Message envoyé !</h3>
@@ -43,12 +82,29 @@ export default function Contact() {
                   Merci, on revient vers toi dès que possible. En attendant, fais un tour sur le
                   Discord ou découvre la formation.
                 </p>
-                <button onClick={() => setSubmitted(false)} className="btn-ghost mt-4">
+                <button onClick={() => setStatus("idle")} className="btn-ghost mt-4">
                   Envoyer un autre message
                 </button>
               </div>
             ) : (
-              <form onSubmit={onSubmit} className="space-y-5">
+              <form
+                onSubmit={onSubmit}
+                name="contact"
+                method="POST"
+                data-netlify="true"
+                data-netlify-honeypot="bot-field"
+                className="space-y-5"
+              >
+                {/* Champs cachés requis par Netlify Forms */}
+                <input type="hidden" name="form-name" value="contact" />
+                <p className="hidden">
+                  <label>
+                    Ne pas remplir : <input name="bot-field" tabIndex={-1} autoComplete="off" />
+                  </label>
+                </p>
+                {/* Le sujet est géré via state mais on l'expose dans la soumission */}
+                <input type="hidden" name="subject" value={SUBJECT_LABELS[subject]} />
+
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-pikachu-yellow mb-2 font-semibold">
                     Sujet
@@ -104,15 +160,43 @@ export default function Contact() {
                   </span>
                 </label>
 
-                <button type="submit" className="btn-primary w-full sm:w-auto">
-                  Envoyer le message
-                  <span aria-hidden>→</span>
+                {status === "error" && (
+                  <div className="rounded-xl bg-pokeball-red/15 border border-pokeball-red/40 text-pokeball-red text-sm px-4 py-3">
+                    Impossible d'envoyer le message ({errorMsg}). Réessaie ou écris directement à{" "}
+                    <a
+                      href="mailto:contact@archivesprofesseurchen.com"
+                      className="underline font-semibold"
+                    >
+                      contact@archivesprofesseurchen.com
+                    </a>
+                    .
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="btn-primary w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {status === "sending" ? "Envoi en cours…" : "Envoyer le message"}
+                  {status !== "sending" && <span aria-hidden>→</span>}
                 </button>
               </form>
             )}
           </div>
 
           <aside className="space-y-4">
+            <div className="card">
+              <div className="text-xs uppercase tracking-widest text-pikachu-yellow mb-2 font-semibold">
+                Email direct
+              </div>
+              <a
+                href="mailto:contact@archivesprofesseurchen.com"
+                className="font-mono text-sm text-white hover:text-pikachu-yellow break-all"
+              >
+                contact@archivesprofesseurchen.com
+              </a>
+            </div>
             <div className="card">
               <div className="text-xs uppercase tracking-widest text-pikachu-yellow mb-2 font-semibold">
                 Réponse
@@ -127,8 +211,11 @@ export default function Contact() {
                 Le plus rapide ?
               </div>
               <p className="text-sm text-lab-200">
-                Pose ta question sur le <a href="/discord" className="text-pikachu-yellow underline">Discord</a> —
-                souvent un membre te répond avant nous.
+                Pose ta question sur le{" "}
+                <a href="/discord" className="text-pikachu-yellow underline">
+                  Discord
+                </a>{" "}
+                — souvent un membre te répond avant nous.
               </p>
             </div>
             <div className="card">
