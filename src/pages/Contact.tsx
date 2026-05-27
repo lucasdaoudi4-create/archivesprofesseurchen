@@ -1,5 +1,4 @@
 import { useState } from "react";
-import SectionHeading from "../components/ui/SectionHeading";
 import TypeBadge from "../components/ui/TypeBadge";
 
 type Subject = "formation" | "partenariat" | "minecraft" | "presse" | "autre";

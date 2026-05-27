@@ -4,8 +4,20 @@ import Pokeball from "../components/ui/Pokeball";
 import SocialIcon from "../components/ui/SocialIcon";
 import SectionHeading from "../components/ui/SectionHeading";
 import TypeBadge from "../components/ui/TypeBadge";
+import LiveDot from "../components/ui/LiveDot";
+import DiscordLiveStats from "../components/ui/DiscordLiveStats";
+import { useMinecraftStatus } from "../hooks/useMinecraftStatus";
+import YouTubeFeed from "../components/home/YouTubeFeed";
 
 export default function Home() {
+  const mcStatus = useMinecraftStatus(minecraft.ip);
+  const mcOnline = mcStatus.status === "ok" && mcStatus.data.online;
+  const mcDotStatus = mcStatus.status === "loading" ? "loading" : mcOnline ? "online" : "offline";
+  const mcPlayers =
+    mcStatus.status === "ok" && mcStatus.data.online && mcStatus.data.players
+      ? `${mcStatus.data.players.online} en jeu`
+      : null;
+
   return (
     <>
       {/* HERO */}
@@ -176,7 +188,10 @@ export default function Home() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-accent-grass/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
             <div className="relative space-y-4">
-              <TypeBadge variant="grass">Serveur Minecraft</TypeBadge>
+              <div className="flex items-center justify-between gap-3">
+                <TypeBadge variant="grass">Serveur Minecraft</TypeBadge>
+                <LiveDot status={mcDotStatus} label={mcPlayers ?? undefined} />
+              </div>
               <h3 className="text-3xl font-display text-white">{minecraft.name}</h3>
               <p className="text-lab-200">{minecraft.description}</p>
               <div className="flex flex-wrap gap-2 pt-2">
@@ -200,8 +215,11 @@ export default function Home() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#5865f2]/30 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
             <div className="relative space-y-4">
-              <TypeBadge variant="water">Communauté Discord</TypeBadge>
-              <h3 className="text-3xl font-display text-white">{discord.memberCountApprox} dresseurs t'attendent</h3>
+              <div className="flex items-center justify-between gap-3">
+                <TypeBadge variant="water">Communauté Discord</TypeBadge>
+                <DiscordLiveStats variant="inline" />
+              </div>
+              <h3 className="text-3xl font-display text-white">Une communauté de dresseurs t'attend</h3>
               <p className="text-lab-200">
                 Discussions Pokémon, échanges, combats, événements et avant-premières. Le QG officiel.
               </p>
@@ -221,6 +239,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* YOUTUBE FEED */}
+      <YouTubeFeed />
 
       {/* NEWS / LATEST */}
       <section className="section">

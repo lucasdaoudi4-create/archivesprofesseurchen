@@ -2,9 +2,16 @@ import { useState } from "react";
 import { minecraft } from "../data/site";
 import SectionHeading from "../components/ui/SectionHeading";
 import TypeBadge from "../components/ui/TypeBadge";
+import LiveDot from "../components/ui/LiveDot";
+import { useMinecraftStatus } from "../hooks/useMinecraftStatus";
 
 export default function Minecraft() {
   const [copied, setCopied] = useState(false);
+  const status = useMinecraftStatus(minecraft.ip);
+  const isOnline = status.status === "ok" && status.data.online;
+  const players = status.status === "ok" ? status.data.players : undefined;
+  const liveVersion = status.status === "ok" ? status.data.version : undefined;
+  const dotStatus = status.status === "loading" ? "loading" : isOnline ? "online" : "offline";
 
   const copyIp = async () => {
     try {
@@ -30,21 +37,35 @@ export default function Minecraft() {
               {minecraft.name}
             </h1>
             <p className="text-lg text-lab-200 leading-relaxed">{minecraft.description}</p>
-            <div className="grid grid-cols-3 gap-3 max-w-md">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
+              <div className="card !p-3 text-center">
+                <div className="text-xs uppercase tracking-wider text-lab-400">Statut</div>
+                <div className="mt-1 flex justify-center">
+                  <LiveDot status={dotStatus} />
+                </div>
+              </div>
+              <div className="card !p-3 text-center">
+                <div className="text-xs uppercase tracking-wider text-lab-400">Joueurs</div>
+                <div className="font-display text-white">
+                  {status.status === "loading" && "…"}
+                  {status.status === "ok" && isOnline && players
+                    ? `${players.online}/${players.max}`
+                    : status.status === "ok"
+                    ? "—"
+                    : status.status === "error"
+                    ? "?"
+                    : null}
+                </div>
+              </div>
               <div className="card !p-3 text-center">
                 <div className="text-xs uppercase tracking-wider text-lab-400">Version</div>
-                <div className="font-display text-white">{minecraft.version}</div>
+                <div className="font-display text-white text-sm">
+                  {liveVersion ?? minecraft.version}
+                </div>
               </div>
               <div className="card !p-3 text-center">
                 <div className="text-xs uppercase tracking-wider text-lab-400">Mode</div>
-                <div className="font-display text-white text-sm">Pixelmon</div>
-              </div>
-              <div className="card !p-3 text-center">
-                <div className="text-xs uppercase tracking-wider text-lab-400">Status</div>
-                <div className="font-display text-accent-grass text-sm flex items-center justify-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-accent-grass animate-pulse" />
-                  Online
-                </div>
+                <div className="font-display text-white text-sm">Cobblemon</div>
               </div>
             </div>
           </div>
@@ -76,7 +97,7 @@ export default function Minecraft() {
               </div>
 
               <div className="mt-5 p-4 rounded-xl bg-pikachu-yellow/10 border border-pikachu-yellow/30 text-sm text-pikachu-yellow">
-                ⚡ Pixelmon est requis pour rejoindre. Installation via CurseForge ou Modrinth en quelques clics.
+                ⚡ Cobblemon est requis pour rejoindre. Installation via CurseForge ou Modrinth en quelques clics.
               </div>
             </div>
           </div>
@@ -88,7 +109,7 @@ export default function Minecraft() {
           <SectionHeading
             eyebrow="L'expérience"
             title="Ce qui rend l'Académie unique"
-            subtitle="Plus qu'un serveur Pixelmon — un véritable univers structuré, pédagogique et social."
+            subtitle="Plus qu'un serveur Cobblemon — un véritable univers structuré, pédagogique et social."
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {minecraft.features.map((f) => (
@@ -108,7 +129,7 @@ export default function Minecraft() {
           <SectionHeading eyebrow="Premier pas" title="Comment rejoindre en 3 étapes" />
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { n: "01", t: "Installe Pixelmon", d: "Via CurseForge ou Modrinth, version 1.20.x recommandée." },
+              { n: "01", t: "Installe Cobblemon", d: "Via CurseForge ou Modrinth, version 1.20.x recommandée." },
               { n: "02", t: "Ajoute le serveur", d: `Dans Multijoueur, ajoute l'IP : ${minecraft.ip}` },
               { n: "03", t: "Rejoins l'Académie", d: "Suis les instructions du spawn pour t'inscrire à un cours." },
             ].map((s) => (

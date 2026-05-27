@@ -10,3 +10,6 @@ dist-ssr
 .idea
 *.log
 .claude/
+*.tsbuildinfo
+vite.config.d.ts
+vite.config.js

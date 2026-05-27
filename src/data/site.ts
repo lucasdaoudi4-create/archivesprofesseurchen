@@ -20,12 +20,14 @@ export const socials: Record<
     color: string;
     bg: string;
     description: string;
+    channelId?: string;
   }
 > = {
   youtube: {
     label: "YouTube",
     handle: "@LesArchivesduProfChen",
     url: "https://www.youtube.com/channel/UC5pkQWvaRE0DyJPhN89yGDw",
+    channelId: "UC5pkQWvaRE0DyJPhN89yGDw",
     color: "text-red-400",
     bg: "from-red-600/30 to-red-900/10",
     description: "Vidéos longues, analyses, lives et séries Pokémon.",
@@ -59,13 +61,16 @@ export const socials: Record<
 export const discord = {
   name: "Discord — Les Archives",
   inviteUrl: "https://discord.com/invite/lesarchivesduprofchen",
-  memberCountApprox: "1 000+",
+  // ID numérique du serveur Discord (Dev Mode → clic droit sur le serveur → Copier l'ID).
+  // Laisser null si pas encore configuré : le compteur live sera masqué.
+  guildId: null as string | null,
+  memberCountApprox: "360+",
   features: [
-    "Salons thématiques par génération Pokémon",
-    "Échanges, dressage et combats compétitifs",
-    "Annonces en avant-première des contenus",
-    "Salon dédié à la formation et au serveur Minecraft",
-    "Événements communautaires réguliers",
+    "Salons Cobblemon, TCG, JCC et discussions Pokémon",
+    "Salon dédié à la formation création IA",
+    "Échanges, dressage et combats entre membres",
+    "Annonces en avant-première des contenus YouTube",
+    "Communauté active autour du serveur Minecraft",
   ],
 };
 
@@ -73,40 +78,40 @@ export const minecraft = {
   name: "L'Académie du Professeur Chen",
   ip: "play.archivesprofesseurchen.com", // TODO
   version: "1.20.x",
-  gamemode: "Pixelmon / Survival éducatif",
+  gamemode: "Cobblemon / Survival éducatif",
   description:
-    "Le serveur Minecraft officiel : un monde inspiré de l'univers Pokémon où tu rejoins l'Académie, capture des Pokémon, complète ton Pokédex et participe à des cours et événements.",
+    "Le serveur Minecraft officiel : un monde inspiré de l'univers Pokémon où tu rejoins l'Académie, captures des Pokémon avec Cobblemon, complètes ton Pokédex et participes à des cours et événements.",
   features: [
-    "Mod Pixelmon avec tous les Pokémon",
+    "Mod Cobblemon avec tous les Pokémon",
     "Cours et événements en jeu animés par l'équipe",
     "Régions custom inspirées des jeux officiels",
     "Système de Ligue avec champions d'arène",
-    "Échanges, GTS et tournois communautaires",
+    "Échanges et tournois communautaires",
   ],
 };
 
 export const formation = {
   title: "La Formation",
-  subtitle: "Deviens créateur Pokémon — du zéro à la publication",
+  subtitle: "Créer du contenu Pokémon avec l'IA — du zéro à la publication",
   pitch:
-    "Une formation complète pour lancer ta chaîne, créer du contenu Pokémon de qualité, fédérer une communauté et en vivre. Méthode testée, accompagnement réel.",
+    "Une formation complète pour lancer ta chaîne, créer du contenu Pokémon de qualité en exploitant les outils IA, fédérer une communauté et en vivre. Workflows testés, prompts éprouvés, accompagnement réel.",
   highlights: [
     { icon: "🎯", title: "Stratégie de contenu", text: "Trouve ton angle unique, construis ton univers et ta ligne éditoriale." },
-    { icon: "🎬", title: "Production vidéo", text: "Tournage, montage, miniatures, sound design : la chaîne complète." },
+    { icon: "🤖", title: "IA dans le workflow", text: "ChatGPT, Midjourney, ElevenLabs : intégrer l'IA dans chaque étape de prod." },
+    { icon: "🎬", title: "Production vidéo", text: "Tournage, montage, miniatures, sound design — accéléré par l'IA." },
     { icon: "📈", title: "Croissance & SEO", text: "Algorithmes YouTube, TikTok, Instagram — comprends et exploite." },
     { icon: "💬", title: "Communauté", text: "Construis et anime ton Discord, fidélise ton audience sur la durée." },
     { icon: "💼", title: "Monétisation", text: "Sponsoring, AdSense, Patreon, prestations — diversifie tes revenus." },
-    { icon: "🧪", title: "Accompagnement", text: "Sessions live, retours personnalisés, communauté privée d'élèves." },
   ],
   modules: [
-    "Module 1 — Trouver ton positionnement unique",
-    "Module 2 — Maîtriser les outils de production",
-    "Module 3 — Storytelling et écriture pour la vidéo",
-    "Module 4 — Algorithmes & growth multi-plateformes",
-    "Module 5 — Construire et animer une communauté",
-    "Module 6 — Monétiser sans perdre l'authenticité",
-    "Module 7 — Cas pratiques & mises en situation",
-    "Bonus — Modèles, presets et templates prêts à l'emploi",
+    "Module 1 — Trouver ton positionnement unique de créateur Pokémon",
+    "Module 2 — Stack IA du créateur : outils, prompts et workflows",
+    "Module 3 — Écriture et storytelling assistés par IA",
+    "Module 4 — Production vidéo accélérée (miniatures, voix, montage)",
+    "Module 5 — Algorithmes & growth multi-plateformes",
+    "Module 6 — Construire et animer une communauté Discord",
+    "Module 7 — Monétiser ton activité sans perdre l'authenticité",
+    "Bonus — Bibliothèque de prompts et templates prêts à l'emploi",
   ],
   testimonials: [
     {
@@ -125,7 +130,7 @@ export const formation = {
     },
     {
       name: "Pierre F.",
-      role: "Streamer Pixelmon",
+      role: "Streamer Cobblemon",
       avatar: "🧑",
       quote:
         "La partie communauté m'a permis de transformer mes viewers en vrais fans. Le Discord est devenu mon hub.",

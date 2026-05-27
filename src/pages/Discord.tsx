@@ -1,6 +1,7 @@
 import { discord } from "../data/site";
 import SectionHeading from "../components/ui/SectionHeading";
 import TypeBadge from "../components/ui/TypeBadge";
+import DiscordLiveStats from "../components/ui/DiscordLiveStats";
 
 export default function Discord() {
   return (
@@ -28,7 +29,10 @@ export default function Discord() {
             Rejoindre le serveur
             <span aria-hidden>→</span>
           </a>
-          <div className="mt-4 text-xs text-lab-400 font-mono">{discord.inviteUrl}</div>
+          <div className="mt-4 flex justify-center">
+            <DiscordLiveStats variant="inline" />
+          </div>
+          <div className="mt-2 text-xs text-lab-400 font-mono">{discord.inviteUrl}</div>
         </div>
       </section>
 
