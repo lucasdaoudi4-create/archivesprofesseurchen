@@ -8,6 +8,7 @@ import LiveDot from "../components/ui/LiveDot";
 import DiscordLiveStats from "../components/ui/DiscordLiveStats";
 import { useMinecraftStatus } from "../hooks/useMinecraftStatus";
 import YouTubeFeed from "../components/home/YouTubeFeed";
+import NewsletterForm from "../components/home/NewsletterForm";
 
 export default function Home() {
   const mcStatus = useMinecraftStatus(minecraft.ip);
@@ -283,26 +284,7 @@ export default function Home() {
               <p className="text-lab-200 max-w-xl mx-auto">
                 Un email par mois : nouveautés, événements, sorties de contenus exclusifs et coulisses.
               </p>
-              <form
-                className="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  alert("Inscription enregistrée — à connecter à un service (Mailchimp, Brevo, Supabase).");
-                }}
-              >
-                <input
-                  type="email"
-                  required
-                  placeholder="ton@email.com"
-                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-lab-400 focus:outline-none focus:border-pikachu-yellow"
-                />
-                <button type="submit" className="btn-yellow">
-                  S'inscrire
-                </button>
-              </form>
-              <p className="text-xs text-lab-400 pt-2">
-                Pas de spam, désinscription en un clic.
-              </p>
+              <NewsletterForm />
             </div>
           </div>
         </div>
