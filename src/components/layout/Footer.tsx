@@ -1,88 +1,89 @@
 import { Link } from "react-router-dom";
 import { navLinks, site, socials } from "../../data/site";
-import Pokeball from "../ui/Pokeball";
+import Seal from "../brand/Seal";
+import SparkField from "../brand/SparkField";
 import SocialIcon from "../ui/SocialIcon";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="mt-24 border-t border-white/10 bg-lab-950/80">
-      <div className="container-wide py-16 grid gap-12 lg:grid-cols-4">
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center gap-3">
-            <Pokeball size={36} />
-            <div>
-              <div className="font-display text-white text-lg">{site.name}</div>
-              <div className="text-xs uppercase tracking-widest text-pikachu-yellow/80">
-                {site.tagline}
+    <footer className="relative mt-24 bg-encre text-creme overflow-hidden">
+      <SparkField color="#5E7A48" opacity={0.13} />
+      <div className="relative">
+        <div className="container-wide py-16 grid gap-12 lg:grid-cols-4">
+          <div className="lg:col-span-2 space-y-5">
+            <div className="flex items-center gap-4">
+              <Seal size={52} variant="simple" tone="cream" />
+              <div className="leading-tight">
+                <div className="font-display font-extrabold text-creme text-lg">{site.name}</div>
+                <div className="mono-meta text-laiton-400 mt-1">Savoir · Partage · Passion</div>
               </div>
             </div>
+            <p className="text-encre-300 max-w-md leading-relaxed">{site.description}</p>
+            <div className="flex items-center gap-2.5 pt-1">
+              {(Object.keys(socials) as Array<keyof typeof socials>).map((k) => (
+                <a
+                  key={k}
+                  href={socials[k].url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={socials[k].label}
+                  className="p-2.5 rounded-lg border border-creme/15 text-creme/80 hover:text-creme hover:border-laiton/60 hover:bg-creme/5 transition-colors"
+                >
+                  <SocialIcon type={k} className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
           </div>
-          <p className="text-lab-300 max-w-md text-sm leading-relaxed">{site.description}</p>
-          <div className="flex items-center gap-3 pt-2">
-            {(Object.keys(socials) as Array<keyof typeof socials>).map((k) => (
-              <a
-                key={k}
-                href={socials[k].url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={socials[k].label}
-                className="p-2.5 rounded-lg bg-white/5 border border-white/10 text-lab-200 hover:text-pikachu-yellow hover:border-pikachu-yellow/40 transition-colors"
-              >
-                <SocialIcon type={k} className="w-5 h-5" />
-              </a>
-            ))}
-          </div>
-        </div>
 
-        <div>
-          <div className="text-white font-display text-sm mb-4 uppercase tracking-wider">
-            Navigation
+          <div>
+            <div className="label text-laiton-400 mb-4">Navigation</div>
+            <ul className="space-y-2.5 text-sm">
+              {navLinks.map((l) => (
+                <li key={l.to}>
+                  <Link to={l.to} className="text-encre-300 hover:text-creme transition-colors">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-2 text-sm">
-            {navLinks.map((l) => (
-              <li key={l.to}>
-                <Link to={l.to} className="text-lab-300 hover:text-pikachu-yellow transition-colors">
-                  {l.label}
+
+          <div>
+            <div className="label text-laiton-400 mb-4">Légal</div>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <Link to="/mentions-legales" className="text-encre-300 hover:text-creme transition-colors">
+                  Mentions légales
                 </Link>
               </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <div className="text-white font-display text-sm mb-4 uppercase tracking-wider">
-            Légal
+              <li>
+                <Link to="/cgv" className="text-encre-300 hover:text-creme transition-colors">
+                  CGV / CGU
+                </Link>
+              </li>
+              <li>
+                <Link to="/confidentialite" className="text-encre-300 hover:text-creme transition-colors">
+                  Confidentialité
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-encre-300 hover:text-creme transition-colors">
+                  Contact
+                </Link>
+              </li>
+            </ul>
           </div>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link to="/mentions-legales" className="text-lab-300 hover:text-pikachu-yellow transition-colors">
-                Mentions légales
-              </Link>
-            </li>
-            <li>
-              <Link to="/cgv" className="text-lab-300 hover:text-pikachu-yellow transition-colors">
-                CGV / CGU
-              </Link>
-            </li>
-            <li>
-              <Link to="/confidentialite" className="text-lab-300 hover:text-pikachu-yellow transition-colors">
-                Confidentialité
-              </Link>
-            </li>
-            <li>
-              <Link to="/contact" className="text-lab-300 hover:text-pikachu-yellow transition-colors">
-                Contact
-              </Link>
-            </li>
-          </ul>
         </div>
-      </div>
 
-      <div className="border-t border-white/5">
-        <div className="container-wide py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lab-400">
-          <div>© {new Date().getFullYear()} {site.name}. Tous droits réservés.</div>
-          <div className="opacity-70">
-            Site non affilié à The Pokémon Company. Pokémon™ et noms associés sont des marques déposées de leurs ayants droit.
+        <div className="border-t border-creme/10">
+          <div className="container-wide py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="mono-meta text-encre-300">
+              © {year} {site.name} — Tous droits réservés
+            </div>
+            <div className="mono-meta text-encre-400 text-center sm:text-right max-w-md">
+              Site non affilié à The Pokémon Company. Pokémon™ et les noms associés sont des marques de leurs ayants droit.
+            </div>
           </div>
         </div>
       </div>

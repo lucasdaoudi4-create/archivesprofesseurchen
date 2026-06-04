@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { navLinks, site } from "../../data/site";
-import Pokeball from "../ui/Pokeball";
+import { navLinks } from "../../data/site";
+import Seal from "../brand/Seal";
+import Spark from "../brand/Spark";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -9,7 +10,7 @@ export default function Navbar() {
   const location = useLocation();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 16);
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -21,21 +22,22 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ${
         scrolled
-          ? "bg-lab-950/85 backdrop-blur-md border-b border-white/10"
-          : "bg-transparent"
+          ? "bg-creme/90 backdrop-blur-md border-b border-encre/10 shadow-[0_8px_30px_-24px_rgba(22,19,13,0.5)]"
+          : "bg-creme/70 backdrop-blur-sm border-b border-transparent"
       }`}
     >
       <div className="container-wide flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-3 group">
-          <Pokeball size={32} className="group-hover:rotate-180 transition-transform duration-700" />
-          <div className="leading-tight">
-            <div className="font-display text-white text-sm sm:text-base">{site.shortName}</div>
-            <div className="text-[10px] uppercase tracking-widest text-pikachu-yellow/80 hidden sm:block">
-              Laboratoire officiel
-            </div>
-          </div>
+        <Link to="/" className="flex items-center gap-3 group" aria-label="Accueil — Les Archives du Professeur Chen">
+          <Seal size={34} variant="simple" tone="rouge" className="transition-transform duration-500 group-hover:rotate-[18deg]" />
+          <span className="flex flex-col leading-none">
+            <span className="font-display font-extrabold tracking-tight text-encre text-[0.95rem] inline-flex items-center gap-1">
+              Prof. Chen
+              <Spark size="0.55em" className="text-rouge" />
+            </span>
+            <span className="mono-meta text-encre-400 mt-0.5">Les Archives · FR</span>
+          </span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
@@ -45,10 +47,8 @@ export default function Navbar() {
               to={l.to}
               end={l.to === "/"}
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-pikachu-yellow bg-white/5"
-                    : "text-lab-200 hover:text-white hover:bg-white/5"
+                `px-3.5 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? "text-rouge" : "text-encre-600 hover:text-encre"
                 }`
               }
             >
@@ -65,7 +65,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setOpen((v) => !v)}
-          className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10"
+          className="lg:hidden p-2 rounded-md text-encre hover:bg-encre/5"
           aria-label="Menu"
           aria-expanded={open}
         >
@@ -80,7 +80,7 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="lg:hidden border-t border-white/10 bg-lab-950/95 backdrop-blur-md">
+        <div className="lg:hidden border-t border-encre/10 bg-creme/95 backdrop-blur-md">
           <nav className="container-wide py-4 flex flex-col gap-1">
             {navLinks.map((l) => (
               <NavLink
@@ -88,10 +88,8 @@ export default function Navbar() {
                 to={l.to}
                 end={l.to === "/"}
                 className={({ isActive }) =>
-                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? "text-pikachu-yellow bg-white/5"
-                      : "text-lab-200 hover:text-white hover:bg-white/5"
+                  `px-4 py-3 rounded-md text-base font-medium transition-colors ${
+                    isActive ? "text-rouge bg-rouge-50" : "text-encre-700 hover:bg-encre/5"
                   }`
                 }
               >

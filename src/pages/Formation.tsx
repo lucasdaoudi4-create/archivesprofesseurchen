@@ -1,74 +1,72 @@
-import { useState } from "react";
 import { formation } from "../data/site";
+import Seal from "../components/brand/Seal";
+import Spark from "../components/brand/Spark";
+import SparkField from "../components/brand/SparkField";
+import Pictogram from "../components/brand/Pictogram";
+import type { PictoName } from "../components/brand/Pictogram";
 import SectionHeading from "../components/ui/SectionHeading";
-import TypeBadge from "../components/ui/TypeBadge";
-import Pokeball from "../components/ui/Pokeball";
+
+const HIGHLIGHT_PICTOS: PictoName[] = [
+  "curiosite",
+  "decouverte",
+  "chroniques",
+  "nature",
+  "collection",
+  "savoir",
+];
 
 export default function Formation() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
   return (
     <>
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-30" />
-        <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pokeball-red/20 blur-3xl" />
-        <div className="absolute -bottom-32 left-1/4 w-96 h-96 rounded-full bg-pikachu-yellow/20 blur-3xl" />
-
-        <div className="container-narrow relative pt-20 pb-20 text-center">
-          <TypeBadge variant="fire">Programme phare</TypeBadge>
-          <h1 className="heading-display mt-4">
-            <span className="text-white">{formation.title}</span>
-            <br />
-            <span className="text-gradient-fire">{formation.subtitle}</span>
-          </h1>
-          <p className="text-xl text-lab-200 max-w-2xl mx-auto mt-6 leading-relaxed">
-            {formation.pitch}
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 mt-8">
-            <a
-              href={formation.ctaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary text-base px-8 py-4"
-            >
-              Rejoindre sur Patreon
-              <span aria-hidden>→</span>
-            </a>
-            <a href="#programme" className="btn-ghost">
-              Voir le programme détaillé
-            </a>
+      <section className="relative overflow-hidden bg-creme-veil">
+        <div className="container-narrow relative pt-20 pb-16 text-center">
+          <div className="flex justify-center mb-6">
+            <Seal size={84} variant="simple" tone="rouge" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto mt-14">
+          <span className="eyebrow justify-center">Programme phare</span>
+          <h1 className="display text-encre mt-4">{formation.title}.</h1>
+          <p className="font-display text-xl sm:text-2xl font-bold text-rouge mt-3">{formation.subtitle}</p>
+          <p className="text-lg text-encre-500 max-w-2xl mx-auto mt-5 leading-relaxed">{formation.pitch}</p>
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            <a href={formation.ctaUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-base px-7 py-3.5">
+              Rejoindre sur Patreon
+              <Spark size="0.8em" />
+            </a>
+            <a href="#programme" className="btn-outline">Voir le programme détaillé</a>
+          </div>
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto mt-14">
             {[
-              { value: "7+", label: "Modules" },
-              { value: "50h+", label: "De contenu" },
-              { value: "Privé", label: "Discord élèves" },
-              { value: "1:1", label: "Suivi inclus" },
+              { v: "7+", l: "Modules" },
+              { v: "50h+", l: "De contenu" },
+              { v: "Privé", l: "Discord élèves" },
+              { v: "1:1", l: "Suivi inclus" },
             ].map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-3xl sm:text-4xl font-display text-pikachu-yellow">{s.value}</div>
-                <div className="text-xs uppercase tracking-widest text-lab-400 mt-1">{s.label}</div>
+              <div key={s.l} className="text-center">
+                <dd className="font-display font-extrabold text-3xl sm:text-4xl text-encre">{s.v}</dd>
+                <dt className="mono-meta text-encre-400 mt-1.5">{s.l}</dt>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 
-      {/* WHAT YOU GET */}
+      {/* CE QUE TU APPRENDS */}
       <section className="section">
         <div className="container-wide">
           <SectionHeading
             eyebrow="Ce que tu apprends"
-            title="Tout ce qu'il te faut pour réussir"
+            title="Tout ce qu'il te faut pour réussir."
             subtitle="De la stratégie à la production, de la croissance à la monétisation."
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {formation.highlights.map((h) => (
-              <div key={h.title} className="card group hover:-translate-y-1">
-                <div className="text-4xl mb-3">{h.icon}</div>
-                <div className="font-display text-white text-lg mb-2">{h.title}</div>
-                <p className="text-sm text-lab-300">{h.text}</p>
+            {formation.highlights.map((h, i) => (
+              <div key={h.title} className="card card-hover">
+                <div className="h-12 w-12 rounded-xl border border-parchemin-600 bg-parchemin/60 flex items-center justify-center text-rouge mb-4">
+                  <Pictogram name={HIGHLIGHT_PICTOS[i % HIGHLIGHT_PICTOS.length]} size={24} />
+                </div>
+                <div className="font-display font-bold text-encre text-lg mb-1.5">{h.title}</div>
+                <p className="text-sm text-encre-500 leading-relaxed">{h.text}</p>
               </div>
             ))}
           </div>
@@ -76,120 +74,90 @@ export default function Formation() {
       </section>
 
       {/* PROGRAMME */}
-      <section id="programme" className="section bg-gradient-to-b from-transparent via-pokeball-red/5 to-transparent">
+      <section id="programme" className="section pt-0">
         <div className="container-narrow">
           <SectionHeading
             eyebrow="Le programme"
-            title="Module par module"
+            title="Module par module."
             subtitle="Une progression claire, du positionnement à la monétisation. Tu avances à ton rythme."
           />
-          <div className="space-y-3">
+          <ol className="divide-y divide-encre/10 border-y border-encre/10">
             {formation.modules.map((m, i) => (
-              <div
-                key={m}
-                className="card flex items-center gap-5 hover:border-pikachu-yellow/40"
-              >
-                <div className="shrink-0 h-12 w-12 rounded-xl bg-pokeball-red/15 border border-pokeball-red/30 flex items-center justify-center font-display text-pokeball-red text-lg">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <div className="flex-1 text-lab-100">{m}</div>
-                <span className="text-lab-500 text-xl">→</span>
-              </div>
+              <li key={m} className="flex items-center gap-5 py-4 group">
+                <span className="font-mono text-lg text-laiton-700 w-9 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                <span className="flex-1 text-encre-700">{m.replace(/^Module \d+ — /, "").replace(/^Bonus — /, "")}</span>
+                <Spark size="0.7em" className="text-parchemin-700 group-hover:text-rouge transition-colors shrink-0" />
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="section">
+      {/* TÉMOIGNAGES */}
+      <section className="section pt-0">
         <div className="container-wide">
           <SectionHeading
             eyebrow="Ils l'ont fait"
-            title="Témoignages d'élèves"
-            subtitle="Des créateurs qui sont passés par la formation et qui en parlent mieux que nous."
+            title="Témoignages d'élèves."
+            subtitle="Des créateurs passés par la formation, qui en parlent mieux que nous."
           />
           <div className="grid md:grid-cols-3 gap-4">
             {formation.testimonials.map((t) => (
-              <div key={t.name} className="card relative">
-                <div className="text-6xl text-pokeball-red/20 absolute top-2 right-4 font-serif">"</div>
-                <p className="text-lab-100 mb-6 relative">{t.quote}</p>
-                <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-                  <div className="h-10 w-10 rounded-full bg-pikachu-yellow/20 flex items-center justify-center text-2xl">
-                    {t.avatar}
+              <figure key={t.name} className="card flex flex-col">
+                <Spark size={18} className="text-rouge" />
+                <blockquote className="text-encre-700 mt-4 mb-6 leading-relaxed flex-1">« {t.quote} »</blockquote>
+                <figcaption className="flex items-center gap-3 pt-4 border-t border-encre/10">
+                  <div className="h-10 w-10 rounded-full bg-rouge-50 text-rouge-700 flex items-center justify-center font-display font-bold">
+                    {t.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-semibold text-white text-sm">{t.name}</div>
-                    <div className="text-xs text-lab-400">{t.role}</div>
+                    <div className="font-semibold text-encre text-sm">{t.name}</div>
+                    <div className="caption">{t.role}</div>
                   </div>
-                </div>
-              </div>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="section">
+      <section className="section pt-0">
         <div className="container-narrow">
-          <SectionHeading eyebrow="FAQ" title="Tu te poses encore des questions ?" />
-          <div className="space-y-3">
-            {formation.faq.map((f, i) => {
-              const open = openFaq === i;
-              return (
-                <div key={f.q} className="card !p-0 overflow-hidden">
-                  <button
-                    onClick={() => setOpenFaq(open ? null : i)}
-                    className="w-full p-5 flex items-center justify-between text-left hover:bg-white/5"
-                    aria-expanded={open}
-                  >
-                    <span className="font-semibold text-white">{f.q}</span>
-                    <span
-                      className={`text-pikachu-yellow text-2xl transition-transform ${
-                        open ? "rotate-45" : ""
-                      }`}
-                      aria-hidden
-                    >
-                      +
-                    </span>
-                  </button>
-                  {open && (
-                    <div className="px-5 pb-5 text-lab-200 text-sm leading-relaxed border-t border-white/10 pt-4">
-                      {f.a}
-                    </div>
-                  )}
+          <SectionHeading eyebrow="FAQ" title="Les questions fréquentes." />
+          <dl className="divide-y divide-encre/10 border-y border-encre/10">
+            {formation.faq.map((f, i) => (
+              <div key={f.q} className="py-6 grid sm:grid-cols-[auto_1fr] gap-x-5 gap-y-2">
+                <dt className="font-mono text-sm text-laiton-700 sm:pt-0.5">Q.{String(i + 1).padStart(2, "0")}</dt>
+                <div>
+                  <p className="font-display font-bold text-encre">{f.q}</p>
+                  <dd className="text-encre-500 mt-2 leading-relaxed">{f.a}</dd>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="section">
+      {/* CTA FINAL */}
+      <section className="section pt-0">
         <div className="container-narrow">
-          <div className="card !p-10 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-pokeball-red/30 to-pikachu-yellow/10 opacity-60" />
-            <div className="absolute -top-10 -right-10 opacity-30">
-              <Pokeball size={180} spin />
-            </div>
-            <div className="relative space-y-4">
-              <TypeBadge variant="fire">Rejoindre</TypeBadge>
-              <h3 className="heading-display text-white">Prêt à lancer ta chaîne ?</h3>
-              <p className="text-lab-100 max-w-xl mx-auto">
-                Accède à la formation et à la communauté privée directement sur Patreon.
+          <div className="relative rounded-2xl bg-encre text-creme overflow-hidden">
+            <SparkField color="#5E7A48" opacity={0.13} />
+            <div className="relative px-6 py-14 sm:px-12 text-center">
+              <div className="flex justify-center mb-5">
+                <Seal size={64} variant="simple" tone="cream" />
+              </div>
+              <span className="eyebrow justify-center text-laiton-400">Rejoindre</span>
+              <h3 className="display text-creme mt-4 text-[2rem] sm:text-4xl">Prêt à lancer ta chaîne ?</h3>
+              <p className="text-encre-300 max-w-xl mx-auto mt-4 leading-relaxed">
+                Accède à la formation et à la communauté privée directement sur Patreon, sans engagement.
               </p>
-              <div className="flex flex-wrap justify-center gap-3 pt-3">
-                <a
-                  href={formation.ctaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary text-base px-8 py-4"
-                >
+              <div className="flex flex-wrap justify-center gap-3 mt-8">
+                <a href={formation.ctaUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-base px-7 py-3.5">
                   Accéder via Patreon
                 </a>
-                <a href="/contact" className="btn-ghost">
-                  Poser une question d'abord
-                </a>
+                <a href="/contact" className="btn-ghost-dark">Poser une question d'abord</a>
               </div>
             </div>
           </div>

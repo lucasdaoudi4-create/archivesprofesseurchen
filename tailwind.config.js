@@ -4,67 +4,93 @@ export default {
   theme: {
     extend: {
       colors: {
-        pokeball: {
-          red: "#ee1515",
-          dark: "#1a1a1a",
-          white: "#fafafa",
-          shadow: "#222224",
+        // Charte — Les Archives du Professeur Chen (Édition 2026)
+        // Encre : near-black chaud, texte principal & sections sombres
+        encre: {
+          DEFAULT: "#16130D",
+          950: "#16130D",
+          900: "#1E1A12",
+          800: "#29231A",
+          700: "#3A3328",
+          600: "#544A3A",
+          500: "#6B5E47",
+          400: "#8A7C63",
+          300: "#B6A782",
         },
-        pikachu: {
-          yellow: "#ffcb05",
-          dark: "#3d7dca",
+        // Surfaces claires
+        creme: "#FAF4E7",
+        parchemin: {
+          DEFAULT: "#F0E6CC",
+          600: "#E4D8BD", // hairlines / bordures chaudes
+          700: "#D8C9A6",
         },
-        lab: {
-          50: "#f7f7fb",
-          100: "#eef0f7",
-          200: "#dde1ec",
-          300: "#c0c6d8",
-          400: "#9aa2bd",
-          500: "#7a85a4",
-          600: "#5c6783",
-          700: "#454e66",
-          800: "#2e3548",
-          900: "#181c2a",
-          950: "#0c0e18",
+        // Accent primaire — Rouge Sceau
+        rouge: {
+          DEFAULT: "#C73B2B",
+          700: "#A02E20",
+          600: "#B33324",
+          500: "#C73B2B",
+          400: "#D75B4C",
+          50: "#FAEBE8",
         },
-        accent: {
-          electric: "#facc15",
-          fire: "#f97316",
-          water: "#3b82f6",
-          grass: "#22c55e",
-          psychic: "#ec4899",
+        // Accent secondaire — Vert Herbier (pont avec CMAY)
+        vert: {
+          DEFAULT: "#5E7A48",
+          700: "#4A6238",
+          600: "#547040",
+          400: "#7C9764",
+          50: "#EDF1E7",
+        },
+        // Accent tertiaire — Laiton
+        laiton: {
+          DEFAULT: "#C2922F",
+          700: "#9E7623",
+          600: "#B0832A",
+          400: "#D4AB55",
+          50: "#F8F0DD",
         },
       },
       fontFamily: {
-        display: ['"Russo One"', "Impact", "system-ui", "sans-serif"],
-        sans: ['"Inter"', "system-ui", "sans-serif"],
-        mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
+        sans: ['"DM Sans"', "system-ui", "sans-serif"],
+        display: ['"DM Sans"', "system-ui", "sans-serif"],
+        mono: ['"DM Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
+      },
+      fontSize: {
+        // Échelle typographique de la charte (px / line-height)
+        display: ["4.5rem", { lineHeight: "1.05", letterSpacing: "-0.02em", fontWeight: "800" }],
+        h1: ["3rem", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+        h2: ["1.875rem", { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "700" }],
+      },
+      letterSpacing: {
+        label: "0.22em",
       },
       boxShadow: {
-        pokeball: "0 10px 30px -10px rgba(238, 21, 21, 0.5)",
-        glow: "0 0 40px rgba(255, 203, 5, 0.4)",
-        cardhover: "0 25px 60px -20px rgba(0, 0, 0, 0.6)",
+        card: "0 1px 2px rgba(22,19,13,0.04), 0 14px 34px -22px rgba(58,42,24,0.30)",
+        lift: "0 22px 48px -24px rgba(22,19,13,0.40)",
+        seal: "0 14px 34px -14px rgba(199,59,43,0.40)",
+        inset: "inset 0 0 0 1px rgba(22,19,13,0.06)",
+      },
+      borderColor: {
+        hair: "rgba(22,19,13,0.12)",
       },
       backgroundImage: {
-        "pokeball-pattern":
-          "radial-gradient(circle at 20% 20%, rgba(238,21,21,0.08) 0, transparent 40%), radial-gradient(circle at 80% 80%, rgba(255,203,5,0.08) 0, transparent 40%)",
-        "lab-grid":
-          "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+        // Dégradé parchemin très doux pour les fonds clairs
+        "creme-veil":
+          "radial-gradient(120% 80% at 50% -10%, rgba(194,146,47,0.07) 0, transparent 55%), radial-gradient(90% 70% at 100% 0%, rgba(199,59,43,0.05) 0, transparent 50%)",
       },
       animation: {
-        float: "float 6s ease-in-out infinite",
-        spin_slow: "spin 12s linear infinite",
-        shine: "shine 3s linear infinite",
-        ping_slow: "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+        "spin-slow": "spin 22s linear infinite",
+        "float-slow": "float 7s ease-in-out infinite",
+        "fade-up": "fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
       keyframes: {
         float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-12px)" },
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
         },
-        shine: {
-          "0%": { backgroundPosition: "-200% center" },
-          "100%": { backgroundPosition: "200% center" },
+        fadeUp: {
+          "0%": { opacity: "0", transform: "translateY(14px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },
     },

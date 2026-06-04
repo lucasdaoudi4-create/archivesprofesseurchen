@@ -2,98 +2,177 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================================
+   Les Archives du Professeur Chen — système éditorial archivistique
+   Clair par défaut (Crème / Encre), sections sombres « Encre » en ponctuation
+   ========================================================================= */
+
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
   html {
     scroll-behavior: smooth;
   }
+
   body {
-    font-family: "Inter", system-ui, sans-serif;
-    background-color: #0c0e18;
-    background-image:
-      radial-gradient(circle at 15% 10%, rgba(238, 21, 21, 0.08) 0, transparent 35%),
-      radial-gradient(circle at 85% 90%, rgba(255, 203, 5, 0.07) 0, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0, transparent 50%);
-    background-attachment: fixed;
+    font-family: "DM Sans", system-ui, sans-serif;
+    background-color: #faf4e7;
+    color: #16130d;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4 {
-    font-family: "Russo One", Impact, system-ui, sans-serif;
-    letter-spacing: -0.01em;
+    font-family: "DM Sans", system-ui, sans-serif;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   ::selection {
-    background: #ffcb05;
-    color: #1a1a1a;
+    background: #c73b2b;
+    color: #faf4e7;
   }
 
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: #181c2a; }
+  /* Accessibilité — anneau de focus visible et chaud */
+  :focus-visible {
+    outline: 2px solid #c73b2b;
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Barre de défilement chaude */
+  * {
+    scrollbar-color: #d8c9a6 transparent;
+  }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: #f0e6cc; }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #ee1515, #c00000);
-    border-radius: 6px;
+    background: #c2922f;
+    border-radius: 8px;
+    border: 3px solid #f0e6cc;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer components {
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold
-           transition-all duration-200 active:scale-95 select-none;
-  }
-  .btn-primary {
-    @apply btn bg-pokeball-red text-white shadow-pokeball hover:shadow-lg hover:brightness-110;
-  }
-  .btn-yellow {
-    @apply btn bg-pikachu-yellow text-lab-950 hover:brightness-110;
-  }
-  .btn-ghost {
-    @apply btn bg-white/5 backdrop-blur border border-white/10 text-white hover:bg-white/10;
-  }
-  .card {
-    @apply relative rounded-2xl border border-white/10 bg-lab-900/60 backdrop-blur-sm
-           p-6 transition-all duration-300 hover:border-white/20 hover:shadow-cardhover;
-  }
-  .badge {
-    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
-  }
+  /* --- Conteneurs ------------------------------------------------------- */
   .container-narrow {
-    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-5xl mx-auto px-5 sm:px-8;
   }
   .container-wide {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-6xl mx-auto px-5 sm:px-8;
   }
   .section {
     @apply py-20 sm:py-28;
   }
-  .heading-display {
-    @apply text-4xl sm:text-5xl lg:text-6xl font-display leading-tight;
+
+  /* --- Typographie de marque ------------------------------------------- */
+  .display {
+    @apply font-display font-extrabold leading-[1.04] tracking-[-0.02em]
+           text-[2.6rem] sm:text-6xl lg:text-[4.5rem];
   }
-  .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 203, 5, 0.6), transparent);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: shine 3s linear infinite;
+  .heading-1 {
+    @apply font-display font-bold leading-[1.1] tracking-[-0.02em]
+           text-3xl sm:text-4xl lg:text-5xl;
+  }
+  .heading-2 {
+    @apply font-display font-bold leading-tight tracking-[-0.01em]
+           text-2xl sm:text-3xl;
+  }
+  /* Intitulé / label mono — la signature « fiche d'archive » */
+  .label {
+    @apply font-mono uppercase text-[0.72rem] tracking-label text-encre-500;
+  }
+  .caption {
+    @apply font-mono text-[0.78rem] leading-5 text-encre-400;
+  }
+
+  /* Eyebrow : petit label rouge précédé d'une étincelle/tiret */
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 font-mono uppercase
+           text-[0.72rem] tracking-label text-rouge;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-6 bg-rouge/60;
+  }
+
+  /* --- Boutons ---------------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg
+           font-medium text-[0.95rem] transition-all duration-200
+           active:translate-y-px select-none;
+  }
+  .btn-primary {
+    @apply btn bg-rouge text-creme shadow-seal hover:bg-rouge-600;
+  }
+  .btn-dark {
+    @apply btn bg-encre text-creme hover:bg-encre-800;
+  }
+  .btn-outline {
+    @apply btn bg-transparent text-encre border border-encre/25
+           hover:border-encre/60 hover:bg-encre/[0.04];
+  }
+  /* Sur fond sombre « Encre » */
+  .btn-cream {
+    @apply btn bg-creme text-encre hover:bg-parchemin;
+  }
+  .btn-ghost-dark {
+    @apply btn bg-transparent text-creme border border-creme/25 hover:bg-creme/10;
+  }
+
+  /* --- Surfaces / cartes ----------------------------------------------- */
+  .card {
+    @apply relative rounded-xl border border-parchemin-600 bg-creme
+           p-6 transition-all duration-300;
+  }
+  .card-hover {
+    @apply hover:border-laiton/50 hover:shadow-card hover:-translate-y-0.5;
+  }
+  .card-parch {
+    @apply bg-parchemin border-parchemin-700/60;
+  }
+
+  /* --- Tag / chip mono « fiche » --------------------------------------- */
+  .tag {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded
+           font-mono uppercase text-[0.66rem] tracking-[0.14em] border;
+  }
+
+  /* --- Filet / règle ---------------------------------------------------- */
+  .rule {
+    @apply h-px w-full bg-encre/10 border-0;
   }
 }
 
 @layer utilities {
-  .text-gradient-fire {
-    background: linear-gradient(135deg, #ee1515 0%, #ffcb05 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  /* Métadonnée courante façon entête/pied de charte */
+  .mono-meta {
+    @apply font-mono uppercase text-[0.62rem] tracking-[0.18em];
   }
-  .text-gradient-electric {
-    background: linear-gradient(135deg, #ffcb05 0%, #ffffff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .bg-grid {
-    background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
+
+  /* Filets décoratifs sous un titre */
+  .underline-laiton {
+    text-decoration: underline;
+    text-decoration-color: rgba(194, 146, 47, 0.55);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
   }
 }

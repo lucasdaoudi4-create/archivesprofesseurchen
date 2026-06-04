@@ -1,24 +1,28 @@
-type Variant = "fire" | "water" | "grass" | "electric" | "psychic" | "dark";
+import Spark from "../brand/Spark";
 
-const styles: Record<Variant, string> = {
-  fire: "bg-accent-fire/15 text-accent-fire border-accent-fire/30",
-  water: "bg-accent-water/15 text-accent-water border-accent-water/30",
-  grass: "bg-accent-grass/15 text-accent-grass border-accent-grass/30",
-  electric: "bg-accent-electric/15 text-accent-electric border-accent-electric/30",
-  psychic: "bg-accent-psychic/15 text-accent-psychic border-accent-psychic/30",
-  dark: "bg-lab-800 text-lab-200 border-lab-700",
+export type TagVariant = "rouge" | "vert" | "laiton" | "ink" | "cream";
+
+const styles: Record<TagVariant, string> = {
+  rouge: "bg-rouge-50 text-rouge-700 border-rouge/25",
+  vert: "bg-vert-50 text-vert-700 border-vert/25",
+  laiton: "bg-laiton-50 text-laiton-700 border-laiton/30",
+  ink: "bg-encre/[0.04] text-encre-700 border-encre/15",
+  cream: "bg-creme/5 text-creme border-creme/30",
 };
 
+// Étiquette « fiche d'archive » : mono, capitales, étincelle en tête.
 export default function TypeBadge({
-  variant = "electric",
+  variant = "rouge",
   children,
+  spark = true,
 }: {
-  variant?: Variant;
+  variant?: TagVariant;
   children: React.ReactNode;
+  spark?: boolean;
 }) {
   return (
-    <span className={`badge border ${styles[variant]}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+    <span className={`tag ${styles[variant]}`}>
+      {spark && <Spark size="0.7em" />}
       {children}
     </span>
   );

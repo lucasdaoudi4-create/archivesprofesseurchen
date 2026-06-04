@@ -3,27 +3,24 @@ type Props = {
   title: string;
   subtitle?: string;
   align?: "left" | "center";
+  tone?: "ink" | "cream";
 };
 
-export default function SectionHeading({ eyebrow, title, subtitle, align = "center" }: Props) {
-  const alignClass = align === "center" ? "text-center mx-auto" : "text-left";
+export default function SectionHeading({
+  eyebrow,
+  title,
+  subtitle,
+  align = "left",
+  tone = "ink",
+}: Props) {
+  const center = align === "center";
+  const titleColor = tone === "cream" ? "text-creme" : "text-encre";
+  const subColor = tone === "cream" ? "text-encre-300" : "text-encre-500";
   return (
-    <div className={`max-w-3xl ${alignClass} mb-12`}>
-      {eyebrow && (
-        <div
-          className={`uppercase tracking-[0.2em] text-xs font-bold text-pikachu-yellow mb-3 ${
-            align === "center" ? "flex justify-center" : ""
-          }`}
-        >
-          <span className="inline-flex items-center gap-2">
-            <span className="h-px w-6 bg-pikachu-yellow" />
-            {eyebrow}
-            <span className="h-px w-6 bg-pikachu-yellow" />
-          </span>
-        </div>
-      )}
-      <h2 className="heading-display text-white">{title}</h2>
-      {subtitle && <p className="mt-4 text-lab-300 text-lg leading-relaxed">{subtitle}</p>}
+    <div className={`max-w-2xl mb-12 ${center ? "mx-auto text-center" : ""}`}>
+      {eyebrow && <span className={`eyebrow ${center ? "justify-center" : ""}`}>{eyebrow}</span>}
+      <h2 className={`heading-1 mt-4 ${titleColor}`}>{title}</h2>
+      {subtitle && <p className={`mt-4 text-lg leading-relaxed ${subColor}`}>{subtitle}</p>}
     </div>
   );
 }

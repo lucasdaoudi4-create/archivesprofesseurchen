@@ -1,9 +1,9 @@
 type Status = "online" | "offline" | "loading";
 
 const colors: Record<Status, { dot: string; bg: string; text: string; label: string }> = {
-  online: { dot: "bg-accent-grass", bg: "bg-accent-grass/15", text: "text-accent-grass", label: "Online" },
-  offline: { dot: "bg-pokeball-red", bg: "bg-pokeball-red/15", text: "text-pokeball-red", label: "Offline" },
-  loading: { dot: "bg-lab-400", bg: "bg-lab-700/30", text: "text-lab-300", label: "Vérification…" },
+  online: { dot: "bg-vert", bg: "bg-vert-50", text: "text-vert-700", label: "En ligne" },
+  offline: { dot: "bg-rouge", bg: "bg-rouge-50", text: "text-rouge-700", label: "Hors ligne" },
+  loading: { dot: "bg-laiton", bg: "bg-laiton-50", text: "text-laiton-700", label: "Vérification…" },
 };
 
 export default function LiveDot({
@@ -18,7 +18,7 @@ export default function LiveDot({
   const c = colors[status];
   return (
     <span
-      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold ${c.bg} ${c.text} ${className}`}
+      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded font-mono text-[0.66rem] uppercase tracking-[0.12em] ${c.bg} ${c.text} ${className}`}
     >
       <span className="relative flex h-2 w-2">
         {status === "online" && (

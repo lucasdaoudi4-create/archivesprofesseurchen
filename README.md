@@ -5,9 +5,19 @@ Site officiel — `archivesprofesseurchen.com`
 ## Stack
 
 - React 18 + Vite + TypeScript
-- Tailwind CSS
+- Tailwind CSS 3
 - React Router 6
 - Déploiement Netlify (config incluse)
+
+## Design — Charte graphique 2026
+
+Identité éditoriale archivistique « Les Archives du Professeur Chen » (marque sœur de CMAY Collections, vocabulaire typographique partagé).
+
+- **Typographies** : DM Sans (titres / corps) + DM Mono (intitulés, légendes, métadonnées)
+- **Palette** : Encre `#16130D`, Crème `#FAF4E7`, Parchemin `#F0E6CC`, Rouge Sceau `#C73B2B`, Vert Herbier `#5E7A48`, Laiton `#C2922F`
+- **Signes** : le sceau d'archiviste (étincelle + livre ouvert), l'étincelle à quatre branches en motif, pictogrammes en ligne
+- Mode clair par défaut ; sections sombres « Encre » en ponctuation (hero, bandeaux, footer) avec motif d'étincelles
+- Tokens dans `tailwind.config.js`, classes éditoriales (`.display`, `.heading-1/2`, `.eyebrow`, `.label`, `.tag`, `.card`…) dans `src/index.css`
 
 ## Lancer en local
 
@@ -34,8 +44,9 @@ src/
 ├── index.css         # styles globaux + Tailwind
 ├── data/site.ts      # CONTENU ÉDITABLE — liens, textes, modules, FAQ
 ├── components/
+│   ├── brand/        # Seal, Spark, SparkField, Wordmark, Pictogram (identité charte)
 │   ├── layout/       # Navbar, Footer, Layout
-│   └── ui/           # Pokeball, SectionHeading, TypeBadge, SocialIcon
+│   └── ui/           # SectionHeading, TypeBadge, LiveDot, SocialIcon, DiscordLiveStats
 └── pages/
     ├── Home.tsx
     ├── Formation.tsx
@@ -69,7 +80,7 @@ Tout est centralisé dans `src/data/site.ts` :
 - Calendrier d'événements avec inscription
 - Page "Hall of Fame" pour les meilleures créations Minecraft
 - Pokédex interactif des membres du Discord
-- Mode clair (le site est dark-first)
+- Mode sombre intégral (variante « Encre » de la charte ; le site est clair-first)
 - i18n (anglais, espagnol — d'après les fichiers SACD multilingues)
 
 ## Déploiement

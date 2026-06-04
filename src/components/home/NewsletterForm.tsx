@@ -41,10 +41,10 @@ export default function NewsletterForm() {
 
   if (status === "ok") {
     return (
-      <div className="mt-6 max-w-md mx-auto p-5 rounded-xl bg-accent-grass/15 border border-accent-grass/40 text-accent-grass">
-        <div className="font-display text-lg">Bienvenue au labo ! 🧪</div>
-        <p className="text-sm mt-1 opacity-90">
-          Ton email est enregistré. À très vite dans ta boîte de réception.
+      <div className="mt-6 max-w-md mx-auto rounded-xl bg-vert-50 border border-vert/30 px-5 py-4 text-left">
+        <div className="font-display font-bold text-vert-700">Inscription confirmée.</div>
+        <p className="text-sm mt-1 text-encre-600">
+          Ton adresse est enregistrée dans les Archives. À très vite dans ta boîte de réception.
         </p>
       </div>
     );
@@ -72,22 +72,22 @@ export default function NewsletterForm() {
           required
           placeholder="ton@email.com"
           disabled={status === "sending"}
-          className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-lab-400 focus:outline-none focus:border-pikachu-yellow disabled:opacity-60"
+          className="flex-1 px-4 py-3 rounded-lg bg-creme border border-encre/20 text-encre placeholder-encre-400 focus:outline-none focus:border-rouge disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={status === "sending"}
-          className="btn-yellow disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {status === "sending" ? "Envoi…" : "S'inscrire"}
         </button>
       </form>
       {status === "error" && (
-        <p className="text-xs text-pokeball-red pt-2">
-          Erreur ({errorMsg}). Réessaie ou écris-nous à contact@archivesprofesseurchen.com.
+        <p className="caption text-rouge-700 pt-2">
+          L'envoi a échoué ({errorMsg}). Réessaie, ou écris à contact@archivesprofesseurchen.com.
         </p>
       )}
-      <p className="text-xs text-lab-400 pt-2">Pas de spam, désinscription en un clic.</p>
+      <p className="caption pt-2">Un courrier par mois. Désinscription en un clic.</p>
     </>
   );
 }

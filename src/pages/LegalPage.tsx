@@ -1,4 +1,5 @@
 import { site } from "../data/site";
+import Spark from "../components/brand/Spark";
 
 type Kind = "mentions" | "cgv" | "confidentialite";
 
@@ -39,22 +40,23 @@ const CONTENT: Record<Kind, { title: string; intro: string; sections: { h: strin
 export default function LegalPage({ kind }: { kind: Kind }) {
   const data = CONTENT[kind];
   return (
-    <section className="container-narrow pt-20 pb-20">
-      <div className="text-xs uppercase tracking-widest text-pikachu-yellow font-semibold">
-        {site.name}
-      </div>
-      <h1 className="heading-display text-white mt-2 mb-4">{data.title}</h1>
-      <p className="text-lab-200 leading-relaxed">{data.intro}</p>
-      <div className="mt-10 space-y-8">
+    <section className="container-narrow pt-20 pb-20 max-w-3xl">
+      <div className="label text-rouge">{site.name}</div>
+      <h1 className="display text-encre mt-3 mb-4 text-[2.4rem] sm:text-5xl">{data.title}</h1>
+      <p className="text-encre-500 text-lg leading-relaxed">{data.intro}</p>
+      <div className="mt-10 divide-y divide-encre/10 border-t border-encre/10">
         {data.sections.map((s) => (
-          <section key={s.h}>
-            <h2 className="font-display text-xl text-white mb-2">{s.h}</h2>
-            <p className="text-lab-300 leading-relaxed">{s.p}</p>
+          <section key={s.h} className="py-7 grid sm:grid-cols-[14rem_1fr] gap-x-6 gap-y-2">
+            <h2 className="font-display font-bold text-lg text-encre">{s.h}</h2>
+            <p className="text-encre-500 leading-relaxed">{s.p}</p>
           </section>
         ))}
       </div>
-      <div className="mt-12 p-5 rounded-xl bg-pikachu-yellow/10 border border-pikachu-yellow/30 text-sm text-pikachu-yellow">
-        ⚠ Page à compléter avec ton avocat / les informations réelles avant la mise en ligne publique.
+      <div className="mt-10 flex items-start gap-3 p-5 rounded-xl bg-laiton-50 border border-laiton/30">
+        <Spark size="1em" className="text-laiton-700 mt-0.5 shrink-0" />
+        <p className="text-sm text-laiton-700 leading-relaxed">
+          Page à compléter avec ton avocat et les informations réelles avant la mise en ligne publique.
+        </p>
       </div>
     </section>
   );
