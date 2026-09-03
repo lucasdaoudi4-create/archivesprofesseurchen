@@ -1,9 +1,20 @@
 node_modules
 dist
 dist-ssr
-.env
-.env.local
+
+# Variables d'environnement — `.env` seul n'attrape pas .env.production,
+# .env.development ni .env.staging : le joker est indispensable.
+.env*
+!.env.example
 *.local
+
+# Netlify CLI (state.json, cache de build local)
+.netlify/
+
+# Charte graphique 2026 — vit dans un dépôt privé séparé,
+# ne doit jamais atterrir sur ce dépôt public.
+/charte/
+
 .DS_Store
 .vscode/*
 !.vscode/extensions.json

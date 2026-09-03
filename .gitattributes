@@ -1,0 +1,13 @@
+# Normalise les fins de ligne : LF dans le dépôt, quelle que soit la
+# valeur de core.autocrlf sur la machine qui clone.
+* text=auto eol=lf
+
+# Binaires : jamais de conversion de fins de ligne.
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
