@@ -1,178 +1,21 @@
+/* Les Archives du Professeur Chen — point d'entrée CSS de l'application.
+   Quatre lignes, et rien d'autre : la charte d'un côté, Tailwind de l'autre.
+
+   ORDRE. L'@import précède les trois directives, et c'est obligatoire :
+   une règle @import doit venir avant toute autre règle (hors @charset et
+   @layer vide). Posé après @tailwind, postcss-import — que Vite place en
+   tête de la chaîne PostCSS — refuse de l'inliner, avec un simple
+   avertissement de compilation : « @import must precede all other
+   statements ». Le build passe, et la feuille produite ne contient alors
+   NI les couches, NI les tokens, NI les fontes. Mesuré : 19,5 ko de
+   Tailwind seul, zéro @layer. C'est la forme qui marche.
+
+   CASCADE. Les utilitaires Tailwind sortent hors couche, donc après les
+   sept couches de arc.css — c'est la doctrine du socle § 0.21 : la mise
+   en page locale d'une page corrige un composant, jamais l'inverse. */
+
+@import "./styles/arc.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* =========================================================================
-   Les Archives du Professeur Chen — système éditorial archivistique
-   Clair par défaut (Crème / Encre), sections sombres « Encre » en ponctuation
-   ========================================================================= */
-
-@layer base {
-  :root {
-    color-scheme: light;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: "DM Sans", system-ui, sans-serif;
-    background-color: #faf4e7;
-    color: #16130d;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  h1, h2, h3, h4 {
-    font-family: "DM Sans", system-ui, sans-serif;
-    letter-spacing: -0.018em;
-    text-wrap: balance;
-  }
-
-  p {
-    text-wrap: pretty;
-  }
-
-  ::selection {
-    background: #c73b2b;
-    color: #faf4e7;
-  }
-
-  /* Accessibilité — anneau de focus visible et chaud */
-  :focus-visible {
-    outline: 2px solid #c73b2b;
-    outline-offset: 2px;
-    border-radius: 3px;
-  }
-
-  /* Barre de défilement chaude */
-  * {
-    scrollbar-color: #d8c9a6 transparent;
-  }
-  ::-webkit-scrollbar { width: 11px; height: 11px; }
-  ::-webkit-scrollbar-track { background: #f0e6cc; }
-  ::-webkit-scrollbar-thumb {
-    background: #c2922f;
-    border-radius: 8px;
-    border: 3px solid #f0e6cc;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-}
-
-@layer components {
-  /* --- Conteneurs ------------------------------------------------------- */
-  .container-narrow {
-    @apply max-w-5xl mx-auto px-5 sm:px-8;
-  }
-  .container-wide {
-    @apply max-w-6xl mx-auto px-5 sm:px-8;
-  }
-  .section {
-    @apply py-20 sm:py-28;
-  }
-
-  /* --- Typographie de marque ------------------------------------------- */
-  .display {
-    @apply font-display font-extrabold leading-[1.04] tracking-[-0.02em]
-           text-[2.6rem] sm:text-6xl lg:text-[4.5rem];
-  }
-  .heading-1 {
-    @apply font-display font-bold leading-[1.1] tracking-[-0.02em]
-           text-3xl sm:text-4xl lg:text-5xl;
-  }
-  .heading-2 {
-    @apply font-display font-bold leading-tight tracking-[-0.01em]
-           text-2xl sm:text-3xl;
-  }
-  /* Intitulé / label mono — la signature « fiche d'archive » */
-  .label {
-    @apply font-mono uppercase text-[0.72rem] tracking-label text-encre-500;
-  }
-  .caption {
-    @apply font-mono text-[0.78rem] leading-5 text-encre-400;
-  }
-
-  /* Eyebrow : petit label rouge précédé d'une étincelle/tiret */
-  .eyebrow {
-    @apply inline-flex items-center gap-2.5 font-mono uppercase
-           text-[0.72rem] tracking-label text-rouge;
-  }
-  .eyebrow::before {
-    content: "";
-    @apply h-px w-6 bg-rouge/60;
-  }
-
-  /* --- Boutons ---------------------------------------------------------- */
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg
-           font-medium text-[0.95rem] transition-all duration-200
-           active:translate-y-px select-none;
-  }
-  .btn-primary {
-    @apply btn bg-rouge text-creme shadow-seal hover:bg-rouge-600;
-  }
-  .btn-dark {
-    @apply btn bg-encre text-creme hover:bg-encre-800;
-  }
-  .btn-outline {
-    @apply btn bg-transparent text-encre border border-encre/25
-           hover:border-encre/60 hover:bg-encre/[0.04];
-  }
-  /* Sur fond sombre « Encre » */
-  .btn-cream {
-    @apply btn bg-creme text-encre hover:bg-parchemin;
-  }
-  .btn-ghost-dark {
-    @apply btn bg-transparent text-creme border border-creme/25 hover:bg-creme/10;
-  }
-
-  /* --- Surfaces / cartes ----------------------------------------------- */
-  .card {
-    @apply relative rounded-xl border border-parchemin-600 bg-creme
-           p-6 transition-all duration-300;
-  }
-  .card-hover {
-    @apply hover:border-laiton/50 hover:shadow-card hover:-translate-y-0.5;
-  }
-  .card-parch {
-    @apply bg-parchemin border-parchemin-700/60;
-  }
-
-  /* --- Tag / chip mono « fiche » --------------------------------------- */
-  .tag {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded
-           font-mono uppercase text-[0.66rem] tracking-[0.14em] border;
-  }
-
-  /* --- Filet / règle ---------------------------------------------------- */
-  .rule {
-    @apply h-px w-full bg-encre/10 border-0;
-  }
-}
-
-@layer utilities {
-  .text-balance { text-wrap: balance; }
-  .text-pretty { text-wrap: pretty; }
-
-  /* Métadonnée courante façon entête/pied de charte */
-  .mono-meta {
-    @apply font-mono uppercase text-[0.62rem] tracking-[0.18em];
-  }
-
-  /* Filets décoratifs sous un titre */
-  .underline-laiton {
-    text-decoration: underline;
-    text-decoration-color: rgba(194, 146, 47, 0.55);
-    text-underline-offset: 4px;
-    text-decoration-thickness: 2px;
-  }
-}

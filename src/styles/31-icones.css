@@ -1,0 +1,346 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 06 · ICONOGRAPHIE, PICTOGRAMMES ET MARQUES DESSINÉES
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Couche `composants`, assignée par arc.css. CE FICHIER NE DÉCLARE AUCUN
+   @layer et aucune @media de préférence (règle de couche (c) : elles vivent
+   toutes dans 99-preferences.css).
+
+   Ce fichier porte LE SYSTÈME, pas les dessins. Les tracés <path> vivent
+   dans des composants React, un fichier par signe, nommés d'après le jeu du
+   chapitre 06 (`ico-<famille>-<nom>`). Ici : la grille, le trait, la
+   compensation optique, les tailles, la couleur héritée.
+
+   ── Ce que le CSS impose au tracé ────────────────────────────────────────
+   Le chapitre 06 §6.1 exige `fill:none`, `stroke:currentColor`,
+   `stroke-linecap:round`, `stroke-linejoin:round`, et que `stroke-width`
+   soit posé SUR la balise <svg> — jamais sur les <path> enfants, sinon
+   l'héritage est cassé et la compensation optique ne s'applique plus.
+   Ces quatre propriétés sont donc écrites ici, sur `.ico`, et pas dans le
+   balisage : un composant React ne peut plus les oublier ni les contredire.
+
+   ── LITTÉRAUX TOLÉRÉS DANS CE FICHIER, ET NULLE PART AILLEURS ────────────
+   La règle de couche (b) interdit à un composant d'écrire un pas d'échelle.
+   Deux catégories y échappent ici, et elles seules :
+
+   1. Les ÉPAISSEURS DE TRACÉ (`stroke-width`), en unités de viewBox.
+      Motif : les jetons `--ico-trait-*` et `--pic-trait-*` sont spécifiés au
+      chapitre 06 (§6.1, §6.6) mais ne sont déclarés dans AUCUN fichier de
+      `charte/styles/`. Un composant ne peut pas les ouvrir lui-même — ce
+      serait une déclaration de token hors `tokens`, donc une violation de la
+      règle (a). Les valeurs sont donc écrites en clair, confinées ici, en
+      attendant `charte/propositions/`. Voir « À signaler », point 1.
+
+   2. Les DIMENSIONS D'OBJETS DESSINÉS (`inline-size` / `block-size`), en px.
+      Motif : socle §0.13 exception 4 les sort explicitement de la trame de 4
+      (icônes 16·20·24·32·40·48 · pictogrammes 48·64·96 · logos 20·28·36·44·
+      52·62·80), et socle §0.14 point 3 les maintient explicitement en px —
+      « ce sont des grandeurs physiques d'écran : les grandir avec la police
+      du lecteur les déformerait ». Aucun jeton ne les nomme, aucun ne le
+      peut. Toutes les valeurs ci-dessous sont prises dans ces trois listes.
+
+   Aucun autre littéral : pas de #hex, pas de rgb(), pas de ms, pas de
+   distance en px. Les couleurs passent toutes par un rôle sémantique.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1 · LE TRAIT — ARC · CHT — 06 §6.1
+
+   Une seule épaisseur, des bouts ronds, des angles adoucis. Le trait des
+   Archives est monolinéaire et fermé sur lui-même : c'est le tube de néon de
+   l'enseigne et le tracé d'instrument du plan au sol, qui imposent la même
+   chose. Grille unique `viewBox="0 0 24 24"`, aucune exception.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ico {
+  display: block;
+  flex: none;
+
+  /* Le contour porte tout le dessin. Le tracé n'a rien à déclarer. */
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  /* L'icône hérite de la couleur du texte, du bouton, de l'état.
+     C'est la règle : on ne pose une couleur en dur sur un SVG que dans un
+     fichier autonome (favicon, pièce jointe). */
+  color: inherit;
+
+  inline-size: 24px;
+  block-size: 24px;
+  stroke-width: 1.6;
+}
+
+/* ── Compensation optique à l'échelle ─────────────────────────────────────
+   Une icône de 24 réduite à 16 rendrait un trait de 1,07 px : elle
+   disparaît. Agrandie à 48, elle rendrait 3,2 px : elle s'épaissit. C'est
+   `stroke-width` qui change avec la taille servie, jamais le `viewBox`.
+
+     16 px → 1,8   rend 1,20 px        32 px → 1,45  rend 1,93 px
+     20 px → 1,7   rend 1,42 px        40 px → 1,3   rend 2,17 px
+     24 px → 1,6   rend 1,60 px        48 px → 1,25  rend 2,50 px          */
+
+.ico--16 { inline-size: 16px; block-size: 16px; stroke-width: 1.8;  }
+.ico--20 { inline-size: 20px; block-size: 20px; stroke-width: 1.7;  }
+.ico--32 { inline-size: 32px; block-size: 32px; stroke-width: 1.45; }
+.ico--40 { inline-size: 40px; block-size: 40px; stroke-width: 1.3;  }
+.ico--48 { inline-size: 48px; block-size: 48px; stroke-width: 1.25; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2 · COULEUR ET ÉTATS — §6.3, corrigé par le socle §0.8
+
+   Les huit jetons `--ico-sur-clair*` / `--ico-sur-acier*` du chapitre 06
+   sont SUPPRIMÉS par le socle §0.8 : ils dupliquaient les trois niveaux de
+   texte et introduisaient deux valeurs en opacité, que le §0.10 abroge
+   (« une couleur en opacité n'a pas de ratio, donc pas de verdict »).
+
+   Chaque rôle lit désormais un jeton sémantique. Conséquence directe : plus
+   aucune règle descendante `.acier .ico--*` n'est nécessaire — `.acier`
+   rebascule déjà `--accent`, `--texte-tertiaire`, `--succes` et
+   `--verrouille`, donc une icône écrite une fois fonctionne dans les deux
+   contextes. C'est tout l'objet du §0.11.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Icône porteuse de sens : elle hérite, on ne la colore pas.       16,02 / 12,40 */
+
+/* Icône d'accompagnement — elle double une information déjà écrite.  6,04 / 5,42 */
+.ico--muet   { color: var(--texte-tertiaire); }
+
+/* Icône d'action ou de lien.                                       10,04 / 9,72 */
+.ico--action { color: var(--accent); }
+
+/* Icône verrouillée. JAMAIS `opacity:.38` : le rendu tomberait à 2,35 (§6.3).
+   Le mot « Verrouillé » reste obligatoire à côté — le signe ne suffit pas. */
+.ico--verrou { color: var(--verrouille); }
+
+/* Validation. Le vert de la colonne « ce qu'il fait bien », jamais un vert
+   système importé : la palette du laboratoire n'en accueille aucun.  5,48 / 9,55 */
+.ico--succes { color: var(--succes); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3 · LES GLYPHES DE PLATEFORME — §6.4, famille `marque`
+
+   Ils appartiennent à un autre système graphique. Silhouette pleine : ils ne
+   prennent ni le trait 1,6, ni les bouts ronds, ni la grille des Archives.
+   On ne les redessine pas « au style maison » — ce serait une déformation de
+   marque. On les prend dans le kit officiel de leur propriétaire, on les
+   normalise en `viewBox 0 0 24 24`, on les met en monochrome quand le
+   propriétaire l'autorise.
+
+   Ce modificateur neutralise le trait posé par `.ico` : sans lui, un glyphe
+   plein hériterait d'un `stroke-width` qui n'a aucun sens pour lui.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ico--marque {
+  fill: currentColor;
+  stroke: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4 · LE TÉMOIN DE CHARGEMENT — §6.3, tableau des états
+
+   `ico-systeme-chargement` (anneau ouvert) est le SEUL tracé du système
+   autorisé à tourner. Sous `prefers-reduced-motion`, 99-preferences.css
+   ramène toute animation à 1 ms et à une itération : la rotation s'arrête et
+   l'icône reste lisible, ce qu'exige le §6.3. Rien à écrire ici pour cela —
+   et surtout rien à écrire dans ce fichier, où une @media serait une
+   violation de la règle de couche (c).
+
+   Durée : `--dur-remplissage` (900 ms) au lieu du « 1s » du chapitre 06.
+   L'échelle des durées est fermée et s'arrête à 900 ms ; c'est le pas le
+   plus proche, et `--ease-continu` est nommément la courbe de « la barre
+   d'attente indéterminée ». Aucun littéral n'est donc nécessaire.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ico--chargement {
+  animation: ico-rotation var(--dur-remplissage) var(--ease-continu) infinite;
+  transform-origin: 50% 50%;
+}
+
+/* Le chapitre 09 est propriétaire des keyframes et n'en déclare que trois
+   (`apparition`, `entree-page`, `balayage`). Celle-ci manque à sa liste
+   fermée alors que le chapitre 06 la rend obligatoire. Elle est écrite ici
+   par nécessité et doit remonter dans 04-tokens-motion.css.
+   Voir « À signaler », point 2. */
+@keyframes ico-rotation {
+  to { transform: rotate(360deg); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5 · LES PICTOGRAMMES DE SECTION — §6.6
+
+   Un pictogramme OUVRE une section : il donne son climat avant que le
+   premier mot soit lu. Il ne se clique pas, il ne signale rien, il ne
+   remplace pas un titre. Un seul par section, posé au-dessus de l'`.eyebrow`,
+   aligné à gauche sur la marge du contenu.
+
+   Grille propre : `viewBox="0 0 48 48"`, zone vive 44 × 44. Huit à quatorze
+   éléments, contre huit au maximum pour une icône. Il entre dans la
+   révélation `.rv` avec le reste de la tête de section — il n'a pas
+   d'animation propre.
+
+   Les cinq pictogrammes, tous relevés sur les images de référence, aucun
+   inventé : `pic-microscope` (ce qui examine) · `pic-incubation` (ce qui
+   n'est pas encore là) · `pic-vitrine` (ce qui se collectionne) ·
+   `pic-paillasse` (ce qui se fait à la main) · `pic-carnet` (ce qui se note).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pic {
+  display: block;
+  flex: none;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  /* Agnostique de fond : `--accent` vaut le bordeaux sur clair et le néon
+     sous `.acier`. La règle `section.steel .pic` du chapitre 06 disparaît. */
+  color: var(--accent);
+
+  inline-size: 48px;
+  block-size: 48px;
+  stroke-width: 2;
+
+  /* 18 px au chapitre 06 : hors trame de 4, recalé par le socle §0.13. */
+  margin-block-end: var(--sp-4);
+}
+
+.pic--64 { inline-size: 64px; block-size: 64px; stroke-width: 1.6;  }
+.pic--96 { inline-size: 96px; block-size: 96px; stroke-width: 1.15; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6 · L'EMBLÈME — ARC · CHT — 02
+
+   `ico-marque-archives` n'est pas une icône : c'est la marque. Il vit sur sa
+   propre grille et suit ses propres coupes optiques, parce qu'un tracé de
+   6 unités sur 200 fait 0,48 px à 16 px. Il faut trois dessins, pas un — ils
+   rendent tous le même encombrement optique grâce au viewBox recadré de la
+   coupe Micro.
+
+   | Coupe    | Emploi                      | viewBox           | e  |
+   |----------|-----------------------------|-------------------|----|
+   | Micro    | ≤ 28 px · favicon · gravure | `31 31 138 138`   | 14 |
+   | Courant  | 29 – 95 px · l'interface    | `0 0 200 200`     |  8 |
+   | Enseigne | ≥ 96 px · impression        | `0 0 200 200`     |  6 |
+
+   La coupe Micro supprime la lentille et grossit l'anneau du bouton : à
+   20 px, deux anneaux concentriques deviennent une tache. C'est une
+   compensation optique assumée, pas une simplification.
+
+   Le composant React choisit le TRACÉ ; les classes ci-dessous fixent la
+   TAILLE SERVIE et l'épaisseur qui va avec. Les deux doivent concorder :
+   `.emb--28` attend le tracé Micro, les autres le tracé Courant.
+   Tailles prises dans l'échelle des logos du socle §0.13.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.emb {
+  display: block;
+  flex: none;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  color: inherit;
+
+  /* Défaut : coupe Courant à 36 px — la marque dans la barre de navigation.
+     La maquette la sert à 30 px, valeur absente de l'échelle des logos
+     (20·28·36·44·52·62·80) ; 36 est le pas voisin qui reste dans la plage
+     de la coupe Courant (29–95 px). */
+  inline-size: 36px;
+  block-size: auto;
+  stroke-width: 8;
+}
+
+/* Coupe Micro — le seul pas de l'échelle qui descend sous la charnière des
+   29 px. Le tracé change avec, il ne s'agit pas d'une simple réduction. */
+.emb--28 { inline-size: 28px; stroke-width: 14; }
+
+.emb--44 { inline-size: 44px; }
+.emb--52 { inline-size: 52px; }
+.emb--62 { inline-size: 62px; }
+.emb--80 { inline-size: 80px; }
+
+/* Coupe Enseigne — au-delà de 95 px. La taille vient du conteneur : à cette
+   échelle l'emblème est une pièce de mise en page, pas un signe d'interface. */
+.emb--enseigne { inline-size: 100%; stroke-width: 6; }
+
+/* ── Le halo ──────────────────────────────────────────────────────────────
+   Le halo appartient au néon, et le néon n'existe que sur fond sombre.
+   Le chapitre 02 §10.2 le borne par la taille RENDUE, parce que les rayons
+   sont en pixels et ne suivent pas l'échelle du SVG :
+
+     < 40 px      AUCUN HALO — le flou mange un trait de 6 unités.
+     40 – 96 px   halo court   (2 couches)
+     97 – 240 px  halo moyen   (4 couches)
+     > 240 px     halo long    (4 couches)
+
+   Budget : le rayon total ne dépasse jamais 0,24 D, sans quoi la fente
+   médiane se remplit de lumière et l'écart É2 disparaît.
+
+   `--halo-emb` est le seul halo en syntaxe `filter` livré dans
+   `charte/styles/`. Son rayon le plus large vaut 40 px, ce qui exige
+   D ≥ 167 px : il n'est donc PAS applicable aux tailles ci-dessus, seulement
+   à la coupe Enseigne servie à 200 px ou plus. Les halos court et moyen du
+   chapitre 02 n'ont pas de jeton livré et ne peuvent pas être écrits ici
+   sans littéral. Voir « À signaler », point 3.
+
+   Conséquence assumée, contre la maquette : la marque de la barre de
+   navigation, servie à 30 px, perd son `filter:var(--halo-emb)`. Elle est
+   sous la charnière des 40 px, et la charte est explicite et mesurée. */
+.emb--halo { filter: var(--halo-emb); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7 · L'ÉCUSSON DE PALIER — ARC · MBR — 01 à 03
+
+   Troisième grille du système : `viewBox="0 0 100 120"`, un blason au ratio
+   5:6. Ce n'est ni une icône (grille 24) ni un pictogramme (grille 48) : il
+   vit ici parce que ce fichier est le propriétaire du trait, et que le socle
+   §6.4 ne tolère les épaisseurs de tracé QUE dans ce fichier. 32-membre.css
+   ne fait que le placer et lui donner sa couleur.
+
+   Le dimensionnement se fait sur la HAUTEUR : c'est la dimension qui compte
+   pour un blason, et la largeur en découle. Hauteurs prises dans l'échelle
+   des logos du socle §0.13.
+
+   Attention — un piège vérifié : servir cet écusson avec `.ico--16` ou
+   `.pic--64`, comme on pourrait le croire d'après sa taille, poserait un
+   `stroke-width` calculé pour une grille de 24 ou de 48 sur une grille de
+   100. À 16 px, `stroke-width:1.8` rendrait un trait de 0,29 px — l'écusson
+   disparaîtrait sans qu'aucune erreur ne soit levée. D'où ces classes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ecu {
+  display: block;
+  flex: none;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  color: inherit;
+
+  /* Plaque de palier. La maquette sert 56 × 66 px, absent de toute échelle ;
+     62 px de haut est le pas voisin de l'échelle des logos, et la largeur
+     suit à 51,7 px. Trait rendu : 2,07 px, sur la plage des pictogrammes. */
+  block-size: 62px;
+  inline-size: auto;
+  stroke-width: 4;
+}
+
+/* Bandeau de compte — la maquette sert 17 px, hors échelle. Rendu : 1,17 px. */
+.ecu--20 { block-size: 20px; stroke-width: 7; }
+
+/* Taille intermédiaire, fiche de membre. Rendu : 1,50 px. */
+.ecu--36 { block-size: 36px; stroke-width: 5; }

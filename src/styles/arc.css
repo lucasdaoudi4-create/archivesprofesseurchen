@@ -1,0 +1,76 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC — Les Archives du Professeur Chen
+   Charte graphique v1.0.0 · 1ᵉʳ septembre 2026
+   Seul fichier importé par l'application. Il ne contient que des @import
+   et la déclaration des couches.
+
+   Trois règles de couche, vérifiables :
+     · `tokens` ne contient aucun sélecteur autre que :root, .acier,
+       .bandeau-email. Une déclaration de token ailleurs est un défaut.
+     · `composants` n'écrit jamais un pas d'échelle. Un composant lit
+       var(--surface), var(--sp-4), var(--tr-reaction) ; il n'écrit ni
+       #6E212B, ni 16px, ni 220ms.
+     · `preferences` est toujours chargé en dernier, parce qu'il pose les
+       états finaux de prefers-reduced-motion et les compensations de
+       forced-colors.
+
+   Copie de travail du lot L1. Elle reprend charte/styles/arc.css et
+   n'en diffère que par trois points, tous documentés :
+     1. les six @import du lot L1 sont actifs ;
+     2. `00-fontes.css` est ajouté — les cinq @font-face réelles et les
+        trois replis métriques. La charte les décrit au chapitre 04
+        (§ 4.13) mais ne les livre dans aucun fichier de styles/ ; les
+        auto-héberger est une exigence du lot L1 (socle § 0.36) et de
+        § 0.32 sur les sous-traitants. Le fichier ne contient que des
+        @font-face : aucun sélecteur, donc la règle de couche (a) tient.
+     3. la couche `base` du socle § 0.2 s'appelle ici `arc.base`. Voir
+        la note ci-dessous : c'est une contrainte de Tailwind, pas un choix.
+
+   POURQUOI `arc.base` ET NON `base`
+   `@layer base` n'est pas un nom libre tant que Tailwind est dans la
+   chaîne. Vite place postcss-import en tête : il inline `@import
+   "./20-base.css" layer(base)` en un `@layer base { … }`, que le plugin
+   tailwindcss ramasse ensuite comme SA directive de couche — il en sort
+   le contenu, le déplace à l'emplacement de `@tailwind base` et
+   SUPPRIME la couche. Mesuré sur le build : les règles de 20-base.css
+   ressortaient hors couche, donc devant `composants`, `utilitaires` et
+   `preferences` — un `a { color: var(--lien) }` battait alors le
+   `.sitenav__l a` de la barre de navigation. Et retirer `@tailwind base`
+   ne sauve rien : Tailwind lève « `@layer base` is used but no matching
+   `@tailwind base` directive is present ».
+   La sous-couche `arc.base` a exactement la même place dans l'ordre —
+   elle est déclarée à son rang ci-dessous — et Tailwind ne la reconnaît
+   pas. `composants`, `utilitaires` et `matieres` sont en français : eux
+   ne collisionnent avec rien.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer reset, tokens, matieres, arc.base, composants, utilitaires, preferences;
+
+/* — reset ————————————————————————————————————————————————————————— */
+@import "./00-reset.css"          layer(reset);
+
+/* — fontes ———————————————————————————————————————————————————————— */
+@import "./00-fontes.css"         layer(tokens);   /* CHT — 04 · faces réelles + replis   */
+
+/* — tokens ————————————————————————————————————————————————————— */
+@import "./01-tokens-couleur.css" layer(tokens);   /* CHT — 03 · propriétaire couleur      */
+@import "./02-tokens-typo.css"    layer(tokens);   /* CHT — 04 · propriétaire typographie  */
+@import "./03-tokens-grille.css"  layer(tokens);   /* CHT — 05 · propriétaire géométrie    */
+@import "./04-tokens-motion.css"  layer(tokens);   /* CHT — 09 · propriétaire mouvement    */
+@import "./05-tokens-socle.css"   layer(tokens);   /* CHT — 00 · arbitrages                */
+
+/* — matieres ——————————————————————————————————————————————————————
+   La couche est déclarée et reste vide au lot L1 : les cinq .mat-* vivent
+   pour l'instant dans 03-tokens-grille.css. Elle est le point de sortie
+   prévu si on les en extrait (proposition d'extraction de la couche tokens).
+   ———————————————————————————————————————————————————————————————— */
+
+/* — base, composants, utilitaires ————————————————————————————————— */
+@import "./20-base.css"           layer(arc.base);     /* html, body, titres      */
+@import "./30-composants.css"     layer(composants);   /* CHT — 08                */
+@import "./31-icones.css"         layer(composants);   /* CHT — 06                */
+@import "./32-membre.css"         layer(composants);   /* CHT — 10                */
+@import "./90-utilitaires.css"    layer(utilitaires);
+
+/* — préférences système : toujours en dernier ——————————————————————— */
+@import "./99-preferences.css"    layer(preferences); /* CHT — 00 */

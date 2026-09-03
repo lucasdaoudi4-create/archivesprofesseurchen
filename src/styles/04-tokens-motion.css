@@ -1,0 +1,100 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 09 · MOUVEMENT
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Chapitre PROPRIÉTAIRE de --ease-* --dur-* --pas-* --dist-* --tr-* et des
+   keyframes. Les noms --arc-ease, --ease, --courbe, --img-ease, --t,
+   --duree-ui, --dur-reaction concurrents sont abrogés (socle §0.4, 06-07).
+
+   Trois principes :
+     · L'instrument réagit, il ne rebondit pas. Aucun ressort, aucun
+       dépassement, aucune élasticité. Une seule courbe pour tout ce qui
+       entre, survole ou se remplit.
+     · Le relevé se remplit, il n'apparaît pas. Une mesure se construit
+       segment par segment, sous les yeux : c'est ce qui la rend crédible.
+     · Ce que le lecteur n'a pas demandé se révèle lentement (700 ms).
+       Ce qui répond à son clic est immédiat (220 ms).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Courbes — trois, pas quatre ──────────────────────────────────── */
+  --ease-instrument: cubic-bezier(.2, .7, .2, 1);  /* tout, par défaut          */
+  --ease-retrait:    cubic-bezier(.4, 0, 1, 1);    /* ce qui sort ou se ferme   */
+  --ease-continu:    linear;                        /* barre d'attente indéterminée */
+
+  /* ── Durées — échelle fermée ──────────────────────────────────────── */
+  --dur-0:            0ms;   /* coupé : contour de focus, message d'erreur   */
+  --dur-declic:     120ms;   /* :active                                     */
+  --dur-bascule:    180ms;   /* case à cocher, micro-état, SORTIE            */
+  --dur-reaction:   220ms;   /* RÉFÉRENCE : survol, focus, onglet, bordure   */
+  --dur-fondu:      300ms;   /* fondu d'image, barre pilotée par une valeur  */
+  --dur-apparition: 450ms;   /* bloc commandé par un clic, pli, modale       */
+  --dur-scene:      550ms;   /* zoom ou déplacement d'une image plein cadre  */
+  --dur-revelation: 700ms;   /* révélation au défilement, et rien d'autre    */
+  --dur-remplissage:900ms;   /* barre d'émail : sommaire, palier             */
+
+  /* ── Délais ───────────────────────────────────────────────────────────
+     Un relevé complet finit à 60 + 9 × 45 + 450 = 915 ms ; la barre du
+     sommaire à 900 ms. Les deux instruments s'arrêtent ensemble.
+     Plafond de retard cumulé : 560 ms. Au-delà, on n'échelonne pas.    */
+  --pas-segment:      45ms;   /* les 10 segments d'une jauge          */
+  --pas-bloc:         80ms;   /* les 8 cellules du sommaire, une rangée */
+  --amorce-segment:   60ms;   /* avant le premier segment             */
+  --amorce-sommaire: 260ms;   /* avant le remplissage du sommaire     */
+
+  /* ── Distances ────────────────────────────────────────────────────── */
+  --dist-revelation: 18px;   /* ce que le lecteur n'a pas demandé */
+  --dist-reponse:     8px;   /* ce qui répond à un clic           */
+  --dist-carte:      -4px;   /* soulèvement d'une carte           */
+  --dist-poussee:     3px;   /* poussée d'un bouton               */
+  --dist-fleche:      4px;   /* poussée de la flèche dans un bouton */
+
+  /* ── Scène — le zoom texture du banc d'essai ──────────────────────── */
+  --zoom-facteur: 2.35;
+  --zoom-origine: 86% 32%;
+
+  /* ── Raccourcis composés — à employer partout ─────────────────────── */
+  --tr-declic:      var(--dur-declic)      var(--ease-instrument);
+  --tr-bascule:     var(--dur-bascule)     var(--ease-instrument);
+  --tr-reaction:    var(--dur-reaction)    var(--ease-instrument);
+  --tr-fondu:       var(--dur-fondu)       var(--ease-instrument);
+  --tr-apparition:  var(--dur-apparition)  var(--ease-instrument);
+  --tr-scene:       var(--dur-scene)       var(--ease-instrument);
+  --tr-revelation:  var(--dur-revelation)  var(--ease-instrument);
+  --tr-remplissage: var(--dur-remplissage) var(--ease-instrument);
+  --tr-sortie:      var(--dur-bascule)     var(--ease-retrait);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES SEULES KEYFRAMES DU SYSTÈME
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(var(--dist-reponse)); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes entree-page {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Barre d'attente indéterminée — la seule animation en boucle du système. */
+@keyframes balayage {
+  from { transform: translateX(-110%); }
+  to   { transform: translateX(420%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RÉVÉLATION AU DÉFILEMENT — .rv, pilotée par IntersectionObserver
+   Le contenu est visible sans JavaScript : c'est la classe .rv qui masque,
+   et elle n'est posée que si l'observateur existe.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rv {
+  opacity: 0;
+  transform: translateY(var(--dist-revelation));
+  transition: opacity var(--tr-revelation), transform var(--tr-revelation);
+}
+.rv.on { opacity: 1; transform: none; }

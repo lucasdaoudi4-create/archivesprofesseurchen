@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · BASE — html, body, titres, paragraphe, lien
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Couche `base` (affectée par le @import layer(base) d'arc.css).
+
+   Elle ne contient AUCUNE classe de composant et n'écrit aucune valeur :
+   elle ne lit que des tokens. Sources : socle § 0.2, § 0.14 (unités),
+   chapitre 04 § 4 « Socle » (html, body, titres), et les règles
+   correspondantes de la maquette validée.
+
+   Ce qui n'est PAS ici, et pourquoi :
+     · `:focus-visible` — déclaration unique du système, déjà posée dans
+       `05-tokens-socle.css` (socle § 0.15). La redéclarer ici en ferait
+       une seconde déclaration, et `layer(base)` battrait `layer(tokens)`
+       silencieusement.
+     · `::selection` — appartient à `01-tokens-couleur.css`.
+     · `[id]{scroll-margin}` — appartient à `05-tokens-socle.css`.
+     · `text-rendering:optimizeLegibility` — retiré par le chapitre 04
+       (coût de rendu, disparitions de texte connues). `font-kerning`
+       suffit et dit ce qu'il fait.
+     · `em, i { font-style: normal }` du chapitre 04 — voir la note sur
+       `font-synthesis` plus bas.
+
+   PIÈGE DE COUCHE, tenu ici : les dix-neuf styles nommés du chapitre 04
+   (`.h2`, `.lede`, `.eyebrow`, `.corps-s`…) vivent en `layer(tokens)`,
+   soit SOUS cette couche. Un sélecteur d'élément écrit ici les battrait
+   quelle que soit leur spécificité. Les règles `h1…h4` et `p` s'effacent
+   donc explicitement devant eux : c'est alors la classe qui porte la
+   famille et la mesure, comme le chapitre 04 l'exige.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Le document ──────────────────────────────────────────────────────────
+   Jamais de `font-size` sur `html` : le rem vaut 16 px, et le régler
+   casserait le zoom texte du lecteur (SC 1.4.4, chapitre 04 et § 0.14).
+   Le corps de 17 px se règle sur `body`, plus bas.                       */
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--acier-400) var(--blanc-100);
+  accent-color: var(--accent);
+  caret-color: var(--accent);
+}
+
+/* Le contexte sombre emporte aussi ses chromes de navigateur. `--accent`
+   y vaut le néon : la barre, la coche et le curseur suivent le contexte
+   au lieu de rester bordeaux sur de l'acier.
+   `.hero` et `.sitefoot` sortent de cette liste : le pied de page portera
+   `class="acier"`, et le hero est un panneau CLAIR (Amendement A1.2).   */
+.acier {
+  scrollbar-color: var(--acier-700) var(--acier-950);
+  accent-color: var(--accent);
+  caret-color: var(--accent);
+}
+
+/* ── Le corps ─────────────────────────────────────────────────────────────
+   `font-synthesis: none` remplace le `em, i { font-style: normal }` du
+   chapitre 04. Le motif de cette règle était que Space Grotesk n'a pas
+   d'italique et que le navigateur en fabriquait une, penchée de force.
+   Couper la synthèse traite la cause ; écrire `font-style: normal` sur
+   `em` traiterait le symptôme et tuerait au passage les deux italiques
+   RÉELLES du système, `.h1 em` et `.citation`, qui sont en Fraunces et
+   qui vivent, elles, dans la couche tokens — donc sous celle-ci.        */
+body {
+  background: var(--surface);
+  color: var(--texte);
+  font-family: var(--f-corps);
+  font-size: var(--fs-corps);
+  line-height: var(--lh-corps);
+  font-kerning: normal;
+  font-synthesis: none;
+  font-optical-sizing: auto;
+  hyphens: manual;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Les titres ───────────────────────────────────────────────────────────
+   Fraunces, et son axe optique piloté par la taille : à 72 px le titre
+   devient une gravure, à 38 px il redevient robuste (chapitre 04 § 1).
+   La graisse, la taille et l'interlettrage restent aux styles nommés
+   `.h1` … `.h4` : cette couche ne fixe aucun pas d'échelle.
+   L'exclusion laisse passer un titre qui porte, lui, l'un des styles de
+   l'instrument — un `<h2 class="eyebrow">` doit rester en Space Mono.  */
+:is(h1, h2, h3, h4):not(.eyebrow, .label, .code-arc, .legende, .meta, .legal) {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  text-wrap: balance;
+}
+
+/* ── Le paragraphe ────────────────────────────────────────────────────────
+   Une mesure est une contrainte, pas une suggestion : tout paragraphe
+   porte la sienne. Sauf ceux qui portent déjà un style nommé — `.lede`
+   tient à ses 50ch, `.citation` à ses 34ch, `.legal` à ses 74ch.       */
+p:not(.lede, .corps, .corps-s, .corps-xs, .citation,
+      .meta, .legal, .eyebrow, .label, .code-arc, .legende) {
+  margin-block-end: var(--sp-4);
+  max-inline-size: var(--me-corps);
+}
+
+p { text-wrap: pretty; }
+p:last-child { margin-block-end: 0; }
+
+/* ── Le gras du texte courant ─────────────────────────────────────────────
+   Le système n'a que quatre graisses : 400 · 500 · 600 · 900. Le 700 du
+   navigateur n'en fait pas partie (§ 0.14 et recalage de la maquette).  */
+b, strong { font-weight: var(--fw-semi); }
+
+/* ── Le lien ──────────────────────────────────────────────────────────────
+   La couleur seule ; le soulignement, le filet et le survol appartiennent
+   à CMP — 44, déclaré dans `05-tokens-socle.css` sur `.corps a`,
+   `.lede a` et `.prose a`.                                              */
+a { color: var(--lien); }

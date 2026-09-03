@@ -1,0 +1,185 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 04 · FONTES
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Les cinq faces réelles et les trois replis à métriques ajustées.
+   Application de 04-typographie § 4.13. Ce fichier ne contient QUE des
+   @font-face : aucun sélecteur, donc la règle de couche (a) tient — il
+   est chargé en layer(tokens), aux côtés de 02-tokens-typo.css qui
+   déclare les piles --f-display / --f-corps / --f-mono qui les nomment.
+
+   AUTO-HÉBERGEMENT. Socle § 0.32 : Google Fonts est un sous-traitant, et
+   la feuille de fonts.googleapis.com plus les fichiers de fonts.gstatic.com
+   font deux connexions tierces sur le rendu critique. Les faces sont
+   servies depuis /fonts/. Aucun appel externe ne subsiste.
+
+   LICENCE. Fraunces, Space Grotesk et Space Mono sont sous SIL Open Font
+   License 1.1 — redistribution autorisée. Le texte de chaque licence est
+   dans public/fonts/OFL-Fraunces.txt, OFL-SpaceGrotesk.txt, OFL-SpaceMono.txt.
+
+   SOUS-ENSEMBLE. Fichiers pris à la découpe de Google Fonts, deux blocs
+   par famille : `latin` (celui dont le français a besoin, et le seul qui
+   part au premier rendu) et `latin-ext`, chargé à la demande si un signe
+   le réclame. Les unicode-range sont ceux des fichiers réellement livrés,
+   pas une recopie.
+
+   font-display: swap sur toutes les faces — § 4.9. Pas de texte invisible ;
+   le décalage à l'échange est absorbé par les replis ci-dessous.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · Faces réelles ─────────────────────────────────────────────────────
+   Fraunces et Space Grotesk sont variables. Le format déclaré est
+   `woff2` et non `woff2-variations` de § 4.13 : cette seconde forme est
+   une syntaxe transitoire que plusieurs moteurs ne reconnaissent pas, et
+   une source dont le format est inconnu est ignorée en bloc — la face
+   serait alors muette. `woff2` couvre les fichiers variables partout.  */
+
+/* Fraunces — le display. Axes opsz 9→144 et wght 300→900.
+   L'axe optique est piloté par font-optical-sizing:auto (02-tokens-typo). */
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces-roman.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces-roman-ext.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+                 U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+                 U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* L'italique de Fraunces — un seul emploi dans tout le système :
+   la seconde ligne d'un titre principal (.h1 em / .display em).      */
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces-italic.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces-italic-ext.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+                 U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+                 U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Space Grotesk — le corps. Variable, wght 300→700 : le fichier unique
+   couvre --fw-normal 400, --fw-moyen 500 et --fw-semi 600.            */
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/space-grotesk.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/space-grotesk-ext.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+                 U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+                 U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Space Mono — l'instrument. Deux graisses statiques, pas d'axe.      */
+@font-face {
+  font-family: "Space Mono";
+  src: url("/fonts/space-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Space Mono";
+  src: url("/fonts/space-mono-400-ext.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+                 U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+                 U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Space Mono";
+  src: url("/fonts/space-mono-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Space Mono";
+  src: url("/fonts/space-mono-700-ext.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+                 U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+                 U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── 2 · Replis à métriques ajustées ───────────────────────────────────────
+   But : que la page composée en Georgia / Arial / Consolas occupe
+   EXACTEMENT la place de la page composée en Fraunces / Space Grotesk /
+   Space Mono. Sans cela le contenu saute à l'échange (CLS), et toutes
+   les mesures en `ch` de 02-tokens-typo changent de valeur avec elles.
+
+   Ces trois familles n'existent que pour être citées en deuxième position
+   des piles --f-display / --f-corps / --f-mono. Elles ne téléchargent
+   rien : `local()` seulement.
+
+   Valeurs de § 4.13 — CALIBRAGE DE DÉPART, pas une mesure. Le § 4.9 les
+   donne à recalculer sur les fichiers réellement livrés (fontkit, puis
+   test de superposition : aucun bloc ne bouge de plus de 1 px). Le point
+   est resté ouvert à la livraison de la charte ; il l'est encore.       */
+@font-face {
+  font-family: "Fraunces repli";
+  src: local("Georgia"), local("Times New Roman"), local("Liberation Serif");
+  size-adjust: 105%;
+  ascent-override: 92%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Grotesk repli";
+  src: local("Arial"), local("Helvetica"), local("Liberation Sans");
+  size-adjust: 96%;
+  ascent-override: 99%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Mono repli";
+  src: local("Consolas"), local("Menlo"), local("DejaVu Sans Mono");
+  size-adjust: 100%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}

@@ -1,12 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sceau — Les Archives du Professeur Chen">
-  <circle cx="32" cy="32" r="32" fill="#C73B2B"/>
-  <circle cx="32" cy="32" r="26" fill="none" stroke="#FAF4E7" stroke-width="1.4" opacity="0.85"/>
-  <!-- Étincelle à quatre branches -->
-  <path d="M32 12 Q33.4 21 43 22 Q33.4 23 32 32 Q30.6 23 21 22 Q30.6 21 32 12 Z" fill="#FAF4E7"/>
-  <!-- Petits repères latéraux -->
-  <circle cx="17.5" cy="22" r="1.1" fill="#FAF4E7" opacity="0.8"/>
-  <circle cx="46.5" cy="22" r="1.1" fill="#FAF4E7" opacity="0.8"/>
-  <!-- Livre ouvert -->
-  <path d="M31 38 C 26 36, 21 36, 18 38 L 18 47.5 C 21 45.8, 26 45.8, 31 47.5 Z" fill="#FAF4E7"/>
-  <path d="M33 38 C 38 36, 43 36, 46 38 L 46 47.5 C 43 45.8, 38 45.8, 33 47.5 Z" fill="#FAF4E7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Les Archives du Professeur Chen">
+  <!--
+    ARC · LOG — 04 · favicon.svg — charte v1.0.0, chapitre 02 § 12.1.
+
+    Tuile 200 × 200, rx 24. Fond bordeaux #6E212B, emblème réservé en
+    #F4F5F6 (10,04:1). Bascule sombre : fond acier #2A2F32, trait néon
+    #FFD3A0 (9,72:1). Aucun halo — § 10.4, cas 4 : la plateforme recadre,
+    recompresse et applique son propre fond.
+
+    Le tracé est la coupe MICRO de « L'archive » : l'A d'ARCHIVES au tube,
+    traversé de part en part par la fente d'archive. e = 14, h = 16, boîte
+    d'axe 38 → 162, vide visible 18 unités (13 % de D = 138). La pente du
+    jambage est de 1:2, comme dans les deux autres coupes. Voir
+    src/components/brand/Embleme.tsx pour la géométrie complète et pour le
+    motif du redessin — chapitre 07 § 7.14, point 1 : le cercle à bande
+    médiane et bouton central sort de l'identité, sa validation juridique
+    n'étant pas rendue.
+
+    Remplace le sceau rouge #C73B2B (étincelle à quatre branches et livre
+    ouvert) de l'ancienne charte, retiré au § 12.1.
+  -->
+  <style>
+    .t { fill: #6E212B }
+    .m { stroke: #F4F5F6 }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #2A2F32 }
+      .m { stroke: #FFD3A0 }
+    }
+  </style>
+  <rect class="t" width="200" height="200" rx="24"/>
+  <g class="m" fill="none" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <!-- La fente d'archive, d'un bord à l'autre -->
+    <path d="M38 84 H162"/>
+    <path d="M38 116 H162"/>
+    <!-- Le sommet de l'A, coupé net par la fente -->
+    <path d="M77 84 L100 38 L123 84"/>
+    <!-- Les deux pieds, repris sous la fente -->
+    <path d="M61 116 L38 162"/>
+    <path d="M139 116 L162 162"/>
+  </g>
 </svg>

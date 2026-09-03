@@ -1,0 +1,131 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 00 · PRÉFÉRENCES SYSTÈME
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   TOUJOURS CHARGÉ EN DERNIER. Ce fichier ne contient que des blocs @media.
+   C'est le seul endroit du système où l'on écrit prefers-reduced-motion,
+   prefers-contrast, forced-colors et print. Les blocs concurrents des
+   chapitres 01, 04, 08 et 10 sont supprimés (socle §0.16).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Mouvement réduit ─────────────────────────────────────────────────────
+   1 ms, jamais `none`. Motif mesurable : `transition: none` supprime
+   l'événement `transitionend`, dont dépendent la fermeture du pli, la
+   sortie de modale et la fin de séquence du déverrouillage. Avec `none`,
+   trois composants restent ouverts pour la personne concernée.
+   On coupe donc le mouvement, pas la mécanique.                          */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Les états finaux sont posés, pas devinés. */
+  .rv                      { opacity: 1; transform: none; }
+  .jauge__piste i          { transform: scaleY(1); }
+  .sommaire a::before      { inline-size: 100%; }
+  .progression .bar i,
+  .jalons i                { transition: none; }
+  .entree-page             { animation: none; opacity: 1; transform: none; }
+
+  /* La barre d'attente indéterminée ne peut pas devenir statique sans
+     mentir sur l'état. Elle est remplacée par un libellé.              */
+  .attente::before         { animation: none; display: none; }
+  .attente::after          { content: "Chargement en cours…"; }
+}
+
+/* ── Transparence réduite ──────────────────────────────────────────────── */
+@media (prefers-reduced-transparency: reduce) {
+  .mat-verre {
+    background: var(--verre-clair);
+    backdrop-filter: none;
+  }
+  .enseigne,
+  .halo { box-shadow: var(--halo-neon-doux); }
+}
+
+/* ── Contraste renforcé ────────────────────────────────────────────────────
+   Les trames de matière disparaissent : elles sont du bruit pour qui a
+   besoin de contraste. Les filets décoratifs montent d'un cran.          */
+@media (prefers-contrast: more) {
+  .mat-acier,
+  .mat-papier            { background-image: none; }
+  :root                  { --bordure: var(--rule-5); }
+  .acier                 { --bordure: var(--rule-light-4); }
+  .voile,
+  .scrim                 { background: var(--surface); }
+}
+
+/* ── Couleurs forcées ─────────────────────────────────────────────────────
+   Le point le plus mal couvert d'une charte web en général : les fonds
+   disparaissent, donc l'état d'un module, le rang d'un palier et la
+   pastille de statut deviennent indistinguables.
+
+   La compensation est structurelle : chaque état porte un contour en
+   currentColor. Et surtout — LE MOT RESTE PORTEUR DE L'ÉTAT. C'est la
+   raison pour laquelle « Verrouillé », « Terminé », « En cours » sont
+   écrits en toutes lettres partout dans le système, jamais suggérés par
+   une seule couleur.                                                    */
+@media (forced-colors: active) {
+
+  .etat,
+  .badge,
+  .palier,
+  .mention,
+  .jeton                 { border: 1px solid currentColor; }
+
+  .jauge__piste i.f      { border: 1px solid CanvasText; }
+
+  .enseigne,
+  .halo                  { box-shadow: none; }
+  .mat-verre             { backdrop-filter: none; }
+
+  :focus-visible         { outline-color: Highlight; }
+
+  /* Les dégradés de matière ne survivent pas au mode forcé : on les
+     remplace par la couleur système correspondante.                   */
+  .mat-panneau,
+  .mat-email,
+  .mat-acier,
+  .mat-verre,
+  .mat-papier,
+  .mat-cuir              { background: Canvas; color: CanvasText;
+                           forced-color-adjust: none; }
+}
+
+/* ── Impression ───────────────────────────────────────────────────────────
+   Une page des Archives s'imprime comme une fiche : noir sur blanc, sans
+   halo, sans voile, avec l'URL des liens externes.                       */
+@media print {
+
+  *                      { background: #fff !important; color: #000 !important;
+                           box-shadow: none !important; }
+
+  .enseigne,
+  .halo,
+  .voile,
+  .scrim                 { display: none; }
+
+  .legende               { border: 1px solid #000; }
+
+  a[href^="http"]::after { content: " (" attr(href) ")";
+                           font-family: var(--f-mono);
+                           font-size: 0.85em;
+                           word-break: break-all; }
+
+  p, li                  { orphans: 3; widows: 3; }
+
+  h1, h2, h3, h4,
+  .display, .h1, .h2,
+  .h3, .h4               { break-after: avoid; }
+
+  .spec, .carte,
+  .encart                { break-inside: avoid; }
+}

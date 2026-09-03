@@ -1,142 +1,126 @@
-import { useState } from "react";
-import { minecraft } from "../data/site";
-import Seal from "../components/brand/Seal";
-import Spark from "../components/brand/Spark";
-import Pictogram from "../components/brand/Pictogram";
-import type { PictoName } from "../components/brand/Pictogram";
-import SectionHeading from "../components/ui/SectionHeading";
-import TypeBadge from "../components/ui/TypeBadge";
-import LiveDot from "../components/ui/LiveDot";
-import { useMinecraftStatus } from "../hooks/useMinecraftStatus";
+import { useEffect, useState } from "react";
+import { discord, meta, minecraft, site } from "../data/site";
+import FicheServeur from "../components/minecraft/FicheServeur";
+import { useRevelation } from "../components/minecraft/useRevelation";
 
-const FEATURE_PICTOS: PictoName[] = ["collection", "savoir", "nature", "curiosite", "chroniques"];
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE MINECRAFT — route `/minecraft` · maquette `#v-minecraft` (l. 1144-1168)
+   Les Archives du Professeur Chen — charte v1.0.0 · lot L4
+
+   ── CE QUE LA MAQUETTE DONNE, ET CE QUE LA CHARTE CORRIGE ─────────────────
+
+   La vue de la maquette tient en une section : une tête de bloc, la barre
+   d'adresse `.ip`, quatre cartes. Trois écarts, tous tranchés par la charte :
+
+   1. `.ip` / `.ip__l` / `.affilie` n'existent pas dans `src/styles/`. Le
+      composant s'appelle `.serveur` (`ARC · CMP — 46`, socle § 0.25) et son
+      intitulé `.serveur__libelle` ; la ligne technique est un `.meta`. Le
+      § 0.12 impose un nom par composant : ce sont ces noms-là.
+
+   2. La maquette n'affiche aucun état de serveur. Le § 0.25 en fait une
+      obligation, écrite et horodatée. C'est `FicheServeur` qui la porte.
+
+   3. La maquette n'a aucun appel à l'action sur cette page. Le § 0.25 pose
+      `ARC · CMP — 47 · Bandeau d'invitation` : bande pleine largeur, matière
+      acier, sur-titre, titre, deux phrases, un bouton. Pas de compteur, pas
+      d'urgence, pas de « rejoins-nous ».
+
+   ── UN `h1` PAR PAGE ──────────────────────────────────────────────────────
+   La maquette est un SPA à vues : elle n'a qu'un `h1`, celui du hero de
+   l'accueil, et ouvre ses autres vues sur `<h2 class="h2">`. Avec un routeur,
+   chaque page porte le sien. `.h2` est une classe TYPOGRAPHIQUE
+   (02-tokens-typo.css), pas un niveau : le titre est donc un `h1` habillé
+   en `.h2`, et la hiérarchie descend ensuite sans saut — `h2` sur les
+   quatre cartes, `h2` sur le bandeau d'invitation.
+
+   ── LE TITRE DE DOCUMENT ──────────────────────────────────────────────────
+   `Layout.tsx` (§ 0.28) annonce le changement de route en lisant
+   `document.title` : il compte donc sur la page pour l'avoir posé AVANT —
+   les effets d'un enfant s'exécutent avant ceux de son parent. Le gabarit
+   du § 0.29 est appliqué à `meta.minecraft.titre`, qui vit dans `site.ts`.
+   Le reste de l'en-tête (description, canonique, `og:*`, JSON-LD) demande un
+   gestionnaire partagé qui n'existe pas encore : voir le rapport du lot.
+
+   ── CE QUI DISPARAÎT DE L'ANCIENNE PAGE ───────────────────────────────────
+   `Seal`, `Spark`, `Pictogram`, `SectionHeading`, `TypeBadge` et `LiveDot`
+   appartiennent à l'ancienne charte. `LiveDot` en particulier disait l'état
+   par la seule couleur, ce que le § 0.25 interdit. Les trois « premiers pas »
+   écrits en dur dans le composant (« Installe Cobblemon… », au tutoiement)
+   sortent aussi : aucune copie ne vit ailleurs que dans `src/data/site.ts`.
+
+   ── CE QUI EST PRÉSERVÉ ───────────────────────────────────────────────────
+   `useMinecraftStatus` — inchangé, monté par `FicheServeur` — et la copie de
+   l'adresse, qui gagne le retour `role="status"` exigé par le § 0.25.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 export default function Minecraft() {
-  const [copied, setCopied] = useState(false);
-  const status = useMinecraftStatus(minecraft.ip);
-  const isOnline = status.status === "ok" && status.data.online;
-  const players = status.status === "ok" ? status.data.players : undefined;
-  const liveVersion = status.status === "ok" ? status.data.version : undefined;
-  const dotStatus = status.status === "loading" ? "loading" : isOnline ? "online" : "offline";
+  const reveler = useRevelation();
 
-  const copyIp = async () => {
-    try {
-      await navigator.clipboard.writeText(minecraft.ip);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard indisponible */
-    }
-  };
+  // Un compteur de tentatives, rien de plus : il sert de `key` à la fiche.
+  // Le remontage relance l'effet de `useMinecraftStatus`, qui n'expose pas
+  // de fonction de reprise et qu'on ne modifie pas pour si peu.
+  const [tentative, setTentative] = useState(0);
+
+  useEffect(() => {
+    // § 0.29 · « {Titre de page} · Les Archives du Professeur Chen ».
+    document.title = `${meta.minecraft.titre} · ${site.name}`;
+  }, []);
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-creme-veil">
-        <div className="container-wide relative pt-20 pb-16 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <TypeBadge variant="vert">Serveur officiel · Cobblemon</TypeBadge>
-            <h1 className="display text-encre">{minecraft.name}</h1>
-            <p className="text-lg text-encre-500 leading-relaxed">{minecraft.description}</p>
-            <dl className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-parchemin-600 border border-parchemin-600 rounded-xl overflow-hidden max-w-2xl">
-              <div className="bg-creme p-4">
-                <dt className="mono-meta text-encre-400">Statut</dt>
-                <dd className="mt-1.5"><LiveDot status={dotStatus} /></dd>
-              </div>
-              <div className="bg-creme p-4">
-                <dt className="mono-meta text-encre-400">Joueurs</dt>
-                <dd className="font-display font-bold text-encre mt-1">
-                  {status.status === "loading" && "…"}
-                  {status.status === "ok" && isOnline && players
-                    ? `${players.online}/${players.max}`
-                    : status.status === "ok"
-                    ? "—"
-                    : status.status === "error"
-                    ? "?"
-                    : null}
-                </dd>
-              </div>
-              <div className="bg-creme p-4">
-                <dt className="mono-meta text-encre-400">Version</dt>
-                <dd className="font-display font-bold text-encre text-sm mt-1.5">{liveVersion ?? minecraft.version}</dd>
-              </div>
-              <div className="bg-creme p-4">
-                <dt className="mono-meta text-encre-400">Mode</dt>
-                <dd className="font-display font-bold text-encre text-sm mt-1.5">Cobblemon</dd>
-              </div>
-            </dl>
+      <section className="bande" aria-labelledby="titre-academie">
+        <div className="wrap">
+          <div className="tete" ref={reveler}>
+            <p className="eyebrow">{minecraft.surtitre}</p>
+            <h1 className="h2" id="titre-academie">
+              {minecraft.titre}
+            </h1>
+            <p className="lede">{minecraft.lede}</p>
           </div>
 
-          <div className="card card-parch !p-8">
-            <div className="flex items-center justify-between border-b border-encre/10 pb-4 mb-5">
-              <span className="label text-vert-700">Connexion serveur</span>
-              <Seal size={44} variant="simple" tone="rouge" />
-            </div>
-            <p className="text-sm text-encre-500 mb-4 leading-relaxed">
-              Lance Minecraft, va dans <span className="font-mono text-encre">Multijoueur</span> →{" "}
-              <span className="font-mono text-encre">Ajouter un serveur</span>, puis colle l'IP ci-dessous.
-            </p>
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-creme border border-encre/15">
-              <div className="flex-1 min-w-0">
-                <div className="mono-meta text-encre-400 mb-1">IP du serveur</div>
-                <div className="font-mono text-lg text-rouge break-all">{minecraft.ip}</div>
-              </div>
-              <button
-                onClick={copyIp}
-                className={`btn shrink-0 text-sm py-2 px-4 ${
-                  copied ? "bg-vert text-creme" : "bg-encre text-creme hover:bg-encre-800"
-                }`}
-              >
-                {copied ? "Copié ✓" : "Copier"}
-              </button>
-            </div>
-            <div className="mt-5 flex items-start gap-3 p-4 rounded-lg bg-laiton-50 border border-laiton/30">
-              <Spark size="0.9em" className="text-laiton-700 mt-1 shrink-0" />
-              <p className="text-sm text-laiton-700 leading-relaxed">
-                Le mod Cobblemon est requis pour rejoindre. Installation via CurseForge ou Modrinth en quelques clics.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* EXPÉRIENCE */}
-      <section className="section">
-        <div className="container-wide">
-          <SectionHeading
-            eyebrow="L'expérience"
-            title="Ce qui rend l'Académie unique."
-            subtitle="Plus qu'un serveur Cobblemon — un univers structuré, pédagogique et social."
+          <FicheServeur
+            key={tentative}
+            reveler={reveler}
+            onReessayer={() => setTentative((rang) => rang + 1)}
           />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {minecraft.features.map((f, i) => (
-              <div key={f} className="card card-hover flex gap-4 items-start">
-                <div className="h-10 w-10 rounded-lg bg-vert-50 border border-vert/30 flex items-center justify-center text-vert-700 shrink-0">
-                  <Pictogram name={FEATURE_PICTOS[i % FEATURE_PICTOS.length]} size={20} />
-                </div>
-                <p className="text-encre-700 pt-1.5">{f}</p>
-              </div>
+
+          <div className="cartes mt-[var(--sp-8)]" ref={reveler}>
+            {minecraft.cartes.map((carte) => (
+              <article className="carte" key={carte.titre}>
+                <h2 className="carte-titre">{carte.titre}</h2>
+                <p className="carte__d">{carte.texte}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* COMMENT REJOINDRE */}
-      <section className="section pt-0">
-        <div className="container-narrow">
-          <SectionHeading eyebrow="Premiers pas" title="Rejoindre en trois étapes." />
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              { n: "01", t: "Installe Cobblemon", d: "Via CurseForge ou Modrinth, version 1.20.x recommandée." },
-              { n: "02", t: "Ajoute le serveur", d: `Dans Multijoueur, ajoute l'IP : ${minecraft.ip}` },
-              { n: "03", t: "Rejoins l'Académie", d: "Suis les instructions du spawn pour t'inscrire à un cours." },
-            ].map((s) => (
-              <div key={s.n} className="card">
-                <div className="font-display font-extrabold text-4xl text-rouge">{s.n}</div>
-                <div className="font-display font-bold text-encre mt-2 mb-1">{s.t}</div>
-                <p className="text-sm text-encre-500 leading-relaxed">{s.d}</p>
-              </div>
-            ))}
+      {/* ARC · CMP — 47 · Bandeau d'invitation — socle § 0.25.
+          Acier, jamais bordeaux : la seule bande bordeaux d'une page est le
+          kit affilié. Sur acier, `.acier` bascule `--accent` vers le néon,
+          donc `.btn` EST déjà le bouton d'acier du § 0.25 — aucun `.btn--acier`
+          n'est écrit, et aucun `style` local ne repeint quoi que ce soit.
+          Le serveur s'annonce et s'organise sur le Discord : c'est là que
+          mène l'invitation, et toute sa copie vient de `site.ts`. */}
+      <section className="bande acier mat-acier" aria-labelledby="titre-invitation">
+        <div className="wrap">
+          <div className="tete" ref={reveler}>
+            <p className="eyebrow">{discord.surtitre}</p>
+            <h2 className="h2" id="titre-invitation">
+              {discord.nom}
+            </h2>
+            <p className="lede">{discord.lede}</p>
+          </div>
+
+          <div className="hero__b">
+            <a
+              className="btn lien-externe"
+              href={discord.inviteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {discord.cta}
+            </a>
           </div>
         </div>
       </section>

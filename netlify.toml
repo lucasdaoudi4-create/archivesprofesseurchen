@@ -2,6 +2,45 @@
   command = "npm run build"
   publish = "dist"
 
+# ── Renvois — socle § 0.27 ───────────────────────────────────────────────
+# L'ORDRE COMPTE : Netlify applique la première règle qui correspond, et la
+# règle attrape-tout du bas correspond à tout. Toute nouvelle règle se pose
+# donc AVANT elle.
+#
+# Ces règles ne voient que les chargements de page complets. Une navigation
+# interne (`<Link>`) est résolue par le routeur, jamais par le réseau : les
+# mêmes renvois sont donc écrits une seconde fois dans `src/App.tsx`, et les
+# deux listes doivent rester d'accord.
+
+# Permanent — le § 0.27 l'impose depuis l'existant. Il reste quand la page
+# de paliers sera écrite.
+[[redirects]]
+  from = "/paliers"
+  to = "/laboratoire/paliers"
+  status = 301
+
+# TEMPORAIRES — à retirer dès que les deux pages existent.
+# Le § 0.27 déclare `/laboratoire/paliers` publique ET indexée : un 301
+# poisonnerait l'index et les caches le jour où elle est écrite. `/formation`
+# porte déjà le contenu des deux vues — la notice du Module 01 avec son
+# sommaire, puis les trois paliers avec leur comparatif.
+[[redirects]]
+  from = "/laboratoire/paliers"
+  to = "/formation"
+  status = 302
+
+[[redirects]]
+  from = "/formation/module-01"
+  to = "/formation"
+  status = 302
+
+# ── Application à page unique ────────────────────────────────────────────
+# Toujours en dernier.
+#
+# À SIGNALER : cette règle répond 200 sur TOUTE URL inconnue, y compris
+# celles qui doivent être introuvables. `NotFound` pose bien son `noindex`
+# (§ 0.29), mais le statut HTTP reste 200. Le corriger demande d'énumérer
+# les routes valides ici, ce qui n'est pas une décision de recette.
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · UTILITAIRES MAISON
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Couche `utilitaires` (affectée par le @import layer(utilitaires)
+   d'arc.css). Elle est chargée APRÈS `composants` : ce qui est écrit ici
+   bat un composant. C'est voulu — mais cela oblige à n'y mettre que des
+   réglages de MISE EN PAGE et de rôle de texte, jamais un composant
+   déguisé (socle § 0.21 : Tailwind sert la mise en page locale, la
+   charte sert les composants).
+
+   Sept utilitaires, pas davantage. Aucun n'écrit de couleur, de taille
+   ni de durée : ils ne lisent que des tokens.
+
+   Ce qui n'est PAS ici, et pourquoi :
+     · `.sr-only` et `.evitement` — déjà déclarés, seuls, dans
+       `05-tokens-socle.css` (vérifié identique à charte/styles/). Les
+       réécrire ici en ferait une seconde déclaration que `layer(utilitaires)`
+       ferait gagner silencieusement sur l'originale. Voir le rapport du
+       lot L1 : si on les veut ici, il faut d'abord les retirer là-bas.
+     · `.wrap`, `.wrap--etroit` — `03-tokens-grille.css`.
+     · `.rv` — `04-tokens-motion.css`.
+     · `.tabl-nombre` — `02-tokens-typo.css` porte déjà `tabular-nums` ;
+       seul l'alignement manquait, c'est `.t-droite` ci-dessous.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tête de bloc ─────────────────────────────────────────────────────────
+   Le trio eyebrow + titre + chapô qui ouvre une section. `clamp(32px,
+   5vw, 52px)` de la maquette EST `--rythme-sechead`, au caractère près.
+   Fusionne `.tete` et `.bloc__tete`, qui étaient deux noms pour la même
+   déclaration.                                                          */
+.tete {
+  max-inline-size: var(--me-corps);
+  margin-block-end: var(--rythme-sechead);
+}
+
+/* ── Sous-titre de rang 3 dans un long bloc ───────────────────────────────
+   Ne touche à aucune propriété typographique : le titre reste `.h3`.
+   Cet utilitaire ne pose que le filet et le rythme qui le précèdent.   */
+.sous {
+  margin-block-start: var(--rythme-m);
+  margin-block-end: var(--sp-4);
+  padding-block-start: var(--sp-6);
+  border-block-start: var(--trait-filet) solid var(--bordure);
+}
+.sous:first-of-type {
+  padding-block-start: 0;
+  border-block-start: 0;
+}
+
+/* ── Split majeur — deux colonnes qui retombent en une ────────────────────
+   Mutualise la grille de l'atelier et celle du bloc de contact.
+   `clamp(24px, 4vw, 48px)` de la maquette EST `--gap-5`, au caractère près.
+
+   Le rapport des colonnes et l'alignement appartiennent au BLOC, pas à
+   l'utilitaire : un composant les pose sur lui-même par ces trois
+   propriétés locales (famille `split`, socle § 0.5), et l'utilitaire les
+   lit. C'est ce qui évite que la couche `utilitaires` écrase la grille
+   d'un composant de la couche `composants`, qui est en dessous.
+
+       .atelier  ·  split-gauche .8fr   ·  split-droite 1.2fr  ·  split-aligne center
+       .contact  ·  split-gauche 1.15fr ·  split-droite .85fr  ·  split-aligne (défaut)
+
+   Défauts : deux colonnes égales, alignées en haut.                    */
+.split {
+  display: grid;
+  grid-template-columns:
+    minmax(0, var(--split-gauche, 1fr))
+    minmax(0, var(--split-droite, 1fr));
+  gap: var(--gap-5);
+  align-items: var(--split-aligne, start);
+}
+
+@media (max-width: 979.98px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ── Entrée de page ───────────────────────────────────────────────────────
+   Posée sur le `<main>` à chaque changement de route (socle § 0.28).
+   Le nom est exécutoire : `99-preferences.css` pose l'état final du
+   mouvement réduit sur `.entree-page` et sur aucun autre nom.          */
+.entree-page {
+  animation: entree-page var(--dur-apparition) var(--ease-instrument) both;
+}
+
+/* ── Alignement d'un relevé chiffré ───────────────────────────────────────
+   Un nombre se lit par la droite. `.tabl-nombre` (chapitre 04) apporte
+   déjà les chiffres tabulaires ; il ne manquait que l'alignement.      */
+.t-droite { text-align: right; }
+
+/* ── Les trois rôles de texte ─────────────────────────────────────────────
+   Ils remplacent les `color:` que la maquette écrivait en dur dans les
+   composants. Ils lisent un RÔLE, jamais un pas d'échelle : dans une
+   section `.acier`, les trois basculent tout seuls.                    */
+.t-secondaire { color: var(--texte-secondaire); }
+.t-tertiaire  { color: var(--texte-tertiaire); }
+.t-accent     { color: var(--accent); }

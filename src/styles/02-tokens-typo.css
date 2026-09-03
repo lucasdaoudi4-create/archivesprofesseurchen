@@ -1,0 +1,209 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 04 · TYPOGRAPHIE
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Chapitre PROPRIÉTAIRE des piles, graisses, tailles, interlignes,
+   interlettrages et mesures. Aucun autre fichier ne déclare de font-size.
+
+   Trois fontes, trois métiers :
+     Fraunces      — le display. Serif variable, opsz. La voix de l'archive.
+     Space Grotesk — le corps. Grotesque neutre, lisible en continu.
+     Space Mono    — l'instrument. Étiquettes, codes, relevés, métadonnées.
+
+   Le rem vaut 16 px : ne jamais régler font-size sur html (SC 1.4.4).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Piles ────────────────────────────────────────────────────────────
+     Chaque pile porte son repli métriquement ajusté (voir 99-preferences)
+     pour qu'aucun bloc ne bouge de plus de 1 px au chargement.          */
+  --f-display: "Fraunces", "Fraunces repli", Georgia, "Times New Roman", serif;
+  --f-corps:   "Space Grotesk", "Grotesk repli", system-ui, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  --f-mono:    "Space Mono", "Mono repli", ui-monospace, SFMono-Regular, Menlo,
+               Consolas, monospace;
+
+  /* ── Graisses ─────────────────────────────────────────────────────────
+     Quatre, pas davantage. Le 900 est réservé aux deux plus grands
+     paliers : c'est le lettrage de l'enseigne, pas un titre de section. */
+  --fw-normal: 400;
+  --fw-moyen:  500;
+  --fw-semi:   600;
+  --fw-noir:   900;
+
+  /* ── Échelle — fluide, fermée, quatorze paliers ───────────────────────
+     Toute taille hors de cette échelle est un défaut. Les bornes sont
+     calculées pour --bp-planche (620px) → --bp-plateau (1440px).        */
+  --fs-display:  clamp(2.5rem,    1.425rem + 4.528vw, 5.5rem);    /*  40 → 88 */
+  --fs-h1:       clamp(2.375rem,  1.613rem + 3.208vw, 4.5rem);    /*  38 → 72 */
+  --fs-h2:       clamp(1.875rem,  1.427rem + 1.887vw, 3.125rem);  /*  30 → 50 */
+  --fs-h3:       clamp(1.375rem,  1.196rem + 0.755vw, 1.875rem);  /*  22 → 30 */
+  --fs-h4:       clamp(1.25rem,   1.116rem + 0.566vw, 1.625rem);  /*  20 → 26 */
+  --fs-carte:    clamp(1.0625rem, 0.995rem + 0.283vw, 1.25rem);   /*  17 → 20 */
+  --fs-lede:     clamp(1rem,      0.933rem + 0.283vw, 1.1875rem); /*  16 → 19 */
+  --fs-corps:    clamp(1rem,      0.978rem + 0.094vw, 1.0625rem); /*  16 → 17 */
+  --fs-corps-s:  0.9375rem;   /* 15 */
+  --fs-corps-xs: 0.875rem;    /* 14 */
+  --fs-citation: clamp(1.25rem,   1.071rem + 0.755vw, 1.75rem);   /*  20 → 28 */
+  --fs-mono-l:   0.75rem;     /* 12 — bouton, onglet                     */
+  --fs-mono-m:   0.71875rem;  /* 11,5 — étiquette, source                */
+  --fs-mono-s:   0.6875rem;   /* 11 — eyebrow, code ARC, mention légale  */
+  --fs-mono-xs:  0.625rem;    /* 10 — badge sur image, légende de scène   */
+
+  /* ── Interlignes ──────────────────────────────────────────────────────
+     Un titre respire moins qu'un paragraphe : plus la taille monte,
+     plus l'interligne descend.                                          */
+  --lh-display: 0.95;
+  --lh-titre:   1.05;
+  --lh-h3:      1.10;
+  --lh-h4:      1.15;
+  --lh-lede:    1.55;
+  --lh-corps:   1.65;   /* valeur du Module 01 */
+  --lh-serre:   1.20;
+  --lh-mono:    1.80;
+  --lh-plat:    1.00;
+
+  /* ── Interlettrages ───────────────────────────────────────────────────
+     Négatif sur les grands corps display, franchement positif sur les
+     capitales de l'instrument. Rien entre les deux.                     */
+  --ls-display: -0.04em;
+  --ls-h1:      -0.035em;
+  --ls-h2:      -0.02em;
+  --ls-h3:      -0.015em;
+  --ls-h4:      -0.01em;
+  --ls-lede:    -0.005em;
+  --ls-normal:  0;
+  --ls-xxs:     0.04em;
+  --ls-xs:      0.10em;
+  --ls-s:       0.14em;   /* bouton, onglet          */
+  --ls-m:       0.16em;   /* code ARC, étiquette     */
+  --ls-l:       0.18em;   /* intitulé de relevé      */
+  --ls-xl:      0.22em;   /* eyebrow — le plus large */
+
+  /* ── Mesures — largeur de ligne, en ch ────────────────────────────────
+     Une mesure est une CONTRAINTE, pas une suggestion : tout bloc de
+     texte courant porte la sienne.                                      */
+  --me-h1:       13ch;
+  --me-h2:       22ch;
+  --me-lede:     50ch;
+  --me-corps:    65ch;
+  --me-corps-s:  56ch;
+  --me-meta:     52ch;
+  --me-legal:    74ch;
+  --me-citation: 34ch;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STYLES NOMMÉS — les classes éditoriales
+   Un composant n'invente jamais un style de texte : il prend l'un de ceux-ci.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.display,
+.h1, .h2, .h3, .h4,
+.carte-titre,
+.citation {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.display     { font-size: var(--fs-display); font-weight: var(--fw-noir); line-height: var(--lh-display); letter-spacing: var(--ls-display); }
+.h1          { font-size: var(--fs-h1);      font-weight: var(--fw-noir); line-height: var(--lh-titre);   letter-spacing: var(--ls-h1); max-inline-size: var(--me-h1); }
+.h2          { font-size: var(--fs-h2);      font-weight: var(--fw-semi); line-height: var(--lh-titre);   letter-spacing: var(--ls-h2); max-inline-size: var(--me-h2); }
+.h3          { font-size: var(--fs-h3);      font-weight: var(--fw-semi); line-height: var(--lh-h3);      letter-spacing: var(--ls-h3); }
+.h4          { font-size: var(--fs-h4);      font-weight: var(--fw-semi); line-height: var(--lh-h4);      letter-spacing: var(--ls-h4); }
+.carte-titre { font-size: var(--fs-carte);   font-weight: var(--fw-semi); line-height: var(--lh-h4);      letter-spacing: var(--ls-h4); }
+
+/* L'italique de Fraunces — le sous-titre du hero du Module 01.
+   Un seul emploi : la seconde ligne d'un titre principal.             */
+.h1 em, .display em {
+  display: block;
+  font-style: italic;
+  font-weight: var(--fw-normal);
+  font-size: 0.46em;
+  letter-spacing: -0.015em;
+  margin-block-start: 0.2em;
+  color: var(--texte-secondaire);
+}
+
+.lede {
+  font-family: var(--f-corps);
+  font-size: var(--fs-lede);
+  line-height: var(--lh-lede);
+  letter-spacing: var(--ls-lede);
+  max-inline-size: var(--me-lede);
+  color: var(--texte-secondaire);
+  text-wrap: pretty;
+}
+
+.corps      { font-family: var(--f-corps); font-size: var(--fs-corps);    line-height: var(--lh-corps); max-inline-size: var(--me-corps);   text-wrap: pretty; }
+.corps-s    { font-family: var(--f-corps); font-size: var(--fs-corps-s);  line-height: 1.55;            max-inline-size: var(--me-corps-s); }
+.corps-xs   { font-family: var(--f-corps); font-size: var(--fs-corps-xs); line-height: 1.5; }
+
+.citation {
+  font-size: var(--fs-citation);
+  font-weight: var(--fw-normal);
+  font-style: italic;
+  line-height: 1.35;
+  letter-spacing: var(--ls-h4);
+  max-inline-size: var(--me-citation);
+}
+
+/* ── L'instrument : les quatre styles monospace ────────────────────────
+   Ils portent toute la métadonnée de la marque. Ils sont TOUJOURS en
+   capitales, TOUJOURS espacés, JAMAIS en texte courant.               */
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-xl);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--sp-3);
+}
+.label {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-l);
+  text-transform: uppercase;
+  color: var(--texte-tertiaire);
+}
+.code-arc {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+  color: var(--texte-tertiaire);
+  font-variant-numeric: tabular-nums;
+}
+.meta {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-m);
+  line-height: var(--lh-mono);
+  letter-spacing: var(--ls-xxs);
+  color: var(--texte-tertiaire);
+}
+.legende {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-xs);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+  line-height: var(--lh-serre);
+}
+.legal {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  line-height: 1.7;
+  max-inline-size: var(--me-legal);
+  color: var(--texte-tertiaire);
+}
+
+/* ── Les chiffres d'un relevé s'alignent, toujours ─────────────────── */
+.jauge__val,
+.vrow .vv,
+.tabl-nombre,
+table td,
+time {
+  font-variant-numeric: tabular-nums;
+}

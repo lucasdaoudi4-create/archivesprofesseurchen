@@ -1,107 +1,122 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { navLinks } from "../../data/site";
-import Seal from "../brand/Seal";
-import Spark from "../brand/Spark";
+import Marque from "../brand/Marque";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CMP — 20 · BARRE DE NAVIGATION DU SITE — `.sitenav`
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Portage du balisage de la maquette validée (l. 553-578), sans la barre
+   `.demo`, qui est un outil de démonstration hors site.
+
+   ── CE QUE LE BALISAGE DOIT PORTER, ET POURQUOI ──────────────────────────
+
+   `class="sitenav acier mat-acier"` — les trois, et dans cet ordre
+   (30-composants.css, « Composition : ce que le balisage doit porter ») :
+
+     · `.sitenav`   la géométrie du composant : hauteur `--h-nav`, position
+                    collante, filet de fermeture ;
+     · `.acier`     la classe de CONTEXTE (socle § 0.11). Elle bascule tout
+                    le jeu de tokens d'un coup : `--texte` passe au blanc,
+                    `--accent` au néon, `--focus` au néon, `--bordure` au
+                    filet clair. Aucune redéfinition locale de token n'est
+                    écrite ici — c'est l'interdit n° 3 du § 0.3 ;
+     · `.mat-acier` la MATIÈRE, lue et non recopiée. C'est elle, et elle
+                    seule, que ciblent les compensations `prefers-contrast`
+                    et `forced-colors` de `99-preferences.css`.
+
+   `.sitenav__in` compose `.wrap` : la gouttière et la largeur de conteneur
+   viennent du système de grille, jamais d'une copie locale.
+
+   ── LES HUIT ENTRÉES ──────────────────────────────────────────────────────
+
+   La maquette en porte huit : sept liens de page plus le bouton
+   « Rejoindre ». `src/data/site.ts` n'en déclarait que six — il manquait
+   « Paliers ». Les libellés et l'ordre sont ceux de la maquette ; les
+   destinations sont celles du plan de site du socle § 0.27.
+
+   Elles ne sont pas lues dans `site.ts` : ce fichier n'appartient pas à ce
+   lot, et la barre du chrome a sa propre liste — l'ordre et les libellés du
+   chrome sont un fait de charte, pas une donnée éditoriale.
+
+   ── L'ÉTAT COURANT EST DIT DEUX FOIS ─────────────────────────────────────
+
+   `NavLink` pose `aria-current="page"`, et le CSS y accroche À LA FOIS la
+   couleur d'accent ET le filet de 2 px sous le libellé — jamais la couleur
+   seule (SC 1.4.1). Le bouton `.sitenav__cta` est un `Link` et non un
+   `NavLink` : il ne doit pas prendre l'état courant, sans quoi la règle
+   d'état écraserait son fond d'accent. C'est exactement ce que faisait le
+   script de la maquette, qui excluait `.sitenav__cta` de sa boucle.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Les sept liens de page. `fin` marque la racine, qui ne doit pas rester
+ *  active sur toutes les routes. */
+const LIENS = [
+  { to: "/", libelle: "Accueil", fin: true },
+  { to: "/formation", libelle: "Formation" },
+  { to: "/laboratoire/paliers", libelle: "Paliers" },
+  { to: "/minecraft", libelle: "Minecraft" },
+  { to: "/discord", libelle: "Discord" },
+  { to: "/reseaux", libelle: "Réseaux" },
+  { to: "/contact", libelle: "Contact" },
+];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-  const location = useLocation();
+  const [ouvert, setOuvert] = useState(false);
+  const { pathname } = useLocation();
+  const burger = useRef<HTMLButtonElement>(null);
 
+  // Le menu déroulant ne survit pas à un changement de route.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    setOuvert(false);
+  }, [pathname]);
+
+  // Échappement : on referme, et le focus revient sur le bouton qui a
+  // ouvert — sans quoi il repart en tête de document.
+  const fermer = useCallback(() => {
+    setOuvert(false);
+    burger.current?.focus();
   }, []);
 
   useEffect(() => {
-    setOpen(false);
-  }, [location.pathname]);
+    if (!ouvert) return;
+    const surTouche = (e: KeyboardEvent) => {
+      if (e.key === "Escape") fermer();
+    };
+    document.addEventListener("keydown", surTouche);
+    return () => document.removeEventListener("keydown", surTouche);
+  }, [ouvert, fermer]);
 
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? "bg-creme/90 backdrop-blur-md border-b border-encre/10 shadow-[0_8px_30px_-24px_rgba(22,19,13,0.5)]"
-          : "bg-creme/70 backdrop-blur-sm border-b border-transparent"
-      }`}
-    >
-      <div className="container-wide flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-3 group" aria-label="Accueil — Les Archives du Professeur Chen">
-          <Seal size={34} variant="simple" tone="rouge" className="transition-transform duration-500 group-hover:rotate-[18deg]" />
-          <span className="flex flex-col leading-none">
-            <span className="font-display font-extrabold tracking-tight text-encre text-[0.95rem] inline-flex items-center gap-1">
-              Prof. Chen
-              <Spark size="0.55em" className="text-rouge" />
-            </span>
-            <span className="mono-meta text-encre-400 mt-0.5">Les Archives · FR</span>
-          </span>
-        </Link>
+    <nav className="sitenav acier mat-acier" aria-label="Navigation principale">
+      <div className="sitenav__in wrap">
+        <Marque />
 
-        <nav className="hidden lg:flex items-center gap-1">
-          {navLinks.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === "/"}
-              className={({ isActive }) =>
-                `px-3.5 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive ? "text-rouge" : "text-encre-600 hover:text-encre"
-                }`
-              }
-            >
-              {l.label}
+        {/* Visible sous 980px seulement (`30-composants.css`). Le libellé
+            est un mot, pas une icône : rien à deviner, et il reste lisible
+            en `forced-colors`. */}
+        <button
+          ref={burger}
+          className="sitenav__burger"
+          type="button"
+          aria-expanded={ouvert}
+          aria-controls="menu"
+          onClick={() => setOuvert((v) => !v)}
+        >
+          Menu
+        </button>
+
+        <div className={ouvert ? "sitenav__l ouvert" : "sitenav__l"} id="menu">
+          {LIENS.map((l) => (
+            <NavLink key={l.to} to={l.to} end={l.fin}>
+              {l.libelle}
             </NavLink>
           ))}
-        </nav>
-
-        <div className="hidden lg:flex items-center gap-3">
-          <Link to="/formation" className="btn-primary text-sm py-2 px-4">
-            Rejoindre la formation
+          <Link className="sitenav__cta" to="/laboratoire/paliers">
+            Rejoindre
           </Link>
         </div>
-
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="lg:hidden p-2 rounded-md text-encre hover:bg-encre/5"
-          aria-label="Menu"
-          aria-expanded={open}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {open ? (
-              <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" />
-            ) : (
-              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-            )}
-          </svg>
-        </button>
       </div>
-
-      {open && (
-        <div className="lg:hidden border-t border-encre/10 bg-creme/95 backdrop-blur-md">
-          <nav className="container-wide py-4 flex flex-col gap-1">
-            {navLinks.map((l) => (
-              <NavLink
-                key={l.to}
-                to={l.to}
-                end={l.to === "/"}
-                className={({ isActive }) =>
-                  `px-4 py-3 rounded-md text-base font-medium transition-colors ${
-                    isActive ? "text-rouge bg-rouge-50" : "text-encre-700 hover:bg-encre/5"
-                  }`
-                }
-              >
-                {l.label}
-              </NavLink>
-            ))}
-            <Link to="/formation" className="btn-primary mt-2 w-full">
-              Rejoindre la formation
-            </Link>
-          </nav>
-        </div>
-      )}
-    </header>
+    </nav>
   );
 }

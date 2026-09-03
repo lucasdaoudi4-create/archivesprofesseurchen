@@ -1,0 +1,195 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 05 · GRILLE, ESPACEMENT ET MATIÈRE
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Chapitre PROPRIÉTAIRE de --sp-* --gap-* --pad-* --r-* --elev-* --ar-*
+   --w-* --bp-* et des matières codées. Le rem vaut 16 px : ne jamais
+   régler font-size sur html (SC 1.4.4).
+
+   Trame de 4, sans exception. Les valeurs 6, 10, 13, 14 et 18 px du
+   Module 01 sont recalées (socle §0.4 bis) : elles venaient d'un HTML
+   écrit à la main, pas d'un système.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Breakpoints — cinq paliers, nommés d'après le lieu ───────────────
+     Utilisés en JS et en container queries. En CSS, les requêtes
+     descendantes s'écrivent en .98 : 619.98px, 979.98px. Jamais 620px,
+     qui laisse un trou d'un pixel.                                      */
+  --bp-poche:      420px;
+  --bp-planche:    620px;   /* charnière du Module 01                    */
+  --bp-paillasse:  980px;   /* charnière du Module 01                    */
+  --bp-atelier:   1280px;   /* apparition du sommaire latéral du lecteur */
+  --bp-plateau:   1440px;
+
+  /* ── Conteneurs ───────────────────────────────────────────────────── */
+  --pad-page:   clamp(16px, 4vw, 56px);
+  --w-plateau:  1320px;
+  --w-standard: 1140px;   /* valeur du Module 01 */
+  --w-etroit:    880px;
+  --w-fiche:     680px;
+
+  /* ── Espacement — base 4 ──────────────────────────────────────────── */
+  --sp-0:  0;
+  --sp-05: 0.125rem;  /*   2px */
+  --sp-1:  0.25rem;   /*   4px */
+  --sp-2:  0.5rem;    /*   8px */
+  --sp-3:  0.75rem;   /*  12px */
+  --sp-4:  1rem;      /*  16px */
+  --sp-5:  1.25rem;   /*  20px */
+  --sp-6:  1.5rem;    /*  24px */
+  --sp-7:  2rem;      /*  32px */
+  --sp-8:  2.5rem;    /*  40px */
+  --sp-9:  3rem;      /*  48px */
+  --sp-10: 4rem;      /*  64px */
+  --sp-11: 5rem;      /*  80px */
+  --sp-12: 6.25rem;   /* 100px */
+  --sp-13: 8rem;      /* 128px */
+  --sp-14: 10rem;     /* 160px */
+
+  /* ── Gouttières ───────────────────────────────────────────────────── */
+  --gap-0: 0;
+  --gap-1: var(--sp-3);              /* 12px — vignettes en série  */
+  --gap-2: var(--sp-4);              /* 16px — grilles de cartes   */
+  --gap-3: var(--sp-6);              /* 24px — blocs autonomes     */
+  --gap-4: clamp(24px, 3vw, 40px);   /* colonnes internes          */
+  --gap-5: clamp(24px, 4vw, 48px);   /* split majeur               */
+
+  /* ── Boîtiers — le rembourrage a des noms de meuble ───────────────── */
+  --pad-1: clamp(14px, 2vw,   18px);   /* casier        */
+  --pad-2: clamp(18px, 2.6vw, 26px);   /* tiroir        */
+  --pad-3: clamp(24px, 3.4vw, 34px);   /* caisson       */
+  --pad-4: clamp(26px, 4vw,   40px);   /* vitrine       */
+  --pad-5: clamp(28px, 4vw,   44px);   /* paillasse     */
+  --pad-6: clamp(40px, 6vw,   76px);   /* panneau mural */
+
+  /* ── Rythme vertical ──────────────────────────────────────────────── */
+  --rythme-xs:      clamp(24px,  3.5vw,  40px);
+  --rythme-s:       clamp(32px,  5vw,    56px);
+  --rythme-m:       clamp(56px,  8vw,   100px);  /* valeur du Module 01 */
+  --rythme-l:       clamp(72px, 10vw,   128px);
+  --rythme-xl:      clamp(96px, 12vw,   160px);
+  --rythme-sechead: clamp(32px,  5vw,    52px);
+
+  /* ── Rayons — le lieu est à angle vif ─────────────────────────────────
+     Une arête franche, c'est de l'émail sur un panneau. Un rayon large,
+     c'est une application. Les seuls rayons généreux sont ceux des logos
+     tiers, parce qu'ils ne nous appartiennent pas.                      */
+  --r-0: 0;
+  --r-1: 1px;
+  --r-2: 2px;    /* contrôle : bouton, champ, étiquette, badge */
+  --r-3: 3px;    /* surface : carte, fiche, encart, panneau    */
+  --r-logo-sm:  7px;   /* logo 28 px */
+  --r-logo-md:  9px;   /* logo 36 px */
+  --r-logo:    10px;   /* logo 44 px */
+  --r-logo-lg: 13px;   /* logo 62 px */
+  --r-pastille: 50%;
+
+  /* ── Épaisseurs de trait ──────────────────────────────────────────── */
+  --trait-filet:    1px;
+  --trait-controle: 1.5px;   /* case à cocher, contour de champ */
+  --trait-marque:   2px;     /* anneau de focus, barre active   */
+  --trait-lisere:   3px;     /* filet d'encart, filet de palier */
+  --trait-chant:    4px;     /* chant de plaque de spécimen     */
+  --trait-pilier:  10px;     /* le montant d'émail du hero      */
+
+  /* ── Élévation — quatre rôles, pas cinq rangs ─────────────────────────
+     Le nom dit le rôle. « Soulevé » n'est pas une ombre : c'est un
+     décalage plein d'émail, un objet qu'on soulève de la paillasse.
+     Seule la couche flottante utilise un flou : elle ne repose sur rien. */
+  --elev-0: none;
+  --elev-1: 0 1px 0 rgba(23, 26, 28, .05);            /* contact        */
+  --elev-2: 0 1px 3px rgba(23, 26, 28, .07);          /* pièce posée    */
+  --elev-3: 0 14px 0 -6px var(--bordeaux-900);        /* soulevé        */
+  --elev-3-court: 0 10px 0 -6px var(--bordeaux-900);  /* soulevé, court */
+  --elev-3-nuit:  0 14px 0 -6px var(--encre-950);     /* soulevé, acier */
+  --elev-4: 0 20px 44px -30px rgba(23, 26, 28, .9);   /* encastré       */
+  --elev-5: 0 28px 70px -40px rgba(23, 26, 28, .85);  /* flottant       */
+
+  /* ── Formats ──────────────────────────────────────────────────────── */
+  --ar-scene:    16 / 9;   /* visionneuse, plan vidéo */
+  --ar-portrait:  1 / 1;   /* le narrateur            */
+  --ar-planche:  21 / 9;   /* planche de décor        */
+  --ar-vitrine:   4 / 3;   /* vignette d'archive      */
+  --ar-vertical:  9 / 16;  /* format court            */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTENEUR — .wrap remplace .container-narrow et .container-wide
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.wrap          { width: min(var(--w-standard), 92vw); margin-inline: auto; }
+.wrap--plateau { width: min(var(--w-plateau),  94vw); margin-inline: auto; }
+.wrap--etroit  { width: min(var(--w-etroit),   92vw); margin-inline: auto; }
+.wrap--fiche   { width: min(var(--w-fiche),    92vw); margin-inline: auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES CINQ MATIÈRES, CODÉES — ARC · MAT — 01 à 05
+   Aucune image. Tout est en dégradé, en pseudo-élément, en filet.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* MAT — 01 · Panneau blanc mat : la lumière du plafond tombe du haut. */
+.mat-panneau {
+  background: linear-gradient(180deg, var(--blanc-00) 0%, var(--blanc-100) 100%);
+  border: var(--trait-filet) solid var(--rule-2);
+}
+
+/* MAT — 02 · Émail bordeaux : profond en bas, la lumière glisse dessus. */
+.mat-email {
+  background: linear-gradient(180deg, var(--bordeaux-700) 0%, var(--bordeaux-900) 100%);
+  color: var(--blanc-00);
+}
+
+/* MAT — 03 · Acier inoxydable brossé : le brossage est vertical, très fin,
+   et ne se voit qu'en lumière rasante. Jamais de rayures visibles.      */
+.mat-acier {
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(244, 245, 246, .028) 0 1px,
+      transparent 1px 3px),
+    linear-gradient(160deg, var(--acier-900) 0%, var(--encre-950) 100%);
+  color: var(--blanc-50);
+}
+
+/* MAT — 04 · Verre de laboratoire : translucide, tranche claire en haut.
+   Le repli sans backdrop-filter est un aplat, jamais rien.             */
+.mat-verre {
+  background: var(--verre-clair);
+  border-top: var(--trait-filet) solid var(--verre-chant);
+  border-inline: var(--trait-filet) solid var(--verre-ombre);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .mat-verre {
+    background: color-mix(in srgb, var(--verre) 55%, transparent);
+    backdrop-filter: blur(10px) saturate(1.1);
+  }
+}
+
+/* MAT — 05 · Papier & cuir vieillis : la fibre est une hachure très faible,
+   la tranche est plus sombre que la page.                               */
+.mat-papier {
+  background:
+    repeating-linear-gradient(118deg,
+      rgba(89, 75, 46, .022) 0 2px,
+      transparent 2px 5px),
+    linear-gradient(180deg, var(--papier-clair) 0%, var(--papier-tranche) 100%);
+  color: var(--encre-900);   /* 12,16 sur --papier */
+}
+
+.mat-cuir {
+  background: linear-gradient(180deg, var(--papier-profond) 0%, var(--bordeaux-950) 100%);
+  color: var(--blanc-50);
+}
+
+/* ── Le montant d'émail — l'arête qui cadre un panneau clair ───────────
+   C'est le pilier du mur du fond, pas une bordure d'accent.           */
+.pilier-email { position: relative; }
+.pilier-email::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--trait-pilier);
+  background: linear-gradient(180deg, var(--bordeaux-700), var(--bordeaux-900));
+}

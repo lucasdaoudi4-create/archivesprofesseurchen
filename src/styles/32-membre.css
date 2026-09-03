@@ -1,0 +1,498 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 10 · ESPACE MEMBRE ET PALIERS
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Couche `composants`, assignée par arc.css. CE FICHIER NE DÉCLARE AUCUN
+   @layer, aucun token, et aucune @media de préférence.
+
+   Sources : chapitre 10 (`10-membre-patreon.md`), son addendum
+   (`10-membre-addendum.md`, §10.15 notamment — il CORRIGE le chapitre, il ne
+   le remplace pas), le socle §0.12, §0.13, §0.26, et l'Amendement 1 §A1.1.
+
+   ── CONTRAT DE BALISAGE ─────────────────────────────────────────────────
+   Trois compositions sont OBLIGATOIRES dans le JSX. Elles ne sont pas des
+   commodités : ce sont les seules manières conformes d'obtenir la matière et
+   le contexte, puisque la règle de couche (a) interdit à ce fichier de
+   redéfinir un jeton, et la règle (b) de réécrire un dégradé.
+
+     palier 02  <div class="palier__plaque mat-email">
+     palier 03  <div class="palier__plaque mat-acier acier">
+     le sas     <div class="wrap wrap--fiche"><div class="sas">
+
+   Le palier 03 porte `acier` EN PLUS de `mat-acier` : c'est `acier` qui
+   rebascule `--accent` sur le néon, et c'est de là que vient la couleur du
+   libellé exigée par le §0.26. Sans elle, `--accent` resterait le bordeaux,
+   qui vaut 1,62 sur l'acier — un échec de contraste silencieux.
+
+   ── LITTÉRAUX ET PAS D'ÉCHELLE TOLÉRÉS ICI, ET NULLE PART AILLEURS ──────
+   1. `.palier--01 .palier__plaque` — le couple `--acier-400` / `--encre-900`.
+      Le socle §0.26 arrête le fond et le texte de chaque palier comme
+      NORMATIFS et mesurés (7,00). Aucun jeton sémantique ne nomme ce couple,
+      et aucune des cinq matières ne le produit : `.mat-acier` est l'acier
+      SOMBRE. Les paliers 02 et 03 n'ont pas besoin de cette exception, eux —
+      voir le contrat de balisage ci-dessus.
+   2. `.btn-patreon` — la hauteur de 52 px. Valeur normative du §0.26,
+      reprise telle quelle du chapitre 10. C'est le seul littéral en px du
+      fichier ; les 32 px d'air et les 24 px de rembourrage tombent, eux, sur
+      `--sp-7` et `--sp-6`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1 · LE BANDEAU DE COMPTE — ARC · CMP — 30
+
+   La bande qui dit, sous la navigation, quel palier ouvre la session et
+   jusqu'à quand. Elle s'appelait `.cartouche` dans la maquette : le socle
+   §0.12 réserve ce nom à l'étiquette de tête de page (ex-`.stamp`), et
+   l'arbitrage est exécutoire. D'où `.bandeau-compte`.
+
+   Balisage : `<div class="bandeau-compte"><div class="bandeau-compte__in wrap">`.
+   Le conteneur n'est pas recopié — `.wrap` est déjà déclaré en
+   03-tokens-grille.css, et le redéclarer ici le ferait gagner en silence
+   sur l'original (composants bat tokens).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bandeau-compte {
+  background: var(--surface-2);
+  border-block-end: var(--trait-filet) solid var(--bordure);
+}
+
+.bandeau-compte__in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-3);
+
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+  color: var(--texte-tertiaire);
+}
+
+/* Le palier courant — l'écusson et le nom, à pleine lisibilité. */
+.bandeau-compte__palier {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--texte);
+}
+
+.bandeau-compte a {
+  margin-inline-start: auto;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2 · LE SAS DE CONNEXION — ARC · CMP — 29
+
+   « Prenez votre badge. » Le point d'entrée unique de l'espace membre.
+
+   La maquette le borne à 520 px, valeur absente de l'échelle des conteneurs.
+   Plutôt que d'ouvrir un jeton pour une seule surface, le sas est posé dans
+   `.wrap--fiche` (680 px), qui existe déjà et qui est nommément le format
+   « fiche ». Le composant ne porte donc plus de largeur du tout.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sas {
+  background: var(--surface-carte);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  box-shadow: var(--elev-2);
+  padding: var(--pad-4);
+  text-align: center;
+}
+
+/* Le paragraphe hérite de `max-inline-size:var(--me-corps)` posé sur `p` en
+   20-base.css : sans marge automatique il se collerait à gauche dans un bloc
+   centré. Cette règle remplace un `style="margin-inline:auto"` de la
+   maquette — le socle §0.21 n'admet aucun style en ligne. */
+.sas p { margin-inline: auto; }
+
+/* L'emblème du sas. Balisage : `<svg class="emb emb--62 sas__emb">`.
+   62 px : la maquette sert 64 px, absent de l'échelle des logos.
+   Le fond est clair, donc pas de halo — et pas de `.pic--64` non plus, qui
+   poserait sur une grille de 200 un trait calculé pour une grille de 48. */
+.sas__emb {
+  margin-inline: auto;
+  margin-block-end: var(--sp-5);
+  color: var(--accent);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3 · LE BOUTON PATREON — socle §0.26 · ch. 10 §10.6 · addendum §10.15
+
+   Le SEUL corps étranger toléré par le système. Il est donc traité comme
+   tel : isolé, seul sur sa ligne, 32 px d'air autour, posé sur un fond
+   `--blanc-50` uni. Le bouton s'accorde à la maison par sa FORME — rayon
+   2 px, hauteur 52 px, libellé en `--f-corps` 16 px 500 — jamais par sa
+   couleur.
+
+   ── La couleur, et pourquoi elle n'est pas celle de la maquette ─────────
+   Le §10.6 livrait `--patreon-fond:#A_VERIFIER`. L'addendum §10.15 montre
+   que ce n'est pas un marqueur inerte : la déclaration est rejetée à
+   l'analyse, `background` n'a plus de valeur, et le point d'entrée de
+   l'espace membre s'affichait sans fond. L'addendum pose donc un REPLI, en
+   couleurs de la maison, choisi pour être visiblement provisoire :
+   `#171A1C` de fond, `#FFFFFF` de texte — soit exactement `--encre-900` et
+   `--blanc-00`, 17,49:1, AAA.
+
+   La maquette fait l'inverse (bouton blanc, texte encre). L'addendum est
+   postérieur, il est explicite, et sa mesure est publiée : la charte tranche.
+
+   Les jetons `--patreon-*` ne sont déclarés dans aucun fichier de `tokens`,
+   et ce fichier ne peut pas les ouvrir sans violer la règle (a). Ils sont
+   donc LUS avec un repli — c'est nommément le garde-fou n° 2 de l'addendum
+   (« Repli dans chaque var() ») : le jour où le relevé de marque est fait et
+   les jetons déclarés en 01-tokens-couleur.css, le bouton bascule seul,
+   sans que ce fichier bouge. Voir « À signaler », points 5 et 6.
+
+   ── Le logo : il n'y en a pas ───────────────────────────────────────────
+   L'addendum §10.15 est catégorique tant que le relevé n'est pas fait :
+   « Aucun logo. Le bouton part sans pictogramme plutôt qu'avec un logo
+   redessiné. Un bouton sans logo est correct ; un logo faux est une faute. »
+   La règle ci-dessous ne sert qu'à ce que le logo officiel, LE JOUR où il
+   sera déposé, tombe à la bonne taille. La maquette, elle, embarque un
+   glyphe Patreon redessiné : il doit disparaître du JSX.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn-patreon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+
+  min-block-size: 52px;          /* normatif §0.26 — voir l'exception 2 */
+  padding-inline: var(--sp-6);
+  margin-block: var(--sp-7);     /* les 32 px d'air du corps étranger   */
+  border: var(--trait-filet) solid transparent;
+  border-radius: var(--r-2);
+
+  font-family: var(--f-corps);
+  font-size: var(--fs-corps);
+  font-weight: var(--fw-moyen);
+  text-decoration: none;
+
+  background: var(--patreon-fond, var(--encre-900));
+  color: var(--patreon-texte, var(--blanc-00));
+  border-color: var(--patreon-fond, var(--encre-900));
+
+  transition: filter var(--tr-reaction), transform var(--tr-reaction);
+}
+
+.btn-patreon:hover,
+.btn-patreon:focus-visible {
+  filter: brightness(0.94);
+  transform: translateX(var(--dist-poussee));
+}
+
+.btn-patreon[aria-busy="true"] {
+  pointer-events: none;
+  filter: saturate(0.4);
+}
+
+/* Le logo officiel, non modifié, quand il aura été relevé. 20 px : pas de
+   l'échelle des icônes (§0.13). `inline-size:auto` parce qu'un mot-symbole
+   n'est pas carré et ne se déforme pas. */
+.btn-patreon svg,
+.btn-patreon img {
+  block-size: 20px;
+  inline-size: auto;
+  flex: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4 · LES CARTES DE PALIER — ARC · CMP — 27
+
+   L'addendum 08 renomme `.tiercard` en `.palier` et retire `CMP — 27` des
+   codes réattribuables. La pastille `.palier--2 / --3` à chevrons du
+   chapitre 06 est abrogée par le §0.26 : le nom `.palier` ne désigne plus
+   qu'une chose, la CARTE. L'étiquette inline de palier, elle, est `.badge`
+   (socle §0.12).
+
+   L'ordre des trois est fixe — 01, 02, 03. On ne réordonne jamais pour
+   mettre un palier en avant ; on le signale par `data-mise="recommande"`.
+
+   Le montant s'affiche : Amendement 1 §A1.1 restreint la règle « pas de prix
+   affiché » au contenu éditorial. Sur une carte de palier, dans le hero et
+   dans le comparatif, le prix est OBLIGATOIRE — le cacher reviendrait à
+   dissimuler au visiteur ce qu'on attend de lui.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.paliers {
+  display: grid;
+  /* La maquette borne les colonnes à 268 px. `min()` en plus : sans lui, une
+     colonne de 268 px déborde une fenêtre de 320 px. En rem parce qu'une
+     carte pleine de texte doit suivre la police du lecteur. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--sp-5);
+  align-items: stretch;
+}
+
+.paliers--home { margin-block-start: var(--sp-6); }
+
+.palier {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-carte);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  overflow: hidden;
+}
+
+/* Le seul signalement de mise en avant autorisé. Il ne déplace pas la carte,
+   il ne l'agrandit pas, il n'ajoute pas de couleur : il épaissit le filet.
+   L'étiquette « Recommandé » qui l'accompagne est `.mention` (socle §0.12),
+   déclarée en 30-composants.css. */
+.palier[data-mise="recommande"] {
+  border-color: var(--accent);
+  border-width: var(--trait-marque);
+  box-shadow: var(--elev-2);
+}
+
+/* ── La plaque signalétique ───────────────────────────────────────────────
+   `min-height:132px` de la maquette est retiré : socle §0.13 exception 3,
+   « les hauteurs résultantes ne se fixent jamais à la main ». Les trois
+   plaques s'égalisent d'elles-mêmes par `align-items:stretch` sur la grille. */
+.palier__plaque {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--pad-3);
+}
+
+/* Le code ARC ne passe PAS par `.code-arc` : celui-ci force
+   `--texte-tertiaire`, qui n'a pas de sens sur une plaque colorée. Ici le
+   code hérite de la couleur de sa plaque, à pleine opacité.
+   L'`opacity:.78` de la maquette est retiré : socle §0.10, « une couleur en
+   opacité n'a pas de ratio, donc pas de verdict ». La hiérarchie est portée
+   par la taille et par la fonte, pas par un voile. */
+.palier__code {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-xs);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.palier__n {
+  font-family: var(--f-display);
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-h4);
+  letter-spacing: var(--ls-h4);
+  margin-block-start: var(--sp-1);
+  max-inline-size: var(--me-h1);
+}
+
+/* ── Les trois rangs — socle §0.26 ────────────────────────────────────────
+   | Code | Palier              | Fond / texte              | Ratio | Matière |
+   | 01   | Jeune Dresseur      | --acier-400 / --encre-900 |  7,00 | acier   |
+   | 02   | Champion d'Arène    | --bordeaux-700 / --blanc-00| 10,96 | émail   |
+   | 03   | Maître de la Ligue  | --acier-900 / --neon      |  9,72 | enseigne|
+
+   Les noms sont ceux de l'auteur : l'Amendement 1 §A1.4 est explicite,
+   « ce sont les noms réels de l'auteur : la charte ne les renomme pas ».
+   Les classes `.p1 .p2 .p3` de la maquette sont hors convention de nommage
+   (socle §0.5) et deviennent `.palier--01/--02/--03`.
+
+   Seul le rang 01 est écrit ici : les rangs 02 et 03 prennent leur matière
+   par composition dans le JSX, et leur couleur d'un rôle. Voir le contrat de
+   balisage en tête de fichier. */
+
+.palier--01 .palier__plaque {
+  background: var(--acier-400);   /* exception 1 — couple normatif §0.26 */
+  color: var(--encre-900);
+}
+
+/* Rang 03 : la plaque porte `acier`, donc `--accent` y vaut le néon.
+   C'est la seule écriture qui donne les 9,72 du §0.26 sans nommer une
+   couleur — et la seule qui reste juste si le nuancier bouge. */
+.palier--03 .palier__plaque { color: var(--accent); }
+
+/* Le §0.26 veut que le rang 03 se signale une troisième fois, par
+   `--halo-neon-doux`. Ce halo n'est PAS écrit, et c'est délibéré :
+   `--halo-neon-doux` est en syntaxe `box-shadow`, invalide dans `filter` —
+   l'écrire là ne produirait aucun halo, silencieusement ; et en
+   `box-shadow` sur la plaque il serait rogné par l'`overflow:hidden` de la
+   carte, ou déborderait en néon sur un fond clair, ce que la charte interdit
+   partout. Le halo court du chapitre 02, seul dimensionné pour un objet de
+   52 px, n'a pas de jeton livré. Le rang 03 se signale donc par deux marques
+   sur trois — la plaque et le libellé — jusqu'à ce que le jeton existe.
+   Voir « À signaler », point 3. */
+
+/* ── Le corps de la carte ─────────────────────────────────────────────── */
+.palier__corps {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--pad-2);
+}
+
+/* Le montant. `2rem` et `-.03em` sont hors des deux échelles fermées et
+   tombent sur les pas voisins. */
+.palier__prix {
+  font-family: var(--f-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-noir);
+  line-height: var(--lh-plat);
+  letter-spacing: var(--ls-h2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* « par mois » — la périodicité fait partie du prix, elle n'est pas une
+   mention en petits caractères. */
+.palier__prix span {
+  margin-inline-start: var(--sp-2);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-m);
+  font-weight: var(--fw-normal);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+  color: var(--texte-tertiaire);
+}
+
+/* L'accroche : une phrase, en italique de Fraunces. Pas `.citation`, dont le
+   corps (20 → 28 px) écraserait une carte de 272 px. `--lh-serre` est le pas
+   le plus proche du 1,35 demandé — la charte n'a pas d'interligne à 1,35
+   dans son échelle fermée. Voir « À signaler », point 4. */
+.palier__acc {
+  margin: 0;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: var(--fw-normal);
+  font-size: var(--fs-carte);
+  line-height: var(--lh-serre);
+  letter-spacing: var(--ls-h4);
+  color: var(--texte);
+  max-inline-size: var(--me-citation);
+}
+
+/* Description longue (page Paliers) et description courte (accueil). */
+.palier__d,
+.palier__court {
+  margin: 0;
+  font-size: var(--fs-corps-s);
+  line-height: var(--lh-lede);
+  color: var(--texte-secondaire);
+  max-inline-size: var(--me-corps-s);
+}
+
+/* Ce que le palier ouvre. */
+.palier__l {
+  display: grid;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-corps-s);
+  line-height: var(--lh-lede);
+}
+
+.palier__l li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-3);
+  align-items: start;
+}
+
+/* L'icône se cale sur la ligne de base du premier mot, pas sur le haut de la
+   boîte. `--accent` la fait basculer seule si la carte passe sur acier. */
+.palier__l .ico {
+  margin-block-start: var(--sp-1);
+  color: var(--accent);
+}
+
+/* La graisse 700 n'existe pas dans la charte : elle n'a que 400, 500, 600
+   et 900 (socle §0.14 et 02-tokens-typo). */
+.palier__l b {
+  display: block;
+  font-weight: var(--fw-semi);
+}
+
+/* Le pied colle en bas quelle que soit la longueur du corps : les trois
+   boutons d'une rangée s'alignent. */
+.palier__pied {
+  margin-block-start: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5 · LE COMPARATIF — ARC · CMP — 28
+
+   Variante du `.tableau` de 30-composants.css. Elle ne change que la
+   répartition des colonnes : les trois paliers pèsent le même poids, la
+   colonne des intitulés prend le reste.
+
+   L'état est écrit en toutes lettres dans chaque cellule — « Ouvert »,
+   « Fermé », « En production ». C'est ce qui satisfait SC 1.4.1 : le mot
+   porte l'information, la couleur ne fait que la doubler.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tableau--paliers th[scope="col"] { inline-size: 20%; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6 · LE VERROUILLAGE D'UN CHAPITRE — ARC · CMP — 32
+
+   `.chap` et `.etat` sont déclarés en 30-composants.css ; ce fichier ne pose
+   que les deux modificateurs d'accès, qui relèvent du domaine membre.
+
+   Deux règles de fond du chapitre 10 §10.4, qui gouvernent le JSX :
+     · Aucune opacité, aucun `filter`. Un chapitre fermé garde son titre, son
+       sous-titre et son numéro à opacité 1. Griser ce qu'on a justement le
+       devoir d'annoncer, c'est le rendre illisible.
+     · Le mot est obligatoire. « Verrouillé — badge Champion d'Arène requis »
+       est plus clair qu'un signe, pour tout le monde et pour un lecteur
+       d'écran. La surface change ; la lettre, jamais.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.chap--ouvert .etat { color: var(--succes); }
+
+.chap--verrou {
+  background: var(--verrouille-surface);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* Le verrouillé ne réagit pas au survol : il n'y a rien à ouvrir. Cette
+   règle arrive après celle de 30-composants.css, dans la même couche. */
+.chap--verrou:hover {
+  transform: none;
+  border-color: var(--bordure);
+}
+
+/* Le texte garde son contraste — 7,82 sur `--blanc-200`. C'est la SURFACE
+   qui dit « fermé », jamais la lettre. */
+.chap--verrou .etat,
+.chap--verrou .chap__t,
+.chap--verrou .chap__n {
+  color: var(--verrouille-texte);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7 · ADAPTATION — socle §0.20
+
+   Cinq paliers de rupture, et cinq seulement. Les requêtes descendantes
+   s'écrivent en .98 : 619,98 px, jamais 620, qui laisse un trou d'un pixel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 619.98px) {
+  /* Sous la planche, l'écusson passe au-dessus du nom : à deux colonnes, il
+     ne resterait que six ou sept caractères par ligne au libellé. */
+  .palier__plaque {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

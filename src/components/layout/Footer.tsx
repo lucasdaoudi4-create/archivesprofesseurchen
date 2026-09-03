@@ -1,90 +1,138 @@
 import { Link } from "react-router-dom";
-import { navLinks, site, socials } from "../../data/site";
-import Seal from "../brand/Seal";
-import SparkField from "../brand/SparkField";
-import SocialIcon from "../ui/SocialIcon";
+import Marque from "../brand/Marque";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CMP — 43 · PIED DE PAGE DU SITE — `.sitefoot`
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Portage du balisage de la maquette validée (l. 1245-1288), avec deux
+   corrections que la charte impose.
+
+   ── COMPOSITION ───────────────────────────────────────────────────────────
+
+   `class="sitefoot acier mat-acier"`, comme la barre : la géométrie, le
+   contexte de tokens, la matière. Les quatre redéfinitions locales de token
+   de la maquette (`--texte-tertiaire`, `--accent`, `--focus`, `color`) sont
+   supprimées — c'est le contexte qui fait le travail (§ 0.3, interdit 3).
+
+   Les deux `style=""` en dur de la maquette disparaissent aussi :
+     · `margin-bottom:var(--sp-4)` sur la marque      → `mb-4` (mise en page)
+     · `color:…;font-size:14.5px;max-width:38ch`      → `.corps-s .t-tertiaire`
+
+   ── CORRECTION 1 · LES QUATRE LIENS « INFORMATIONS » ─────────────────────
+
+   Dans la maquette, les quatre pointent tous sur `#contact` : ce sont des
+   marque-places d'une maquette à vues. Les destinations réelles viennent du
+   plan de site du socle § 0.27. Les LIBELLÉS, eux, sont ceux de la maquette
+   — « Conditions de vente », et non le « CGV / CGU » de l'ancien pied.
+
+   ── CORRECTION 2 · LES TROIS MENTIONS DU BAS ─────────────────────────────
+
+   Le pied porte les trois mentions obligatoires, et il est le seul endroit
+   du site où elles vivent :
+
+     1. AFFILIATION — reprise littérale de la maquette. Le chapitre 02
+        § 12.7 et le socle § 0.36 la veulent sur toute page qui porte un
+        lien affilié ;
+     2. GÉNÉRATION PAR IA — chapitre 07 § 7.14 : « Toute page qui présente
+        le décor ou le narrateur porte une mention explicite. Elle vit dans
+        le pied de page, avec les mentions d'affiliation. » Formulation
+        type reprise telle quelle, comme le chapitre l'exige ;
+     3. NON-AFFILIATION — chapitre 02 § 13.3, « obligatoire sur toute page
+        où l'emblème apparaît, et sur tout support commercial ». La
+        formulation retenue est celle du § 13.3, mot pour mot ; elle
+        remplace le « Nintendo, Game Freak ou The Pokémon Company » de la
+        maquette, que le chapitre ne connaît pas.
+
+   Puis la ligne de signature du § 13.2, séparateur ` · `.
+
+   ── CE QUE LE PIED NE PORTE PLUS ──────────────────────────────────────────
+
+   Les six icônes de réseaux de l'ancien pied : la maquette ne les a pas, et
+   le pied renvoie déjà vers `/reseaux`, qui les tient toutes avec leurs
+   pseudonymes. Le `sameAs` des cinq réseaux vit en JSON-LD (§ 0.29), pas
+   dans le chrome.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Colonne « Le lieu » — les cinq destinations du site. */
+const LE_LIEU = [
+  { to: "/formation", libelle: "La formation" },
+  { to: "/laboratoire/paliers", libelle: "Les paliers" },
+  { to: "/minecraft", libelle: "L'Académie" },
+  { to: "/discord", libelle: "Le Discord" },
+  { to: "/reseaux", libelle: "Les réseaux" },
+];
+
+/** Colonne « Informations ». Libellés de la maquette, cibles du § 0.27. */
+const INFORMATIONS = [
+  { to: "/contact", libelle: "Contact" },
+  { to: "/mentions-legales", libelle: "Mentions légales" },
+  { to: "/cgv", libelle: "Conditions de vente" },
+  { to: "/confidentialite", libelle: "Confidentialité" },
+];
 
 export default function Footer() {
-  const year = new Date().getFullYear();
+  const annee = new Date().getFullYear();
+
   return (
-    <footer className="relative mt-24 bg-encre text-creme overflow-hidden">
-      <SparkField color="#5E7A48" opacity={0.13} />
-      <div className="relative">
-        <div className="container-wide py-16 grid gap-12 lg:grid-cols-4">
-          <div className="lg:col-span-2 space-y-5">
-            <div className="flex items-center gap-4">
-              <Seal size={52} variant="simple" tone="cream" />
-              <div className="leading-tight">
-                <div className="font-display font-extrabold text-creme text-lg">{site.name}</div>
-                <div className="mono-meta text-laiton-400 mt-1">Savoir · Partage · Passion</div>
-              </div>
-            </div>
-            <p className="text-encre-300 max-w-md leading-relaxed">{site.description}</p>
-            <div className="flex items-center gap-2.5 pt-1">
-              {(Object.keys(socials) as Array<keyof typeof socials>).map((k) => (
-                <a
-                  key={k}
-                  href={socials[k].url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={socials[k].label}
-                  className="p-2.5 rounded-lg border border-creme/15 text-creme/80 hover:text-creme hover:border-laiton/60 hover:bg-creme/5 transition-colors"
-                >
-                  <SocialIcon type={k} className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
+    <footer className="sitefoot acier mat-acier">
+      <div className="wrap">
+        <div className="sitefoot__g">
+          <div>
+            <Marque className="mb-4" />
+            <p className="corps-s t-tertiaire">
+              Une formation, un serveur, une communauté. Édité par LHM Studio.
+            </p>
           </div>
 
           <div>
-            <div className="label text-laiton-400 mb-4">Navigation</div>
-            <ul className="space-y-2.5 text-sm">
-              {navLinks.map((l) => (
+            <h4>Le lieu</h4>
+            <ul>
+              {LE_LIEU.map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="text-encre-300 hover:text-creme transition-colors">
-                    {l.label}
-                  </Link>
+                  <Link to={l.to}>{l.libelle}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
           <div>
-            <div className="label text-laiton-400 mb-4">Légal</div>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link to="/mentions-legales" className="text-encre-300 hover:text-creme transition-colors">
-                  Mentions légales
-                </Link>
-              </li>
-              <li>
-                <Link to="/cgv" className="text-encre-300 hover:text-creme transition-colors">
-                  CGV / CGU
-                </Link>
-              </li>
-              <li>
-                <Link to="/confidentialite" className="text-encre-300 hover:text-creme transition-colors">
-                  Confidentialité
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-encre-300 hover:text-creme transition-colors">
-                  Contact
-                </Link>
-              </li>
+            <h4>Informations</h4>
+            <ul>
+              {INFORMATIONS.map((l) => (
+                <li key={l.to}>
+                  <Link to={l.to}>{l.libelle}</Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-creme/10">
-          <div className="container-wide py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="mono-meta text-encre-300">
-              © {year} {site.name} — Tous droits réservés
-            </div>
-            <div className="mono-meta text-encre-400 text-center sm:text-right max-w-md">
-              Site non affilié à The Pokémon Company. Pokémon™ et les noms associés sont des marques de leurs ayants droit.
-            </div>
-          </div>
+        {/* `.legal` porte la mesure de 74ch, l'interligne et la couleur ;
+            `.sitefoot__legal` ne pose que le filet et le rythme. La
+            gouttière entre les quatre mentions est de la mise en page. */}
+        <div className="sitefoot__legal grid gap-4">
+          <p className="legal">
+            Communication commerciale — certains liens de ce site sont des liens
+            affiliés. Leur utilisation peut me permettre de percevoir une
+            commission, sans coût supplémentaire pour vous. Les appréciations de
+            qualité et de modération correspondent à mon expérience personnelle
+            au moment de la publication&nbsp;; les modèles et leurs règles
+            évoluent vite. Dernière mise à jour&nbsp;: septembre 2026.
+          </p>
+          <p className="legal">
+            Les visuels de ce site — le laboratoire, le narrateur, les planches
+            de décor — sont générés par intelligence artificielle avec les
+            outils présentés dans la formation. Aucun décor construit, aucune
+            équipe, aucun studio loué.
+          </p>
+          <p className="legal">
+            Site non affilié à The Pokémon Company. Pokémon™ et les noms
+            associés sont des marques de leurs ayants droit.
+          </p>
+          <p className="legal">
+            ©&nbsp;{annee} Les Archives du Professeur Chen&nbsp;·&nbsp;LHM Studio
+          </p>
         </div>
       </div>
     </footer>

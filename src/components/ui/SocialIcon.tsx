@@ -1,7 +1,7 @@
-import type { SocialKey } from "../../data/site";
+import type { ReseauKey } from "../../data/site";
 
 type Props = {
-  type: SocialKey;
+  type: ReseauKey;
   className?: string;
 };
 

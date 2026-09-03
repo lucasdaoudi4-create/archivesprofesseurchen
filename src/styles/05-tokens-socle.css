@@ -1,0 +1,151 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 00 · SOCLE
+   Les Archives du Professeur Chen — charte v1.0.0 · 1ᵉʳ septembre 2026
+
+   Ce fichier ne redéclare aucun token appartenant à un autre chapitre.
+   Il arbitre, il corrige, et il déclare ce dont aucun chapitre n'était
+   propriétaire : le halo, la hauteur d'en-tête, l'ancrage, le lien.
+
+   Règle d'auteur : un chapitre décrit, le socle arbitre. Une valeur qui
+   n'a pas de propriétaire déclaré ici n'existe pas.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Hauteur d'en-tête et ancrage ─────────────────────────────────────
+     Valeur mesurée dans le site existant (Navbar.tsx : h-16 ; Layout.tsx :
+     pt-16), pas devinée. Le lecteur de module empile deux barres
+     collantes : c'est le seul endroit où la valeur double.             */
+  --h-nav: 64px;
+
+  /* ── Halo de l'enseigne néon ──────────────────────────────────────────
+     Cinq couches : le cœur du tube, deux braises, deux diffusions.
+     Le halo n'existe que sur fond sombre — comme le néon lui-même.     */
+  --halo-neon:
+      0 0  1px var(--neon-voile),
+      0 0  6px var(--neon),
+      0 0 18px var(--neon-braise),
+      0 0 38px rgba(214, 117, 35, .55),
+      0 0 72px rgba(214, 117, 35, .28);
+
+  /* Version à trois couches, servie sous prefers-reduced-transparency. */
+  --halo-neon-doux:
+      0 0  1px var(--neon-voile),
+      0 0  8px var(--neon),
+      0 0 22px rgba(221, 156, 70, .45);
+
+  --halo-emb: drop-shadow(0 0 5px var(--neon))
+              drop-shadow(0 0 16px var(--neon-braise))
+              drop-shadow(0 0 40px rgba(214, 117, 35, .45));
+}
+
+/* ── L'ancrage tient compte de la barre collante ──────────────────────── */
+[id] { scroll-margin-block-start: calc(var(--h-nav) + var(--sp-3)); }
+
+@media (min-width: 1280px) {
+  :root { --h-nav: 72px; }
+}
+
+.lecteur                        { --h-nav: calc(64px + 56px); }
+@media (min-width: 1280px) {
+  .lecteur                      { --h-nav: calc(72px + 56px); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANNEAU DE FOCUS — déclaration unique de tout le système (socle §0.15)
+
+   Toutes les déclarations concurrentes des chapitres 01, 04, 05, 08, 09
+   et 10 sont supprimées. La version en dur `outline: 2px solid #8B2C38`
+   est non conforme SC 1.4.11 : sur --acier-900 elle vaut 1,62.
+
+   Trois règles : l'anneau n'est jamais animé ni retardé ; il n'est jamais
+   remplacé par un changement de fond ; il n'est jamais rogné.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: var(--trait-marque) solid var(--focus);
+  outline-offset: 3px;
+  border-radius: var(--r-2);
+}
+
+/* Un élément focusable au bord d'un conteneur en overflow:hidden porte
+   son anneau à l'intérieur, sinon il est rogné.                        */
+.overflow-cache > :focus-visible { outline-offset: -3px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE LIEN DANS UN PARAGRAPHE — ARC · CMP — 44
+   L'élément le plus fréquent d'une page éditoriale ; aucun chapitre ne le
+   spécifiait. Il n'est jamais signalé par la seule couleur (SC 1.4.1) :
+   le filet est porteur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.corps a,
+.lede a,
+.prose a {
+  color: var(--lien);
+  text-decoration: underline;
+  text-decoration-color: var(--lien-filet);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: color var(--tr-reaction), text-decoration-color var(--tr-reaction);
+}
+
+.corps a:hover,
+.lede a:hover,
+.prose a:hover {
+  color: var(--lien-survol);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+/* Un lien externe le dit. Le signe est un caractère, pas une image. */
+.lien-externe::after {
+  content: " ↗";
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  text-decoration: none;
+}
+
+/* Un lien affilié le dit AVANT le clic, jamais après. */
+.lien-affilie {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-m);
+  letter-spacing: var(--ls-xxs);
+  color: var(--texte-tertiaire);
+  margin-inline-start: var(--sp-3);
+  text-transform: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ÉVITEMENT — le premier élément focusable de chaque page
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.evitement {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 999;
+  transform: translateY(-120%);
+  background: var(--accent);
+  color: var(--accent-texte);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-l);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: 0 0 var(--r-2) 0;
+  transition: transform var(--tr-reaction);
+}
+.evitement:focus-visible { transform: none; }
+
+/* Contenu réservé aux technologies d'assistance. */
+.sr-only {
+  position: absolute;
+  inline-size: 1px; block-size: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

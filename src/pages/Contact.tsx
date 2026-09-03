@@ -1,242 +1,397 @@
-import { useState } from "react";
-import Seal from "../components/brand/Seal";
-import Spark from "../components/brand/Spark";
-import Pictogram from "../components/brand/Pictogram";
-import type { PictoName } from "../components/brand/Pictogram";
-import TypeBadge from "../components/ui/TypeBadge";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
+import { accueil, contact, discord, meta, routes, site } from "../data/site";
+import { useRevelation } from "../components/contact/useRevelation";
 
-type Subject = "formation" | "partenariat" | "minecraft" | "presse" | "autre";
+/* ═══════════════════════════════════════════════════════════════════════════
+   ME JOINDRE — route `/contact` · maquette `#v-contact` (l. 1223-1243)
+   Les Archives du Professeur Chen — charte v1.0.0, lot L4
 
-const SUBJECTS: { key: Subject; label: string; picto: PictoName }[] = [
-  { key: "formation", label: "Formation", picto: "savoir" },
-  { key: "partenariat", label: "Partenariat", picto: "collection" },
-  { key: "minecraft", label: "Minecraft", picto: "nature" },
-  { key: "presse", label: "Presse", picto: "chroniques" },
-  { key: "autre", label: "Autre", picto: "decouverte" },
-];
+   La page réunit deux surfaces de la maquette validée :
+     · le panneau gauche du bloc `#b-contact` de l'accueil (l. 862-877) —
+       le titre « Une question avant de vous lancer ? », la liste des trois
+       motifs et le renvoi vers le Discord ;
+     · la vue `#v-contact` elle-même — la tête « Écrivez-moi » et le
+       formulaire en `.champ`.
+   Les deux `.carte` du panneau droit de l'accueil (l. 878-889) suivent,
+   en `.cartes` : sur une colonne de 880 px, deux cartes valent mieux qu'une
+   carte coupée d'un `<hr>` en style en dur.
 
-const SUBJECT_LABELS: Record<Subject, string> = Object.fromEntries(
-  SUBJECTS.map((s) => [s.key, s.label]),
-) as Record<Subject, string>;
+   ── UN SEUL `h1`, ET IL N'EST PAS CELUI DE LA MAQUETTE ────────────────────
+   La maquette est un SPA à vues : elle ouvre toutes ses vues internes sur un
+   `<h2 class="h2">`, le seul `h1` du document étant celui du hero. Avec une
+   route par page, la page porte son propre `h1` — et `.h2` reste ce qu'elle
+   est, une classe TYPOGRAPHIQUE, pas un niveau. D'où `<h1 class="h2">`, puis
+   deux `<h2 class="h3 sous">` qui découpent la colonne sans saut de niveau.
 
-type Status = "idle" | "sending" | "ok" | "error";
+   `.sous` pose son filet par `border-block-start`, et l'annule sur
+   `:first-of-type`. Les deux `h2` sont donc des enfants DIRECTS de la
+   colonne : enfermés chacun dans son `<div>`, chacun redeviendrait
+   « premier de son type » et perdrait le filet qui les sépare.
 
-function encodeForm(data: Record<string, string>): string {
-  return Object.entries(data)
-    .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+   ── LE CONTRAT NETLIFY, INTÉGRALEMENT PRÉSERVÉ ────────────────────────────
+   `index.html` déclare le formulaire caché qui sert de contrat à Netlify :
+
+       <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+         subject · name · email · object · message · bot-field
+
+   Six champs. Tout ce qui suit doit donc rester identique, sinon les
+   soumissions cassent en production sans erreur visible :
+     · le nom exact du formulaire — `contact` ;
+     · `<input type="hidden" name="form-name" value="contact">` ;
+     · `data-netlify` et `data-netlify-honeypot="bot-field"` ;
+     · le honeypot `bot-field`, dans un conteneur masqué ;
+     · le `POST` vers `/` en `application/x-www-form-urlencoded` ;
+     · les SIX noms de champ, tous envoyés.
+
+   La maquette n'en dessine que trois (nom, adresse, message). Passer à trois
+   imposerait de réécrire `index.html` dans le même lot ; ce fichier n'en est
+   pas propriétaire. Les six sont donc tenus : `subject` devient un `<select>`
+   dans un `.champ` — les cinq boutons à pictogrammes de l'ancienne page
+   disparaissent avec `Pictogram` —, `object` reste une ligne de texte.
+
+   La case de consentement ne porte PAS de `name` : elle n'est pas déclarée
+   au contrat, et un champ non déclaré n'est pas enregistré. Elle reste une
+   condition de validation côté navigateur, comme dans la page d'origine.
+
+   ── CE QUE LE § 0.36 RETIRE DE CETTE PAGE ─────────────────────────────────
+   Le délai de réponse annoncé — « ~ 48h », « en moins de 48 heures » — sort
+   sans remplacement : aucune source ne le mesure. La carte « Presse /
+   partenariats » et sa promesse de priorité sortent pour la même raison.
+   Le tutoiement de l'ancienne page (« Raconte-nous tout… », « on revient
+   vers toi ») est remplacé par le vouvoiement de la charte.
+
+   ── L'ADRESSE DE REPLI ────────────────────────────────────────────────────
+   L'ancienne page écrivait `contact@archivesprofesseurchen.com` en dur, deux
+   fois. `site.ts` déclare `contact.email = null` et range le champ au
+   registre `CONTRAT_OUVERT` : « adresse de contact publique, à fournir ». Le
+   repli d'erreur est donc CONDITIONNEL — l'adresse dès qu'elle existe dans
+   `site.ts`, le Discord tant qu'elle n'existe pas. Le mécanisme survit,
+   aucune adresse n'est réécrite ici.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Métadonnées de page — socle § 0.29 ──────────────────────────────────────
+   Le site n'a aucun mécanisme de titre par page : `index.html` porte un
+   `<title>` unique. Or `Layout.tsx` (§ 0.28) ANNONCE `document.title` au
+   changement de route, et lit donc ce que la page a posé. Les effets d'un
+   enfant s'exécutent avant ceux de son parent : l'effet ci-dessous a écrit
+   le titre quand la coquille vient le lire.                                */
+
+const TITRE = `${meta.contact.titre} · ${site.name}`;
+const CANONIQUE = `${site.url}${routes.contact}`;
+
+function poseMeta(attribut: "name" | "property", cle: string, valeur: string) {
+  const selecteur = `meta[${attribut}="${cle}"]`;
+  let balise = document.head.querySelector<HTMLMetaElement>(selecteur);
+  if (!balise) {
+    balise = document.createElement("meta");
+    balise.setAttribute(attribut, cle);
+    document.head.appendChild(balise);
+  }
+  balise.setAttribute("content", valeur);
+}
+
+function poseCanonique(href: string) {
+  let balise = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!balise) {
+    balise = document.createElement("link");
+    balise.setAttribute("rel", "canonical");
+    document.head.appendChild(balise);
+  }
+  balise.setAttribute("href", href);
+}
+
+/* La page est indexée (§ 0.27). On retire donc le `robots` qu'une page
+   non indexée — la page introuvable — aurait pu laisser derrière elle. */
+function poseIndexation(indexee: boolean) {
+  const balise = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+  if (indexee) {
+    balise?.remove();
+    return;
+  }
+  poseMeta("name", "robots", "noindex, nofollow");
+}
+
+/* ── Révélation au défilement — `.rv` · § 1.4 du plan des pages ──────────────
+   `useRevelation` est repris À L'IDENTIQUE des lots voisins (accueil,
+   minecraft) : trois copies du même fichier, pour que la mise en commun soit
+   un simple changement de chemin d'import. Les blocs portent `.rv` dans le
+   JSX, le hook pose `.on`.
+
+   Un `className` qui porte `.rv` reste CONSTANT d'un rendu à l'autre : React
+   ne réécrit un attribut que lorsque la valeur de la propriété change, donc
+   le `.on` posé à la main survit aux rendus du formulaire.               */
+
+/* ── Le formulaire ──────────────────────────────────────────────────────── */
+
+const NOM_FORMULAIRE = "contact";
+
+type Etat = "repos" | "envoi" | "envoye" | "echec";
+
+/* `site.ts` ne déclare que trois intitulés de champ — ceux de la maquette.
+   Les deux suivants n'y sont pas parce que la maquette ne les dessine pas ;
+   le contrat Netlify, lui, les exige. Ils restent donc ici, et ici seulement. */
+const LIBELLE_MOTIF = "Le motif de votre message";
+const LIBELLE_OBJET = "L’objet, en une ligne";
+const MOTIF_VIDE = "Choisissez un motif";
+const MOTIF_AUTRE = "Un autre motif";
+
+const MOTIFS = [...contact.motifs, MOTIF_AUTRE];
+
+function encodeForm(donnees: Record<string, string>): string {
+  return Object.entries(donnees)
+    .map(([cle, valeur]) => encodeURIComponent(cle) + "=" + encodeURIComponent(valeur))
     .join("&");
 }
 
 export default function Contact() {
-  const [status, setStatus] = useState<Status>("idle");
-  const [errorMsg, setErrorMsg] = useState<string>("");
-  const [subject, setSubject] = useState<Subject>("formation");
+  useRevelation();
+  const [etat, setEtat] = useState<Etat>("repos");
+  const [detail, setDetail] = useState("");
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setStatus("sending");
-    setErrorMsg("");
+  useEffect(() => {
+    document.title = TITRE;
+    poseMeta("name", "description", meta.contact.description);
+    poseMeta("property", "og:title", TITRE);
+    poseMeta("property", "og:description", meta.contact.description);
+    poseMeta("property", "og:url", CANONIQUE);
+    poseCanonique(CANONIQUE);
+    poseIndexation(meta.contact.indexee);
+  }, []);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+  const envoyer = async (evenement: FormEvent<HTMLFormElement>) => {
+    evenement.preventDefault();
 
-    const payload: Record<string, string> = {
-      "form-name": "contact",
-      subject: SUBJECT_LABELS[subject],
-    };
-    formData.forEach((value, key) => {
-      if (typeof value === "string") payload[key] = value;
+    // Capturé AVANT le premier `await` : React remet `currentTarget` à null
+    // dès que le gestionnaire a rendu la main.
+    const formulaire = evenement.currentTarget;
+
+    setEtat("envoi");
+    setDetail("");
+
+    const donnees = new FormData(formulaire);
+    const charge: Record<string, string> = { "form-name": NOM_FORMULAIRE };
+    donnees.forEach((valeur, cle) => {
+      if (typeof valeur === "string") charge[cle] = valeur;
     });
 
     try {
-      const res = await fetch("/", {
+      const reponse = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encodeForm(payload),
+        body: encodeForm(charge),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setStatus("ok");
-      form.reset();
-      setSubject("formation");
-    } catch (err) {
-      setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Erreur inconnue");
+      if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
+      formulaire.reset();
+      setEtat("envoye");
+    } catch (erreur) {
+      setEtat("echec");
+      setDetail(erreur instanceof Error ? erreur.message : "");
     }
   };
 
   return (
-    <>
-      <section className="container-narrow pt-20 pb-12 text-center">
-        <TypeBadge variant="rouge">Contact</TypeBadge>
-        <h1 className="display text-encre mt-4">Écris au laboratoire.</h1>
-        <p className="text-lg text-encre-500 max-w-xl mx-auto mt-4 leading-relaxed">
-          Une question, une proposition, une demande presse ? Le Professeur lit tout, et répond
-          généralement en moins de 48 heures.
-        </p>
-      </section>
+    <section className="bande">
+      <div className="wrap wrap--etroit">
 
-      <section className="section pt-4">
-        <div className="container-narrow grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 card !p-8">
-            {status === "ok" ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="flex justify-center">
-                  <Seal size={72} variant="simple" tone="vert" />
-                </div>
-                <h3 className="heading-2 text-encre">Message envoyé.</h3>
-                <p className="text-encre-500 max-w-sm mx-auto">
-                  Merci, on revient vers toi dès que possible. En attendant, fais un tour sur le Discord
-                  ou découvre la formation.
-                </p>
-                <button onClick={() => setStatus("idle")} className="btn-outline mt-2">
-                  Envoyer un autre message
-                </button>
-              </div>
-            ) : (
-              <form
-                onSubmit={onSubmit}
-                name="contact"
-                method="POST"
-                data-netlify="true"
-                data-netlify-honeypot="bot-field"
-                className="space-y-6"
-              >
-                <input type="hidden" name="form-name" value="contact" />
-                <p className="hidden">
-                  <label>
-                    Ne pas remplir : <input name="bot-field" tabIndex={-1} autoComplete="off" />
-                  </label>
-                </p>
-                <input type="hidden" name="subject" value={SUBJECT_LABELS[subject]} />
-
-                <div>
-                  <span className="label block mb-2.5">Sujet</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {SUBJECTS.map((s) => (
-                      <button
-                        type="button"
-                        key={s.key}
-                        onClick={() => setSubject(s.key)}
-                        className={`p-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center gap-1.5 ${
-                          subject === s.key
-                            ? "bg-rouge-50 border-rouge text-rouge-700"
-                            : "bg-creme border-encre/15 text-encre-600 hover:border-encre/40"
-                        }`}
-                      >
-                        <Pictogram name={s.picto} size={20} />
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <Field label="Nom / Pseudo" name="name" required />
-                  <Field label="Email" name="email" type="email" required />
-                </div>
-
-                <Field label="Objet (résumé court)" name="object" required />
-
-                <div>
-                  <label htmlFor="message" className="label block mb-2.5">Message</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={6}
-                    required
-                    className="w-full px-4 py-3 rounded-lg bg-creme border border-encre/20 text-encre placeholder-encre-400 focus:outline-none focus:border-rouge"
-                    placeholder="Raconte-nous tout…"
-                  />
-                </div>
-
-                <label className="flex items-start gap-3 text-sm text-encre-500">
-                  <input type="checkbox" required className="mt-1 accent-rouge" />
-                  <span>
-                    J'accepte que mes données soient utilisées pour me recontacter, conformément à la
-                    politique de confidentialité.
-                  </span>
-                </label>
-
-                {status === "error" && (
-                  <div className="rounded-lg bg-rouge-50 border border-rouge/30 text-rouge-700 text-sm px-4 py-3">
-                    L'envoi a échoué ({errorMsg}). Réessaie, ou écris directement à{" "}
-                    <a href="mailto:contact@archivesprofesseurchen.com" className="underline font-semibold">
-                      contact@archivesprofesseurchen.com
-                    </a>
-                    .
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={status === "sending"}
-                  className="btn-primary w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {status === "sending" ? "Envoi en cours…" : "Envoyer le message"}
-                  {status !== "sending" && <Spark size="0.8em" />}
-                </button>
-              </form>
-            )}
-          </div>
-
-          <aside className="space-y-4">
-            <div className="card">
-              <div className="label text-rouge mb-2">Email direct</div>
-              <a
-                href="mailto:contact@archivesprofesseurchen.com"
-                className="font-mono text-sm text-encre hover:text-rouge break-all"
-              >
-                contact@archivesprofesseurchen.com
-              </a>
-            </div>
-            <div className="card">
-              <div className="label text-rouge mb-2">Délai de réponse</div>
-              <div className="font-display font-extrabold text-3xl text-encre">~ 48h</div>
-              <p className="text-sm text-encre-500 mt-1">Hors week-ends et événements communautaires.</p>
-            </div>
-            <div className="card">
-              <div className="label text-rouge mb-2">Le plus rapide ?</div>
-              <p className="text-sm text-encre-500">
-                Pose ta question sur le{" "}
-                <a href="/discord" className="text-rouge underline-laiton">Discord</a> — souvent un membre
-                te répond avant nous.
-              </p>
-            </div>
-            <div className="card card-parch">
-              <div className="label text-rouge mb-2">Presse / partenariats</div>
-              <p className="text-sm text-encre-600">
-                Choisis <span className="text-encre font-medium">« Presse »</span> ou{" "}
-                <span className="text-encre font-medium">« Partenariat »</span> comme sujet pour être prioritaire.
-              </p>
-            </div>
-          </aside>
+        {/* ── Tête de page ────────────────────────────────────────────── */}
+        <div className="tete rv">
+          <p className="eyebrow">{contact.surtitre}</p>
+          <h1 className="h2">{contact.titre}</h1>
+          <p className="lede">{contact.lede}</p>
         </div>
-      </section>
-    </>
-  );
-}
 
-function Field({
-  label,
-  name,
-  type = "text",
-  required = false,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <div>
-      <label htmlFor={name} className="label block mb-2.5">{label}</label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        required={required}
-        className="w-full px-4 py-3 rounded-lg bg-creme border border-encre/20 text-encre placeholder-encre-400 focus:outline-none focus:border-rouge"
-      />
-    </div>
+        {/* ── Ce qui vaut la peine d'être écrit ───────────────────────── */}
+        <h2 className="h3 sous rv">
+          {accueil.contact.titre}
+        </h2>
+
+        {/* `accueil.contact.lede` n'est PAS repris ici : à un mot près, c'est
+            déjà `contact.lede`, posé quatre lignes plus haut dans la tête. */}
+        <ul className="liste rv">
+          {contact.motifs.map((motif) => (
+            <li key={motif}>
+              <svg
+                className="ico ico--16 ico--action"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="m5 12 5 5L19 7" />
+              </svg>
+              <span>{motif}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="hero__b rv">
+          <a
+            className="btn btn--fantome"
+            href={discord.inviteUrl}
+            target="_blank"
+            rel="noopener"
+          >
+            {contact.ctaDiscord} <span className="btn__f" aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        {/* ── Les deux repères du panneau droit de l'accueil ──────────── */}
+        <div className="cartes rv mt-[var(--rythme-xs)]">
+          {contact.cartes.map((carte) => (
+            <div className="carte" key={carte.titre}>
+              <h3 className="carte-titre">{carte.titre}</h3>
+              <p className="carte__d mt-[var(--sp-2)]">{carte.texte}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Le formulaire ──────────────────────────────────────────── */}
+        <h2 className="h3 sous rv">
+          {contact.ctaEcrire}
+        </h2>
+
+        {etat === "envoye" ? (
+          <div className="encart" role="status">
+            <p className="encart__t">Message envoyé</p>
+            <p className="corps">
+              Il est bien arrivé. Je vous réponds moi-même, à l’adresse que vous venez
+              d’indiquer.
+            </p>
+            <div className="hero__b">
+              <button
+                type="button"
+                className="btn btn--fantome"
+                onClick={() => setEtat("repos")}
+              >
+                {contact.ctaEcrire} <span className="btn__f" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form
+            name={NOM_FORMULAIRE}
+            method="POST"
+            onSubmit={envoyer}
+            data-netlify="true"
+            data-netlify-honeypot="bot-field"
+            aria-describedby="c-necessaires"
+            className="rv"
+          >
+            {/* Contrat Netlify — ne pas retirer, ne pas renommer. */}
+            <input type="hidden" name="form-name" value={NOM_FORMULAIRE} />
+            <p className="hidden">
+              <label>
+                Ne pas remplir :{" "}
+                <input name="bot-field" tabIndex={-1} autoComplete="off" />
+              </label>
+            </p>
+
+            {/* `.meta` est hors du `p:not(…)` de 20-base.css : il n'hérite
+                d'aucune marge basse, elle est posée ici. */}
+            <p className="meta mb-[var(--sp-6)]" id="c-necessaires">
+              Tous les champs sont nécessaires.
+            </p>
+
+            <div className="champ">
+              <label htmlFor="c-motif">{LIBELLE_MOTIF}</label>
+              <select id="c-motif" name="subject" required defaultValue="">
+                <option value="" disabled>
+                  {MOTIF_VIDE}
+                </option>
+                {MOTIFS.map((motif) => (
+                  <option key={motif} value={motif}>
+                    {motif}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-[var(--gap-3)] planche:grid-cols-2">
+              <div className="champ">
+                <label htmlFor="c-nom">{contact.champs.nom}</label>
+                <input id="c-nom" name="name" type="text" autoComplete="name" required />
+              </div>
+              <div className="champ">
+                <label htmlFor="c-mail">{contact.champs.email}</label>
+                <input
+                  id="c-mail"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="champ">
+              <label htmlFor="c-objet">{LIBELLE_OBJET}</label>
+              <input id="c-objet" name="object" type="text" required />
+            </div>
+
+            <div className="champ">
+              <label htmlFor="c-msg">{contact.champs.message}</label>
+              <textarea id="c-msg" name="message" required />
+            </div>
+
+            {/* Sans `name` : le champ n'est pas déclaré au contrat Netlify,
+                il ne part donc pas. C'est une condition de validation, pas
+                une donnée à conserver. */}
+            <label className="flex items-start gap-[var(--sp-3)]">
+              <input
+                type="checkbox"
+                required
+                className="mt-[var(--sp-2)] h-5 w-5 shrink-0 accent-[var(--accent)]"
+              />
+              {/* `.corps`, et non `.corps-s` : le soulignement des liens (CMP — 44)
+                  n'est déclaré que sur `.corps a`, `.lede a` et `.prose a`. Sous
+                  `.corps-s`, le lien ne serait plus qu'une couleur (SC 1.4.1). */}
+              <span className="corps t-secondaire">
+                J’accepte que ces informations servent à me répondre, dans les conditions
+                décrites par la{" "}
+                <Link to={routes.confidentialite}>politique de confidentialité</Link>.
+              </span>
+            </label>
+
+            {etat === "echec" && (
+              <div className="encart mt-[var(--sp-6)]" role="alert">
+                <p className="encart__t">L’envoi a échoué</p>
+                <p className="corps">
+                  Le message n’est pas parti{detail ? ` (${detail})` : ""}. Réessayez dans
+                  un instant,{" "}
+                  {contact.email ? (
+                    <>
+                      ou écrivez directement à{" "}
+                      <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+                    </>
+                  ) : (
+                    <>
+                      ou passez par{" "}
+                      <a
+                        className="lien-externe"
+                        href={discord.inviteUrl}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {discord.nom}
+                      </a>
+                      .
+                    </>
+                  )}
+                </p>
+              </div>
+            )}
+
+            <div className="hero__b">
+              <button className="btn" type="submit" disabled={etat === "envoi"}>
+                {etat === "envoi" ? "Envoi en cours…" : contact.champs.envoyer}{" "}
+                <span className="btn__f" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+      </div>
+    </section>
   );
 }

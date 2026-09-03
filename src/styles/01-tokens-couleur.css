@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 03 · COULEUR
+   Les Archives du Professeur Chen — charte v1.0.0 · 1ᵉʳ septembre 2026
+
+   Chapitre PROPRIÉTAIRE de la couleur. Aucun autre fichier ne déclare de
+   couleur. Aucun littéral hexadécimal, rgb(), hsl() ou oklch() n'apparaît
+   hors de ce fichier — ni dans un composant, ni dans un .tsx.
+   Deux exceptions déclarées : les valeurs d'étalonnage photographique
+   (--img-*, chapitre 07, hors interface) et la couleur de marque Patreon
+   (un seul bouton, socle §0.26).
+
+   Huit familles, cinquante-sept pas, neuf filets, cinq voiles.
+   Les tokens du Module 01 sont épinglés à leur pas exact : ils ne bougent
+   pas, on les entoure. Les échelles sont construites en OKLCH à teinte
+   constante ; « L » en commentaire est la clarté OKLCH, pas un contraste.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Bordeaux — l'émail du plateau (11 pas, teinte 16,8°) ─────────────
+     L'accent est à 700, pas à 500 : l'émail est un bordeaux profond,
+     pas un rouge. Le 600 est la variante claire, celle qui doit se
+     détacher davantage sur un fond blanc (focus, barre active).        */
+  --bordeaux-50:   #FBF0F0;  /* L 96,4 — fond d'encart danger, survol de ligne     */
+  --bordeaux-100:  #F7E0E0;  /* L 92,5 — fond de puce, surlignage discret          */
+  --bordeaux-200:  #EFC5C6;  /* L 86,0 — filet sur bordeaux profond, séparateur    */
+  --bordeaux-300:  #E2A3A5;  /* L 77,6 — illustration, jamais de texte             */
+  --bordeaux-400:  #CC767B;  /* L 66,1 — illustration, jamais de texte             */
+  --bordeaux-500:  #AD4A53;  /* L 54,0 — réservé, à mesurer avant tout emploi      */
+  --bordeaux-600:  #8B2C38;  /* L 43,9 — Module 01 : --burgundy-2                  */
+  --bordeaux-700:  #6E212B;  /* L 37,1 — Module 01 : --burgundy · ACCENT PRINCIPAL */
+  --bordeaux-800:  #53171F;  /* L 30,5 — survol intermédiaire, ombre d'émail       */
+  --bordeaux-900:  #3A1118;  /* L 24,7 — Module 01 : --burgundy-deep               */
+  --bordeaux-950:  #20080A;  /* L 17,6 — ombre d'émail, chant intérieur            */
+
+  /* ── Acier — l'inox brossé (11 pas, teinte 234°) ───────────────────── */
+  --acier-50:      #EDF1F3;  /* L 95,6 — bloc technique, plan de coupe             */
+  --acier-100:     #DBE0E4;  /* L 90,4 — fond de zone désactivée                   */
+  --acier-200:     #C9CFD2;  /* L 85,1 — piste de jauge vide, hachure de verrou    */
+  --acier-300:     #B3BABE;  /* L 78,5 — haut de lumière du brossage               */
+  --acier-400:     #9EA5A9;  /* L 71,8 — Module 01 : --steel · TEXTE 2 SUR SOMBRE  */
+  --acier-500:     #848C90;  /* L 63,5 — creux du brossage, picto sur acier        */
+  --acier-600:     #6C7378;  /* L 55,1 — Module 01 : --steel-2 · BORDURE DE CONTRÔLE
+                                        Texte : sur blanc PUR uniquement (4,82).
+                                        Échoue sur --blanc-50 (4,41).              */
+  --acier-700:     #535B5F;  /* L 46,6 — piste de jauge sur acier, ombre           */
+  --acier-800:     #3E4549;  /* L 38,5 — séparateur épais sur acier                */
+  --acier-900:     #2A2F32;  /* L 30,1 — Module 01 : --steel-deep · SURFACE INVERSE*/
+  --acier-950:     #191C1F;  /* L 22,5 — base des dégradés d'acier sombre          */
+
+  /* ── Blanc / encre — l'axe des panneaux (12 pas, teinte 230°) ─────────
+     Le blanc et l'encre sont la même matière vue des deux côtés :
+     la peinture du panneau et l'encre du carnet.                       */
+  --blanc-00:      #FFFFFF;  /* L 100  — cartes posées, plaques de logo, fiches    */
+  --blanc-50:      #F4F5F6;  /* L 97,0 — Module 01 : --white · SURFACE PAR DÉFAUT  */
+  --blanc-100:     #E8EBEC;  /* L 93,8 — Module 01 : --white-2 · surface alternée  */
+  --blanc-200:     #DCE0E2;  /* L 90,4 — Module 01 : --white-3 · surface verrouillée */
+  --blanc-300:     #C7CBCD;  /* L 84,0 — filet visible, contour de jauge           */
+  --blanc-400:     #A7ACAE;  /* L 74,1 — illustration, jamais de texte             */
+  --blanc-500:     #828789;  /* L 62,0 — illustration, jamais de texte             */
+  --encre-600:     #575E62;  /* L 48,9 — TEXTE TERTIAIRE. Socle §0.8 : cette valeur
+                                        remplace #5B6165, #5D6367, #575E63, #63696E.
+                                        Seule à passer AA sur les six fonds clairs. */
+  --encre-700:     #3A4145;  /* L 37,0 — TEXTE SECONDAIRE sur fond clair           */
+  --encre-800:     #262B2D;  /* L 28,5 — plaque très sombre, bord de scène         */
+  --encre-900:     #171A1C;  /* L 21,5 — Module 01 : --ink · TEXTE PRINCIPAL       */
+  --encre-950:     #0B0E0F;  /* L 16,1 — LA SCÈNE : visionneuses 16:9, banc d'essai*/
+
+  /* ── Verre de laboratoire (teinte 208,7°) ───────────────────────────── */
+  --verre-voile:   #EDF5F7;  /* L 96,5 — bloc d'information très léger             */
+  --verre-clair:   #D8E8EB;  /* L 92,0 — repli quand backdrop-filter est absent    */
+  --verre:         #C3DBDF;  /* L 87,5 — BASE · surface d'information              */
+  --verre-chant:   #A8C4C8;  /* L 80,0 — tranche de la vitre, filet supérieur      */
+  --verre-ombre:   #819FA3;  /* L 68,1 — filet de composant en verre, pictogramme  */
+  --verre-profond: #3D585C;  /* L 44,0 — verre par transparence sur fond sombre    */
+
+  /* ── Papier & cuir vieillis (teinte 86°) ────────────────────────────── */
+  --papier-voile:  #F7F3EA;  /* L 96,5 — fond de citation, fond de mention légale  */
+  --papier-clair:  #EFE5D2;  /* L 92,5 — haut du dégradé de papier                 */
+  --papier:        #E4D6B8;  /* L 88,0 — BASE · surface d'alerte, étiquette        */
+  --papier-tranche:#D9C9A8;  /* L 84,0 — bas du dégradé, tranche de bloc de pages  */
+  --papier-ombre:  #A79774;  /* L 68,1 — filet d'alerte sur clair, réglure         */
+  --papier-profond:#594B2E;  /* L 42,0 — cuir de reliure, dos de livre             */
+
+  /* ── Néon d'enseigne (teinte 70,6°) ──────────────────────────────────
+     LE NÉON N'EXISTE PAS SUR FOND CLAIR. Mesures : 1,28 sur --blanc-50 ·
+     1,16 sur --blanc-100 · 1,05 sur --blanc-200 · 1,39 sur --blanc-00 ·
+     1,03 sur --papier · 1,04 sur --verre. Il est littéralement invisible.
+     Aucune exception, aucune taille de texte, aucun contour de secours. */
+  --neon-voile:    #FFF3E5;  /* L 97,0 — cœur du tube, à l'intérieur d'un halo     */
+  --neon-clair:    #FFE5C7;  /* L 93,5 — survol d'un libellé néon sur acier        */
+  --neon:          #FFD3A0;  /* L 89,3 — BASE · signal sur fond sombre UNIQUEMENT  */
+  --neon-braise:   #DD9C46;  /* L 74,0 — deuxième couche du halo                   */
+  --neon-profond:  #915C01;  /* L 52,1 — tube éteint, tranche de l'enseigne        */
+  --braise-chaude: #D67523;  /* L 55,0 — couche externe du halo, jamais en aplat   */
+
+  /* ── Vert herbier (teinte 174,2°) ───────────────────────────────────── */
+  --vert-voile:    #E9F5F1;  /* L 96,0 — fond de validation très léger             */
+  --vert-clair:    #C2DFD6;  /* L 88,0 — succès sur clair · 9,55 sur --acier-900   */
+  --vert:          #2F6E5E;  /* L 49,2 — BASE · « ce qu'il fait bien », validation */
+  --vert-ombre:    #205548;  /* L 41,0 — survol du vert, filet de succès (7,84)    */
+  --vert-profond:  #0C3027;  /* L 28,0 — plaque de validation sur fond sombre      */
+
+  /* ── Filets — échelle unique (socle §0.4, arbitrages 02 et 03) ────────
+     Un filet en alpha est DÉCORATIF. Dès qu'un contour délimite un
+     composant interactif — champ, case, bouton fantôme, onglet, option —
+     il passe en couleur pleine : --acier-600 sur clair, --acier-400 sur
+     acier. Aucun filet en alpha n'atteint 3:1 (SC 1.4.11).             */
+  --rule-1: rgba(23, 26, 28, .08);   /* séparation à l'intérieur d'une carte      */
+  --rule-2: rgba(23, 26, 28, .11);   /* séparation de rang                        */
+  --rule-3: rgba(23, 26, 28, .14);   /* filet standard sur clair (Module 01)      */
+  --rule-4: rgba(23, 26, 28, .24);   /* séparation entre deux blocs de même valeur*/
+  --rule-5: rgba(23, 26, 28, .35);   /* liseré appuyé, décoratif seulement        */
+  --rule-light-1: rgba(244, 245, 246, .10);
+  --rule-light-2: rgba(244, 245, 246, .16);  /* filet standard sur acier (Module 01) */
+  --rule-light-3: rgba(244, 245, 246, .24);
+  --rule-light-4: rgba(244, 245, 246, .32);  /* séparation entre deux blocs acier */
+
+  /* ── Voiles et plaques ──────────────────────────────────────────────── */
+  --plaque-legende: rgba(11, 14, 15, .78);   /* légende posée sur photo           */
+  --voile-scene:    rgba(11, 14, 15, .55);   /* assombrissement d'une scène       */
+  --voile-lateral:  linear-gradient(90deg, rgba(23, 26, 28, .35), transparent 32%);
+  --scrim-verrou:   rgba(42, 47, 50, .82);   /* écran d'un contenu verrouillé     */
+  --hachure-verrou: repeating-linear-gradient(
+                      45deg,
+                      rgba(23, 26, 28, .06) 0 6px,
+                      transparent 6px 12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOKENS SÉMANTIQUES — contexte clair (défaut)
+
+   Ce sont les SEULS tokens redéfinissables en contexte (socle §0.3).
+   Un composant ne lit jamais un pas d'échelle : il lit un rôle.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --surface:            var(--blanc-50);
+  --surface-2:          var(--blanc-100);   /* section alternée                   */
+  --surface-3:          var(--blanc-200);   /* creux, piste, désactivé            */
+  --surface-carte:      var(--blanc-00);    /* carte posée sur la surface         */
+  --surface-inverse:    var(--acier-900);   /* bloc contrasté dans la section     */
+
+  --texte:              var(--encre-900);   /* 16,02 sur --surface                */
+  --texte-secondaire:   var(--encre-700);   /*  9,51 sur --surface                */
+  --texte-tertiaire:    var(--encre-600);   /*  6,04 sur --surface                */
+  --texte-inverse:      var(--blanc-50);
+
+  --accent:             var(--bordeaux-700);/* 10,04 sur --surface                */
+  --accent-survol:      var(--bordeaux-900);
+  --accent-actif:       var(--bordeaux-950);
+  --accent-texte:       var(--blanc-00);    /* 10,96 sur --accent                 */
+
+  --bordure:            var(--rule-3);      /* décoratif                          */
+  --bordure-forte:      var(--acier-600);   /* 4,41 — contour de contrôle, SC 1.4.11 */
+  --focus:              var(--bordeaux-600);/* socle §0.15 — jamais en dur        */
+
+  --lien:               var(--bordeaux-700);/* 10,04                              */
+  --lien-survol:        var(--bordeaux-900);/* 15,11                              */
+  --lien-filet:         var(--bordeaux-400);
+
+  --succes:             var(--vert);
+  --succes-fond:        var(--vert-voile);
+  --alerte:             var(--papier-profond);
+  --alerte-fond:        var(--papier-voile);
+  --danger:             var(--bordeaux-700);
+  --danger-fond:        var(--bordeaux-50);
+  --info:               var(--verre-profond);
+  --info-fond:          var(--verre-voile);
+
+  /* Verrouillé n'est pas illisible : le texte garde son contraste,
+     c'est la SURFACE qui change, jamais la lettre.                     */
+  --verrouille:         var(--acier-600);
+  --verrouille-surface: var(--blanc-200);
+  --verrouille-texte:   var(--encre-700);   /* 7,82 sur --blanc-200               */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTEXTE ACIER — la seule classe de contexte sombre (socle §0.11)
+
+   `.acier` remplace .steel, .sur-acier et .on-dark. Elle est la seule à
+   redéfinir les tokens sémantiques, donc la seule qui rende les composants
+   agnostiques : un composant écrit une fois fonctionne dans les deux
+   contextes sans variante.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.acier {
+  --surface:            var(--acier-900);
+  --surface-2:          var(--acier-950);
+  --surface-3:          var(--acier-800);
+  --surface-carte:      var(--acier-800);
+  --surface-inverse:    var(--blanc-50);
+
+  --texte:              var(--blanc-50);    /* 12,40 sur --acier-900              */
+  --texte-secondaire:   var(--acier-400);   /*  5,42 sur --acier-900              */
+  --texte-tertiaire:    var(--acier-400);   /* deux valeurs sur sombre, pas trois */
+  --texte-inverse:      var(--encre-900);
+
+  --accent:             var(--neon);        /*  9,72 sur --acier-900              */
+  --accent-survol:      var(--neon-clair);
+  --accent-actif:       var(--neon-braise);
+  --accent-texte:       var(--encre-900);
+
+  --bordure:            var(--rule-light-2);
+  --bordure-forte:      var(--acier-400);   /* 5,42 — contour de contrôle         */
+  --focus:              var(--neon);        /* --bordeaux-600 y vaut 1,62 : exclu */
+
+  --lien:               var(--blanc-50);
+  --lien-survol:        var(--blanc-00);
+  --lien-filet:         var(--acier-400);
+
+  --succes:             var(--vert-clair);  /* 9,55 sur --acier-900               */
+  --succes-fond:        var(--vert-profond);
+  --alerte:             var(--papier);      /* 9,42 sur --acier-900               */
+  --alerte-fond:        var(--papier-profond);
+  --danger:             var(--bordeaux-200);
+  --danger-fond:        var(--bordeaux-950);
+  --info:               var(--verre);
+  --info-fond:          var(--verre-profond);
+
+  --verrouille:         var(--acier-400);
+  --verrouille-surface: var(--acier-800);
+  --verrouille-texte:   var(--blanc-50);
+
+  background: var(--surface);
+  color: var(--texte);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTEXTE ÉMAIL — le bandeau bordeaux plein (le kit de la formation)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bandeau-email {
+  --surface:            var(--bordeaux-700);
+  --surface-2:          var(--bordeaux-800);
+  --surface-carte:      var(--blanc-50);
+  --surface-inverse:    var(--blanc-50);
+
+  --texte:              var(--blanc-00);    /* 10,96 sur --bordeaux-700           */
+  --texte-secondaire:   var(--bordeaux-100);
+  --texte-tertiaire:    var(--bordeaux-200);
+  --texte-inverse:      var(--encre-900);
+
+  --accent:             var(--blanc-00);
+  --accent-survol:      var(--papier);
+  --accent-texte:       var(--bordeaux-700);
+
+  --bordure:            var(--rule-light-2);
+  --bordure-forte:      var(--bordeaux-200);
+  --focus:              var(--blanc-50);    /* 10,04 sur --bordeaux-700           */
+
+  --lien:               var(--blanc-00);
+  --lien-survol:        var(--papier);      /* 7,63                               */
+  --lien-filet:         var(--bordeaux-300);
+
+  background: var(--surface);
+  color: var(--texte);
+}
+
+/* Sélection de texte — une seule déclaration, dans les deux contextes. */
+::selection        { background: var(--bordeaux-700); color: var(--blanc-50); }  /* 10,04 */
+.acier ::selection { background: var(--neon);         color: var(--encre-900); } /*  9,72 */

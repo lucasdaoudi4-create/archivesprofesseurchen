@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · RESET
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Couche `reset` (affectée par le @import layer(reset) d'arc.css : ce
+   fichier n'écrit aucun @layer).
+
+   Elle est UNIQUEMENT élémentaire : aucune classe, aucune couleur, aucune
+   taille de l'échelle. Elle remet à zéro ce que le navigateur décide à
+   notre place, et rien d'autre. Tout ce qui a une valeur — la police, la
+   mesure, l'interligne, la marge de paragraphe — appartient à
+   `20-base.css`, une couche plus haut.
+
+   ELLE REMPLACE LE PREFLIGHT DE TAILWIND, qui est coupé
+   (`corePlugins:{preflight:false}`) parce qu'il sort hors couche : une
+   déclaration hors couche bat toutes les couches, et son
+   `h1,h2,…{font-size:inherit}` aurait battu `.h1{font-size:var(--fs-h1)}`
+   de `02-tokens-typo.css`. C'est donc ce fichier, et lui seul, qui porte
+   désormais les normalisations que tout le reste suppose acquises.
+
+   Trois interdits tenus ici :
+     · aucun `a{text-decoration:none}` global. Le lien éditorial est
+       souligné, et son filet est porteur (socle § 0.22, CMP — 44). Les
+       liens qui ne doivent pas l'être le disent chacun chez eux — c'est
+       ce que fait la maquette, sur ses sept liens de chrome.
+     · aucun `:focus-visible`. Déclaration unique du système, dans
+       `05-tokens-socle.css` (socle § 0.15).
+     · aucun `text-rendering:optimizeLegibility` : explicitement retiré
+       par le chapitre 04.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Le modèle de boîte, une fois pour toutes ──────────────────────────── */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+/* ── Le contour, désarmé mais prêt ────────────────────────────────────────
+   Largeur nulle, style plein : invisible tant qu'on ne demande rien, et
+   un composant qui n'écrit qu'un `border-color` ou qu'un `border-width`
+   obtient bien un filet au lieu de rien. Reprise du preflight.        */
+*,
+*::before,
+*::after { border-width: 0; border-style: solid; }
+
+/* ── Les marges d'auteur du navigateur ────────────────────────────────────
+   En `:where()` — spécificité nulle : n'importe quel style nommé les
+   reprend sans avoir à lutter.                                          */
+:where(h1, h2, h3, h4, h5, h6,
+       p, figure, blockquote,
+       dl, dd) { margin: 0; }
+
+body { margin: 0; }
+
+/* ── Un titre n'a pas de taille par défaut ────────────────────────────────
+   Le `2em bold` du navigateur n'est sur AUCUN des quatorze paliers de
+   l'échelle (§ 0.14), et son 700 n'est sur aucune des quatre graisses.
+   Un titre prend donc sa taille d'un style nommé — `.h1` … `.h4` — ou de
+   son composant. En `:where()`, spécificité nulle : les deux le battent
+   sans effort, et la couche `tokens` passe devant de toute façon.      */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* ── Le média est un bloc, et il ne déborde jamais de sa colonne ───────── */
+img, svg, video, canvas { display: block; max-inline-size: 100%; }
+img, video              { block-size: auto; }   /* le rapport de forme tient */
+
+/* ── Les contrôles héritent de la page, ils ne s'en abstraient pas ────────
+   `font: inherit` porte la famille, la taille et l'interligne du corps :
+   c'est ce qui évite qu'un champ écrive une taille en dur (§ 0.14).     */
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+button, select { text-transform: none; }
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;   /* iOS refuse de styler un bouton sans lui */
+  background: none;
+  cursor: pointer;
+}
+
+textarea { resize: vertical; }
+
+/* Firefox voile le texte indicatif ; il doit valoir sa couleur, pas 54 %
+   de celle-ci. La couleur elle-même appartient au champ (CMP — 34).   */
+::placeholder { opacity: 1; }
+
+fieldset { margin: 0; padding: 0; }
+legend   { padding: 0; }
+
+/* ── Une liste stylée n'est plus une liste à puces ─────────────────────────
+   `ul[class]` et non `ul` : une liste de prose sans classe garde ses
+   puces et son retrait, qui sont une information éditoriale.           */
+ul[class], ol[class] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Un tableau est un relevé, pas une grille d'espacement ─────────────── */
+table { border-collapse: collapse; }
+
+/* ── L'instrument ─────────────────────────────────────────────────────────
+   Le mot-clé `monospace` seul déclenche la « taille de police fixe » des
+   navigateurs, à 13 px : `font-size:1em` la désamorce sans rien fixer
+   sur l'échelle.                                                       */
+code, kbd, samp, pre {
+  font-family: var(--f-mono);
+  font-size: 1em;
+}

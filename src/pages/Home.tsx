@@ -1,283 +1,518 @@
+import { Fragment, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { discord, formation, minecraft, news, site, socials } from "../data/site";
-import Seal from "../components/brand/Seal";
-import Spark from "../components/brand/Spark";
-import SparkField from "../components/brand/SparkField";
-import Pictogram from "../components/brand/Pictogram";
-import type { PictoName } from "../components/brand/Pictogram";
-import SocialIcon from "../components/ui/SocialIcon";
-import SectionHeading from "../components/ui/SectionHeading";
-import TypeBadge from "../components/ui/TypeBadge";
-import LiveDot from "../components/ui/LiveDot";
-import DiscordLiveStats from "../components/ui/DiscordLiveStats";
-import { useMinecraftStatus } from "../hooks/useMinecraftStatus";
-import YouTubeFeed from "../components/home/YouTubeFeed";
-import NewsletterForm from "../components/home/NewsletterForm";
+import {
+  accueil,
+  blocPaliers,
+  blocReseaux,
+  contact,
+  discord,
+  encartProduction,
+  formation,
+  heroPhoto,
+  meta,
+  minecraft,
+  module01,
+  paliers,
+  paliersPayants,
+  patreon,
+  portraitPhoto,
+  reseaux,
+  reseauxOrdre,
+  routes,
+  site,
+} from "../data/site";
+import PlanAuSol from "../components/accueil/PlanAuSol";
+import PanneauMatiere from "../components/accueil/PanneauMatiere";
+import EtatServeur from "../components/accueil/EtatServeur";
+import { Coche, Ecusson, LogoReseau } from "../components/accueil/Glyphes";
+import { useRevelation } from "../components/accueil/useRevelation";
 
-const VALUES: { picto: PictoName; title: string; text: string }[] = [
-  { picto: "curiosite", title: "Explorer", text: "Plonger dans chaque recoin de l'univers Pokémon, jeux, anime et au-delà." },
-  { picto: "savoir", title: "Archiver", text: "Consigner les découvertes, les mythes et les analyses dans un fonds vivant." },
-  { picto: "collection", title: "Partager", text: "Transmettre cette passion en vidéos, en jeu et en communauté." },
-];
+/* ═══════════════════════════════════════════════════════════════════════════
+   L'ACCUEIL — route `/` · la page la plus normée du site
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Portage de la vue `#v-accueil` de la maquette validée (l. 593-893), sur les
+   composants de la charte. Six blocs, dans cet ordre, et pas un de plus :
+
+     1. `.hero`        le split — Amendement 1 § A1.2 et § A1.1
+     2. `.plan-bande`  le plan au sol — Amendement 1 § A1.3
+     3. `#b-formation` 01 — la formation, la notice, l'atelier, les paliers
+     4. `#b-minecraft` 02 — le serveur, en bande d'acier
+     5. `#b-reseaux`   03 — les réseaux, en bande teintée
+     6. `#b-contact`   04 — me joindre
+
+   ── LE HERO EST UN SPLIT, ET SES TROIS INTERDITS SONT VÉRIFIABLES ─────────
+
+   A1.2 : « panneau clair à gauche avec son montant d'émail, photo à droite à
+   pleine lumière ». Ce qui en découle, et qui se lit dans le JSX ci-dessous :
+
+     · JAMAIS DE TEXTE LONG SUR LA PHOTO. Le seul élément posé sur `.hero__v`
+       est `.legende` — une plaque mono d'une cinquantaine de signes. Aucun
+       titre, aucun paragraphe, aucun bouton n'y entre.
+     · JAMAIS D'ASSOMBRISSEMENT. L'image reste à `opacity:1` ; le seul voile
+       est le `::after` latéral du composant, qui raccorde la photo au
+       panneau et devient transparent à 32 %. Aucun filtre n'est écrit ici.
+     · UNE SEULE ENSEIGNE PAR ÉCRAN. Elle est DANS la photo. L'accueil
+       précédent posait par-dessus un `<Seal size={340}>`, deux halos en
+       `blur-[120px]` et un `SparkField` : les quatre disparaissent, sans
+       remplacement.
+
+   Le hero est sur fond CLAIR — `.hero` lit `--surface`. L'inversion par
+   rapport au `bg-encre` de la page précédente est la plus visible de toute
+   la migration, et elle est voulue.
+
+   ── LA PHOTO N'EST PAS PUBLIABLE, ET LA PAGE LE SAIT ──────────────────────
+
+   `heroPhoto` et `portraitPhoto` valent `null` dans `src/data/site.ts` : la
+   validation juridique de l'enseigne du décor n'est pas rendue (07-imagerie
+   § 7.14). La page ne fabrique donc AUCUN repli d'image — elle compose la
+   scène avec les matières du système (`PanneauMatiere`), sans enseigne
+   redessinée et sans légende, puisqu'une légende nomme un sujet photographié.
+   Le jour où la photo arrive, les deux branches `heroPhoto ? … : …` basculent
+   toutes seules : rien d'autre n'est à toucher.
+
+   ── CE QUE § 0.36 RETIRE DE CETTE PAGE, ET NE REMPLACE PAS ────────────────
+
+   Les trois compteurs du hero (« 360+ membres », « 7 modules », « 24/7 »),
+   le manifeste à pictogrammes, le carnet de nouvelles, la newsletter et le
+   flux YouTube. Aucun n'a de source branchée, aucun n'existe dans la
+   maquette validée, et le § 0.25 interdit d'afficher un effectif sans source.
+   Le compteur Discord suit la même règle : `discord.guildId` vaut `null`,
+   donc le widget ne monte plus ici — il vit sur `/discord`, et là seulement.
+
+   Ce qui survit, en revanche : le relevé d'état Minecraft, reformulé en état
+   ÉCRIT dans la fiche `.serveur` du bloc 02 (voir `EtatServeur`).
+
+   ── LES QUATRE ANCRES ─────────────────────────────────────────────────────
+
+   `#b-formation` `#b-minecraft` `#b-reseaux` `#b-contact` sont visées par le
+   plan au sol, et `#b-paliers` par le bouton du hero. Ce sont de vraies
+   ancres de page : elles restent des `<a href="#…">`, jamais des `<Link>`.
+   `[id]{scroll-margin-top}` (§ 0.20) les décale déjà sous la barre collante.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Métadonnées de page — socle § 0.29 ───────────────────────────────────
+   Le site n'a aucun mécanisme de titre par page : `index.html` en porte un
+   seul. Or `Layout.tsx` ANNONCE `document.title` à chaque changement de
+   route (§ 0.28) — sans titre par page, revenir sur l'accueil annoncerait le
+   titre de la page qu'on quitte. La page pose donc le sien, en amont, comme
+   le § 0.28 le suppose.
+
+   Aucune dépendance ajoutée pour cela : quatre lignes de DOM suffisent, et
+   `react-helmet-async` pèserait plus que la fonction qu'il rendrait.        */
+
+function poserMeta(attribut: "name" | "property", cle: string, contenu: string): void {
+  const selecteur = `meta[${attribut}="${cle}"]`;
+  let balise = document.head.querySelector<HTMLMetaElement>(selecteur);
+  if (!balise) {
+    balise = document.createElement("meta");
+    balise.setAttribute(attribut, cle);
+    document.head.appendChild(balise);
+  }
+  balise.setAttribute("content", contenu);
+}
+
+function poserCanonique(href: string): void {
+  let lien = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!lien) {
+    lien = document.createElement("link");
+    lien.setAttribute("rel", "canonical");
+    document.head.appendChild(lien);
+  }
+  lien.setAttribute("href", href);
+}
+
+function useMetadonneesAccueil(): void {
+  useEffect(() => {
+    const { titre, description } = meta.accueil;
+
+    document.title = titre;
+    poserMeta("name", "description", description);
+    poserMeta("property", "og:title", titre);
+    poserMeta("property", "og:description", description);
+    poserMeta("property", "og:url", `${site.url}/`);
+    poserCanonique(`${site.url}/`);
+
+    // Une seule donnée structurée par page (§ 0.29). Sur l'accueil c'est
+    // `Organization` : le nom, l'adresse, la marque, et les comptes tenus
+    // ailleurs. Aucun chiffre, aucune note, aucun avis — rien qui ne soit
+    // vérifiable depuis le site lui-même.
+    const donnees = document.createElement("script");
+    donnees.type = "application/ld+json";
+    donnees.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: site.name,
+      url: site.url,
+      logo: `${site.url}/favicon.svg`,
+      description: meta.accueil.description,
+      sameAs: [
+        ...reseauxOrdre.map((cle) => reseaux[cle].url),
+        patreon.url,
+      ],
+      parentOrganization: { "@type": "Organization", name: site.editeur },
+    });
+    document.head.appendChild(donnees);
+
+    return () => donnees.remove();
+  }, []);
+}
+
+/* Les trois plaques de palier — socle § 0.26 et contrat de balisage de
+   `32-membre.css`. Le rang 01 prend sa couleur du CSS ; les rangs 02 et 03
+   prennent leur MATIÈRE par composition, parce que la couche `composants`
+   n'a pas le droit de réécrire un dégradé. Le rang 03 porte `acier` EN PLUS
+   de `mat-acier` : c'est `acier` qui rebascule `--accent` sur le néon, d'où
+   vient la couleur du libellé exigée par le § 0.26. */
+const PLAQUE: Record<number, string> = {
+  1: "palier__plaque",
+  2: "palier__plaque mat-email",
+  3: "palier__plaque mat-acier acier",
+};
 
 export default function Home() {
-  const mcStatus = useMinecraftStatus(minecraft.ip);
-  const mcOnline = mcStatus.status === "ok" && mcStatus.data.online;
-  const mcDotStatus = mcStatus.status === "loading" ? "loading" : mcOnline ? "online" : "offline";
-  const mcPlayers =
-    mcStatus.status === "ok" && mcStatus.data.online && mcStatus.data.players
-      ? `${mcStatus.data.players.online} en jeu`
-      : null;
+  useMetadonneesAccueil();
+  useRevelation();
 
   return (
     <>
-      {/* ---------------------------------------------------------------- HERO */}
-      <section className="relative bg-encre text-creme overflow-hidden">
-        <SparkField color="#5E7A48" opacity={0.14} />
-        <div className="absolute -top-24 right-0 w-[36rem] h-[36rem] rounded-full bg-rouge/20 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-[28rem] h-[28rem] rounded-full bg-laiton/10 blur-[120px] pointer-events-none" />
+      {/* ══════════════════ 1 · LE HERO — A1.2 ══════════════════ */}
+      <header className="hero">
+        {/* Le panneau clair. `mat-panneau` donne la matière, `pilier-email`
+            le montant : le montant n'est PAS un élément, c'est un
+            pseudo-élément de la matière. On n'ajoute aucun <div> décoratif. */}
+        <div className="hero__g mat-panneau pilier-email">
+          <h1 className="h1">
+            {accueil.hero.titre}
+            <em>{accueil.hero.sousTitre}</em>
+          </h1>
 
-        <div className="container-wide relative pt-20 pb-24 sm:pt-24 sm:pb-32 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
-          <div className="space-y-7 min-w-0">
-            <span className="eyebrow text-laiton-400">Édition 2026 · Le laboratoire est ouvert</span>
-            <h1 className="display text-creme">
-              Le monde Pokémon,
-              <span className="text-rouge-400"> archivé.</span>
-            </h1>
-            <p className="text-lg text-encre-300 max-w-xl leading-relaxed">
-              {site.description}
-            </p>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <Link to="/formation" className="btn-primary">
-                Découvrir la formation
-                <Spark size="0.8em" />
-              </Link>
-              <a href={discord.inviteUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost-dark">
-                Rejoindre le Discord
-              </a>
-            </div>
-            <dl className="flex flex-wrap items-center gap-x-10 gap-y-4 pt-6">
-              {[
-                { v: discord.memberCountApprox, l: "Membres Discord" },
-                { v: "7", l: "Modules de formation" },
-                { v: "24/7", l: "Serveur Cobblemon" },
-              ].map((s) => (
-                <div key={s.l}>
-                  <dd className="font-display font-extrabold text-3xl text-laiton-400 leading-none">{s.v}</dd>
-                  <dt className="mono-meta text-encre-300 mt-1.5">{s.l}</dt>
-                </div>
-              ))}
-            </dl>
-          </div>
+          <p className="hero__p lede">{accueil.hero.texte}</p>
 
-          <div className="relative flex justify-center lg:justify-end min-w-0">
-            <div className="absolute inset-0 m-auto w-64 h-64 rounded-full bg-rouge/15 blur-3xl" />
-            <Seal size={340} variant="full" tone="cream" className="relative animate-float-slow drop-shadow-2xl w-[min(78vw,340px)] h-auto" />
+          {/* A1.1 : le montant exact, la périodicité et « sans engagement »
+              sont dans le texte ci-dessus, et le prix est porté par le CTA.
+              Restent interdits : compte à rebours, prix barré, promotion. */}
+          <div className="hero__b">
+            <a className="btn" href={accueil.hero.ctaPrimaire.ancre}>
+              {accueil.hero.ctaPrimaire.label}{" "}
+              <span className="btn__f" aria-hidden="true">→</span>
+            </a>
+            <a className="btn btn--fantome" href={accueil.hero.ctaSecondaire.ancre}>
+              {accueil.hero.ctaSecondaire.label}{" "}
+              <span className="btn__f" aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
 
-        {/* bandeau mono façon en-tête de charte */}
-        <div className="relative border-t border-creme/10">
-          <div className="container-wide py-3 flex flex-wrap items-center justify-center sm:justify-between gap-x-4 gap-y-1 mono-meta text-encre-300 text-center">
-            <span>Les Archives du Professeur Chen</span>
-            <span className="hidden sm:inline">Savoir · Partage · Passion</span>
-            <span className="hidden sm:inline">archivesprofesseurchen.com</span>
-          </div>
+        {/* La scène. Rien d'autre que l'image et sa plaque n'entre ici. */}
+        <div className="hero__v">
+          {heroPhoto ? (
+            <>
+              <img
+                src={heroPhoto.src}
+                alt={heroPhoto.alt}
+                fetchPriority="high"
+                decoding="async"
+              />
+              <p className="legende legende--bg">{accueil.hero.legendePhoto}</p>
+            </>
+          ) : (
+            <PanneauMatiere variante="plateau" />
+          )}
         </div>
-      </section>
+      </header>
 
-      {/* --------------------------------------------------------- MANIFESTE */}
-      <section className="section">
-        <div className="container-wide">
-          <div className="grid lg:grid-cols-3 gap-x-10 gap-y-10">
-            {VALUES.map((v, i) => (
-              <div key={v.title} className="flex gap-5">
-                <div className="shrink-0">
-                  <div className="h-12 w-12 rounded-xl border border-parchemin-600 bg-parchemin/60 flex items-center justify-center text-rouge">
-                    <Pictogram name={v.picto} size={24} />
-                  </div>
-                </div>
-                <div>
-                  <div className="caption text-laiton-700">RÉF. 0{i + 1}</div>
-                  <h3 className="heading-2 mt-1 text-encre">{v.title}.</h3>
-                  <p className="mt-2 text-encre-500 leading-relaxed">{v.text}</p>
-                </div>
-              </div>
-            ))}
+      {/* ══════════════════ 2 · LE PLAN AU SOL — A1.3 ══════════════════ */}
+      <PlanAuSol />
+
+      {/* ══════════════════ 3 · 01 — LA FORMATION ══════════════════ */}
+      <section className="bande" id="b-formation">
+        <div className="wrap">
+          <div className="tete rv">
+            <p className="eyebrow">{formation.surtitre}</p>
+            <h2 className="h2">{formation.titre}</h2>
+            <p className="lede">{formation.lede}</p>
           </div>
-        </div>
-      </section>
 
-      {/* ----------------------------------------------------- GRILLE RÉSEAUX */}
-      <section className="section pt-0">
-        <div className="container-wide">
-          <SectionHeading
-            eyebrow="Suivre les Archives"
-            title="Quatre plateformes, un même fil."
-            subtitle="Chaque réseau a sa ligne éditoriale. La marque vit avant tout sur YouTube et TikTok."
-          />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {(Object.keys(socials) as Array<keyof typeof socials>).map((k, i) => (
-              <a
-                key={k}
-                href={socials[k].url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="card card-hover group flex flex-col"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-encre-700 group-hover:text-rouge transition-colors">
-                    <SocialIcon type={k} className="w-8 h-8" />
+          {/* ── Le module ouvert aujourd'hui ── */}
+          <h3 className="h3 sous rv">{formation.sousTitreModules}</h3>
+          <p className="corps-s t-secondaire rv">{formation.introModules}</p>
+
+          <div className="notice rv mt-8">
+            <div className="notice__g pilier-email">
+              <p className="code-arc">{module01.chapo}</p>
+              <h3 className="notice__t h3">
+                {module01.titre}
+                <em>{module01.sousTitre}</em>
+              </h3>
+              <p className="notice__d">{module01.resume}</p>
+
+              {/* Les outils du module : chaque puce est un `.jeton`, une
+                  entrée de nomenclature. La notice de `/formation` porte, elle,
+                  les DISPOSITIFS — c'est intentionnel, on n'uniformise pas. */}
+              <div className="notice__m">
+                {module01.outils.map((outil) => (
+                  <span className="jeton" key={outil}>
+                    {outil}
                   </span>
-                  <span className="caption text-encre-400">RÉF. 0{i + 1}</span>
-                </div>
-                <div className="mt-5">
-                  <div className="font-display font-bold text-encre text-lg">{socials[k].label}</div>
-                  <div className="caption">{socials[k].handle}</div>
-                </div>
-                <p className="mt-2 text-sm text-encre-500 leading-relaxed flex-1">{socials[k].description}</p>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-rouge">
-                  Suivre
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------- FORMATION */}
-      <section className="section pt-0">
-        <div className="container-wide grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <span className="eyebrow">Programme phare</span>
-            <h2 className="heading-1 text-encre">
-              La formation qui transforme les passionnés en <span className="text-rouge underline-laiton">créateurs</span>.
-            </h2>
-            <p className="text-encre-500 text-lg leading-relaxed">{formation.pitch}</p>
-            <ul className="space-y-3">
-              {formation.highlights.slice(0, 4).map((h) => (
-                <li key={h.title} className="flex gap-3 items-baseline">
-                  <Spark size="0.7em" className="text-laiton translate-y-0.5 shrink-0" />
-                  <div>
-                    <span className="font-semibold text-encre">{h.title}</span>
-                    <span className="text-encre-500"> — {h.text}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <Link to="/formation" className="btn-primary">Voir le programme</Link>
-              <Link to="/contact" className="btn-outline">Poser une question</Link>
-            </div>
-          </div>
-
-          <div className="card card-parch !p-8">
-            <div className="flex items-center justify-between border-b border-encre/10 pb-4 mb-4">
-              <div>
-                <div className="label text-rouge">Sommaire des modules</div>
-                <div className="font-display font-bold text-encre text-lg mt-1">7 chapitres + bonus</div>
+                ))}
               </div>
-              <Seal size={48} variant="simple" tone="rouge" />
+
+              <div className="hero__b">
+                <Link className="btn" to={routes.module01}>
+                  {formation.ctaModule}{" "}
+                  <span className="btn__f" aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
-            <ol className="space-y-1">
-              {formation.modules.slice(0, 6).map((m, i) => (
-                <li key={m} className="flex items-baseline gap-3 py-2 border-b border-encre/5 last:border-0">
-                  <span className="font-mono text-sm text-laiton-700 w-7 shrink-0">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="text-sm text-encre-700">{m.replace(/^Module \d+ — /, "")}</span>
-                </li>
+
+            <div className="notice__v">
+              {heroPhoto ? (
+                <img src={heroPhoto.src} alt={heroPhoto.alt} loading="lazy" decoding="async" />
+              ) : (
+                <PanneauMatiere variante="scene" />
+              )}
+            </div>
+          </div>
+
+          {/* ── La preuve, avant la promesse ──
+              Sans portrait publiable, le split n'a plus qu'une colonne : on
+              retire la colonne d'image plutôt que d'y poser une plaque et la
+              signature « Le narrateur », qui nommerait un absent. */}
+          <h3 className="h3 sous rv">{formation.atelier.titre}</h3>
+          {portraitPhoto ? (
+            <div className="atelier split rv">
+              <div className="atelier__p">
+                <img
+                  src={portraitPhoto.src}
+                  alt={portraitPhoto.alt}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p className="legende legende--pied">{formation.atelier.signature}</p>
+              </div>
+              <div>
+                {formation.atelier.paragraphes.map((paragraphe) => (
+                  <p key={paragraphe}>{paragraphe}</p>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="atelier rv">
+              {formation.atelier.paragraphes.map((paragraphe) => (
+                <p key={paragraphe}>{paragraphe}</p>
               ))}
-            </ol>
-            <div className="caption text-center pt-4">+ 2 modules et une bibliothèque de bonus à découvrir</div>
+            </div>
+          )}
+
+          {/* ── Trois paliers, une progression ──
+              L'ancre `#b-paliers` est portée par le titre, pas par une
+              section : c'est là que mène le premier bouton du hero. */}
+          <h3 className="h3 sous rv" id="b-paliers">
+            {blocPaliers.titre}
+          </h3>
+          <p className="corps-s t-secondaire rv">{blocPaliers.ledeAccueil}</p>
+
+          {/* L'aveu, dit AVANT l'abonnement et pas après. */}
+          <div className="encart rv mt-6">
+            <div className="encart__t">{encartProduction.accueil.titre}</div>
+            <p className="corps-s">{encartProduction.accueil.texte}</p>
+          </div>
+
+          <div className="paliers paliers--home rv">
+            {paliersPayants.map((cle) => {
+              const palier = paliers[cle];
+              return (
+                <article
+                  key={palier.code}
+                  className={`palier palier--0${palier.rang}`}
+                  data-mise={palier.phare ? "recommande" : undefined}
+                >
+                  <div className={PLAQUE[palier.rang]}>
+                    <Ecusson rang={palier.rang} />
+                    <div>
+                      <div className="palier__code">{palier.code}</div>
+                      {/* Le nom du palier est un TITRE de rang 4 : sous le
+                          `h3` « Trois paliers », il donne à chaque carte une
+                          entrée dans le plan de titres du lecteur d'écran.
+                          La maquette en faisait un `div`, et les trois cartes
+                          n'étaient alors atteignables que ligne à ligne. */}
+                      <h4 className="palier__n">{palier.nom}</h4>
+                    </div>
+                  </div>
+
+                  <div className="palier__corps">
+                    <div className="palier__prix">
+                      {palier.prix}
+                      <span>{palier.periodicite}</span>
+                    </div>
+                    <p className="palier__acc">{palier.accroche}</p>
+                    {/* L'accueil emploie le résumé court ; la version longue
+                        est réservée à la page des paliers. */}
+                    <p className="palier__court">{palier.court_texte}</p>
+
+                    <div className="palier__pied">
+                      <a
+                        className={
+                          palier.phare ? "btn btn--bloc" : "btn btn--fantome btn--bloc"
+                        }
+                        href={patreon.url}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {blocPaliers.ctaCarte}
+                        <span className="sr-only"> (nouvel onglet)</span>{" "}
+                        <span className="btn__f" aria-hidden="true">→</span>
+                      </a>
+                      <Link className="meta text-center" to={routes.paliers}>
+                        {blocPaliers.ctaComparer}
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="hero__b rv">
+            <Link className="btn" to={routes.paliers}>
+              {blocPaliers.ctaComparer}{" "}
+              <span className="btn__f" aria-hidden="true">→</span>
+            </Link>
+            <span className="meta self-center">{patreon.mentionEngagement}</span>
           </div>
         </div>
       </section>
 
-      {/* ----------------------------------------------- MINECRAFT + DISCORD */}
-      <section className="section pt-0">
-        <div className="container-wide grid lg:grid-cols-2 gap-5">
-          <Link to="/minecraft" className="card card-hover group !p-8 flex flex-col">
-            <div className="flex items-center justify-between gap-3">
-              <TypeBadge variant="vert">Serveur Minecraft</TypeBadge>
-              <LiveDot status={mcDotStatus} label={mcPlayers ?? undefined} />
-            </div>
-            <h3 className="heading-2 text-encre mt-5">{minecraft.name}</h3>
-            <p className="text-encre-500 mt-2 leading-relaxed">{minecraft.description}</p>
-            <div className="flex flex-wrap gap-2 mt-4">
-              <span className="tag border-encre/15 text-encre-700 bg-encre/[0.03]">Cobblemon</span>
-              <span className="tag border-encre/15 text-encre-700 bg-encre/[0.03]">v{minecraft.version}</span>
-              <span className="tag border-encre/15 text-encre-700 bg-encre/[0.03]">Système de Ligue</span>
-            </div>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rouge">
-              Explorer l'Académie
-              <span className="transition-transform group-hover:translate-x-1">→</span>
-            </span>
-          </Link>
+      {/* ══════════════════ 4 · 02 — LE SERVEUR ══════════════════
+          `.acier` est la classe de CONTEXTE : elle bascule `--texte`,
+          `--accent`, `--bordure`, `--focus` et `--surface-carte` d'un seul
+          coup. Les onze `style=""` que la maquette écrivait dans ce bloc
+          étaient des rustines pour compenser son absence : aucun ne survit,
+          et les composants basculent seuls. */}
+      <section className="bande acier mat-acier" id="b-minecraft">
+        <div className="wrap">
+          <div className="tete rv">
+            <p className="eyebrow">{minecraft.surtitre}</p>
+            <h2 className="h2">{minecraft.titre}</h2>
+            <p className="lede">{minecraft.lede}</p>
+          </div>
 
-          <Link to="/discord" className="card card-hover group !p-8 flex flex-col">
-            <div className="flex items-center justify-between gap-3">
-              <TypeBadge variant="laiton">Communauté Discord</TypeBadge>
-              <DiscordLiveStats variant="inline" />
-            </div>
-            <h3 className="heading-2 text-encre mt-5">Une communauté de dresseurs t'attend.</h3>
-            <p className="text-encre-500 mt-2 leading-relaxed">
-              Discussions Pokémon, échanges, combats, événements et avant-premières. Le quartier général officiel.
-            </p>
-            <ul className="space-y-1.5 mt-4">
-              {discord.features.slice(0, 3).map((f) => (
-                <li key={f} className="text-sm text-encre-500 flex items-baseline gap-2">
-                  <Spark size="0.6em" className="text-laiton shrink-0 translate-y-0.5" />
-                  {f}
+          <div className="serveur rv">
+            <span className="serveur__libelle">{minecraft.labelAdresse}</span>
+            <code className="serveur__adresse">{minecraft.ip}</code>
+            <span className="meta">{minecraft.releve}</span>
+            <EtatServeur />
+          </div>
+
+          <div className="cartes rv mt-8">
+            {minecraft.cartes.map((carte) => (
+              <div className="carte" key={carte.titre}>
+                <h3 className="carte-titre">{carte.titre}</h3>
+                <p className="carte__d mt-2">{carte.texte}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="hero__b rv">
+            <Link className="btn" to={routes.minecraft}>
+              Voir l’adresse du serveur{" "}
+              <span className="btn__f" aria-hidden="true">→</span>
+            </Link>
+            <a
+              className="btn btn--fantome"
+              href={discord.inviteUrl}
+              target="_blank"
+              rel="noopener"
+            >
+              Ouvrir l’invitation Discord
+              <span className="sr-only"> (nouvel onglet)</span>{" "}
+              <span className="btn__f" aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════ 5 · 03 — LES RÉSEAUX ══════════════════ */}
+      <section className="bande bande--teinte" id="b-reseaux">
+        <div className="wrap">
+          <div className="tete rv">
+            <p className="eyebrow">{blocReseaux.surtitre}</p>
+            <h2 className="h2">{blocReseaux.titre}</h2>
+            <p className="lede">{blocReseaux.lede}</p>
+          </div>
+
+          <div className="reseaux rv">
+            {reseauxOrdre.map((cle) => {
+              const reseau = reseaux[cle];
+              return (
+                <a
+                  className="reseau"
+                  key={cle}
+                  href={reseau.url}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <LogoReseau reseau={cle} />
+                  <div>
+                    <div className="reseau__n">{reseau.label}</div>
+                    <div className="reseau__h">{reseau.handle}</div>
+                    <div className="reseau__d">{reseau.description}</div>
+                    <span className="sr-only"> (nouvel onglet)</span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════ 6 · 04 — ME JOINDRE ══════════════════ */}
+      <section className="bande" id="b-contact">
+        <div className="wrap split">
+          <div className="rv">
+            <p className="eyebrow">{accueil.contact.surtitre}</p>
+            <h2 className="h2">{accueil.contact.titre}</h2>
+            <p className="lede">{accueil.contact.lede}</p>
+
+            <ul className="liste mt-6">
+              {contact.motifs.map((motif) => (
+                <li key={motif}>
+                  <Coche />
+                  <span>{motif}</span>
                 </li>
               ))}
             </ul>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-rouge">
-              Rejoindre le serveur
-              <span className="transition-transform group-hover:translate-x-1">→</span>
-            </span>
-          </Link>
-        </div>
-      </section>
 
-      {/* --------------------------------------------------------- YOUTUBE */}
-      <YouTubeFeed />
-
-      {/* ----------------------------------------------------------- NEWS */}
-      <section className="section pt-0">
-        <div className="container-wide">
-          <SectionHeading
-            eyebrow="Notes d'archive"
-            title="Le carnet du Professeur."
-            subtitle="Annonces, sorties, événements : ce qui s'écrit en ce moment dans le laboratoire."
-          />
-          <div className="grid md:grid-cols-3 gap-4">
-            {news.map((n, i) => (
-              <article key={n.title} className="card card-hover group flex flex-col">
-                <div className="flex items-center justify-between">
-                  <TypeBadge variant={i === 0 ? "rouge" : i === 1 ? "vert" : "laiton"}>{n.tag}</TypeBadge>
-                  <span className="caption">RÉF. {String(i + 1).padStart(3, "0")}</span>
-                </div>
-                <time className="caption mt-4 block">{new Date(n.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</time>
-                <h3 className="font-display font-bold text-encre text-lg mt-1 group-hover:text-rouge transition-colors">{n.title}</h3>
-                <p className="text-sm text-encre-500 mt-2 leading-relaxed">{n.excerpt}</p>
-              </article>
-            ))}
+            <div className="hero__b">
+              <Link className="btn" to={routes.contact}>
+                {contact.ctaEcrire}{" "}
+                <span className="btn__f" aria-hidden="true">→</span>
+              </Link>
+              <a
+                className="btn btn--fantome"
+                href={discord.inviteUrl}
+                target="_blank"
+                rel="noopener"
+              >
+                {contact.ctaDiscord}
+                <span className="sr-only"> (nouvel onglet)</span>{" "}
+                <span className="btn__f" aria-hidden="true">→</span>
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* ------------------------------------------------------- NEWSLETTER */}
-      <section className="section pt-0">
-        <div className="container-narrow">
-          <div className="relative rounded-2xl bg-encre text-creme overflow-hidden">
-            <SparkField color="#C2922F" opacity={0.1} />
-            <div className="relative px-6 py-14 sm:px-12 text-center">
-              <span className="eyebrow justify-center text-laiton-400">Newsletter</span>
-              <h3 className="display text-creme mt-4 text-[2rem] sm:text-4xl">Reste dans la boucle des Archives.</h3>
-              <p className="text-encre-300 max-w-xl mx-auto mt-4 leading-relaxed">
-                Un courrier par mois : nouveautés, événements, sorties de contenus et coulisses du laboratoire.
-              </p>
-              <NewsletterForm />
+          <div className="rv">
+            <div className="carte">
+              {contact.cartes.map((carte, rang) => (
+                <Fragment key={carte.titre}>
+                  {rang > 0 && (
+                    <hr className="my-5 h-px border-0 bg-[var(--bordure)]" />
+                  )}
+                  <h3 className="carte-titre">{carte.titre}</h3>
+                  <p className="carte__d mt-2">{carte.texte}</p>
+                </Fragment>
+              ))}
             </div>
           </div>
         </div>

@@ -1,0 +1,1276 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARC · CHT — 08 · COMPOSANTS
+   Les Archives du Professeur Chen — charte v1.0.0
+
+   Couche `composants` (affectée par le @import layer(composants) d'arc.css :
+   ce fichier n'écrit aucun @layer). Chargée AU-DESSUS de `base` et de
+   `tokens`, EN DESSOUS de `utilitaires` et de `preferences`.
+
+   ── La règle de couche (b), tenue à la lettre ───────────────────────────
+   « composants n'écrit jamais un pas d'échelle. Un composant lit
+     var(--surface), var(--sp-4), var(--tr-reaction) ; il n'écrit ni
+     #6E212B, ni 16px, ni 220ms. »
+
+   Conséquence pratique : aucune couleur de ce fichier n'est un pas
+   d'échelle. Tout passe par un RÔLE — --surface, --texte, --accent,
+   --bordure, --focus, --succes, --verrouille. C'est ce qui rend chaque
+   composant agnostique de son fond : posé dans un bloc `.acier`, il
+   bascule seul, sans une seule règle descendante (socle § 0.11).
+
+   Quatre valeurs seulement échappent au rôle, chacune sur arbitrage
+   nommé du socle. Elles sont marquées « § » à leur ligne :
+     · `--encre-950` sur `.hero__v` / `.notice__v` — « la scène »
+       (01-tokens-couleur.css la nomme ainsi ; aucun token sémantique) ;
+     · `--blanc-50`, `--rule-light-3`, `--acier-400` sur `.legende` —
+       la plaque de légende est TOUJOURS sombre, quel que soit le
+       contexte de la page (socle § 0.23, mesure 10,64 pire cas).
+
+   ── Ce que ce fichier NE contient PAS ───────────────────────────────────
+     · aucune icône, aucun `svg { width }` — chapitre 06, `31-icones.css`.
+       Les composants d'ici ne font que POSITIONNER une `.ico` / `.pic` ;
+     · aucun palier, aucune carte de membre, aucun verrouillage —
+       chapitre 10, `32-membre.css` (`.palier*`, `.bandeau-compte`,
+       `.sas`, `.btn-patreon`, `.chap--ouvert`, `.chap--verrou`,
+       `.tableau--paliers`) ;
+     · aucun `:focus-visible` — déclaration unique du système dans
+       `05-tokens-socle.css` (socle § 0.15). En écrire un ici le ferait
+       gagner silencieusement : `layer(composants)` bat `layer(tokens)` ;
+     · aucun bloc `prefers-*`, `forced-colors` ni `print` — tous dans
+       `99-preferences.css`, chargé en dernier (règle de couche (c)) ;
+     · aucune redéclaration des treize classes déjà posées en amont :
+       `.wrap` `.wrap--etroit` (03) · `.h2` `.h3` `.lede` `.eyebrow`
+       `.carte-titre` `.meta` `.corps-s` `.legende` (typographie, 02) ·
+       `.acier` (01) · `.rv` (04) · `.sr-only` `.evitement` (05).
+
+   ── Composition : ce que le balisage doit porter ────────────────────────
+   Trois composants LISENT une matière au lieu de la recopier — c'est ce
+   qui garde opérantes les compensations `prefers-contrast` et
+   `forced-colors` de `99-preferences.css`, qui ne ciblent que `.mat-*` :
+
+       .sitenav        →  class="sitenav acier mat-acier"
+       .sitefoot       →  class="sitefoot acier mat-acier"
+       .bande.acier    →  class="bande acier mat-acier"
+       .plan-bande     →  class="plan-bande acier mat-acier"
+       .hero__g        →  class="hero__g mat-panneau pilier-email"
+       .notice__g      →  class="notice__g pilier-email"
+
+   Et cinq composants délèguent leur type aux styles nommés du
+   chapitre 04, plutôt que de le réécrire :
+
+       .hero__t        →  n'existe plus : c'est `<h1 class="h1">`
+       .hero__p        →  class="hero__p lede"
+       .notice__t      →  class="notice__t h3"
+       .notice__code   →  n'existe plus : c'est `class="code-arc"`
+       .sitefoot__legal → class="sitefoot__legal legal"
+       .atelier        →  class="atelier split"   (grille en 90-utilitaires)
+
+   ── Valeurs sans token, assumées et signalées ───────────────────────────
+   Quatre plafonds de largeur n'ont aucun `--w-*` ni `--sp-*` qui les
+   approche ; ils sont écrits en `rem` (§ 0.14, règle 2 : toute distance
+   est en rem) et reportent la valeur exacte de la maquette validée :
+       40rem (640px) hauteur haute de la photo du hero
+       32rem (512px) largeur maximale du plan au sol   — maquette : 520px
+       24rem (384px) portrait de l'atelier en colonne  — maquette : 380px
+       17rem / 14rem  minima de colonne de `.cartes` et `.reseaux`
+   Une proposition d'ouverture de pas `--w-*` intermédiaires est à
+   déposer ; d'ici là ces quatre valeurs sont ici, et nulle part ailleurs.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1 · BANDE DE SECTION — `.bande`
+   Le sélecteur d'élément nu `section` de la maquette est proscrit : une
+   page peut contenir un `<section>` qui n'est pas une bande de premier
+   niveau, et il héritait alors d'un rythme de 100px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bande {
+  padding-block: var(--rythme-m);
+  border-block-end: var(--trait-filet) solid var(--bordure);
+}
+
+/* La bande alternée : un creux d'un pas, souligné haut et bas. */
+.bande--teinte {
+  background: var(--surface-2);
+  box-shadow:
+    inset 0 var(--trait-filet) 0 var(--bordure),
+    inset 0 calc(-1 * var(--trait-filet)) 0 var(--bordure);
+}
+
+/* Une bande d'acier se ferme elle-même : le changement de matière sépare
+   déjà les deux blocs, un filet en plus ferait une double ligne.
+   Sélecteur composé sur l'élément lui-même — ce n'est pas une règle
+   descendante qui repeindrait un composant (§ 0.11). */
+.bande.acier { border-block-end: 0; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2 · BARRE DE NAVIGATION DU SITE — `.sitenav` · ARC · CMP — 20
+   Elle porte `class="acier"` : c'est `.acier` qui bascule --accent vers
+   le néon, --texte vers le blanc et --focus vers le néon. Aucune
+   redéfinition locale de token (§ 0.3, interdit 3).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sitenav {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 50;
+  block-size: var(--h-nav);
+  border-block-end: var(--trait-filet) solid var(--bordure);
+}
+
+/* Compose `.wrap` : c'est le conteneur du système qui donne la gouttière,
+   pas une copie locale de `max-width` + `padding-inline`. */
+.sitenav__in {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  block-size: 100%;
+}
+
+.sitenav__l {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-inline-start: auto;
+}
+
+/* Cible tactile : 12 + 12 de rembourrage + 18 de ligne + 2 de filet
+   = 44px (addendum 08 § 8.8.2, ligne `.sitenav .links a`). */
+.sitenav__l a {
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--trait-filet) solid transparent;
+  border-block-end-width: var(--trait-marque);
+  border-radius: var(--r-2);
+  color: var(--texte-secondaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--tr-reaction), border-color var(--tr-reaction);
+}
+
+.sitenav__l a:hover { color: var(--texte); }
+
+/* La page courante est signalée par DEUX choses : la couleur ET le filet
+   de 2px sous le libellé. Jamais la couleur seule (SC 1.4.1). */
+.sitenav__l a[aria-current="page"] {
+  color: var(--accent);
+  border-block-end-color: var(--accent);
+}
+
+/* Le bouton de la barre. Il lit --accent : sur l'acier de la barre, le
+   bordeaux vaut 1,24 contre le fond (échec SC 1.4.11) tandis que le néon
+   vaut 9,72, et son texte --accent-texte 9,72 en retour. C'est
+   exactement ce que `.acier` sert à faire. Sélecteur à spécificité égale
+   à `.sitenav__l a`, placé après : il gagne par l'ordre, sans !important. */
+.sitenav__l a.sitenav__cta {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-texte);
+  transition: background var(--tr-reaction), border-color var(--tr-reaction);
+}
+
+.sitenav__l a.sitenav__cta:hover {
+  background: var(--accent-survol);
+  border-color: var(--accent-survol);
+  color: var(--accent-texte);
+}
+
+/* Le contour d'un contrôle est en couleur pleine, jamais en filet alpha :
+   `--rule-light-4` y vaut 2,96 et échoue SC 1.4.11 (§ 0.9). */
+.sitenav__burger {
+  display: none;
+  margin-inline-start: auto;
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--trait-filet) solid var(--bordure-forte);
+  border-radius: var(--r-2);
+  background: none;
+  color: var(--texte);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sitenav__burger:active {
+  transform: scale(.98);
+  transition-duration: var(--dur-declic);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3 · LA MARQUE DANS LA BARRE — `.marque` · ARC · CHT — 02
+   L'emblème et son halo appartiennent au chapitre 06 : le balisage y pose
+   une `.emb`, ce fichier ne dimensionne aucun `<svg>`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.marque {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: none;
+  color: var(--texte);
+  text-decoration: none;
+}
+
+.marque__t {
+  font-family: var(--f-display);
+  font-size: var(--fs-corps-xs);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-titre);
+  letter-spacing: var(--ls-xxs);
+}
+
+.marque__t span {
+  display: block;
+  margin-block-start: var(--sp-05);
+  color: var(--texte-secondaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  font-weight: var(--fw-normal);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4 · HERO D'ACCUEIL — `.hero` · ARC · PAT — 01 · Amendement A1.2
+
+   « Panneau de laboratoire à gauche avec son montant d'émail, photo du
+     plateau à droite À PLEINE LUMIÈRE. »
+
+   Trois interdits qui en découlent, tenus par ce CSS :
+     1. jamais de texte long posé sur la photo — le texte vit dans
+        `.hero__g`, qui est un panneau CLAIR ;
+     2. jamais d'assombrissement de la photo pour pouvoir écrire dessus —
+        l'image reste à `opacity:1`, et le seul voile est
+        `--voile-lateral`, un dégradé sur le bord intérieur qui raccorde
+        la photo au panneau et porte la légende ;
+     3. une seule enseigne par écran — elle est DANS la photo, on ne la
+        redessine pas par-dessus.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.02fr .98fr;
+  overflow: hidden;
+  background: var(--surface);
+  border-block-end: var(--trait-filet) solid var(--bordure);
+}
+
+/* Compose `.mat-panneau` (la matière) + `.pilier-email` (le montant).
+   Le rembourrage de tête de ligne compte le montant, sinon le texte
+   s'appuierait dessus. */
+.hero__g {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-inline-size: 0;
+  padding-block: var(--pad-6);
+  padding-inline: calc(var(--pad-5) + var(--trait-pilier)) var(--pad-5);
+}
+
+.hero__v {
+  position: relative;
+  min-inline-size: 0;
+  min-block-size: min(72vh, 40rem);
+  overflow: hidden;
+  background: var(--encre-950);   /* § — « la scène », sans token sémantique */
+}
+
+.hero__v img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 52% 46%;
+}
+
+.hero__v::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--voile-lateral);
+}
+
+/* Compose `.lede` : la taille, l'interligne et la mesure appartiennent
+   au chapitre 04, ce composant ne pose que sa place dans le panneau. */
+.hero__p { margin-block-start: var(--sp-6); }
+
+/* Rangée de boutons. Employée aussi hors du hero — c'est la rangée
+   d'actions d'un bloc, et elle garde son nom d'origine. */
+.hero__b {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-8);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5 · BOUTONS — `.btn` · ARC · CMP — 11
+   Rembourrage exécutoire du socle § 0.13 : `var(--sp-4) var(--sp-6)`,
+   soit une hauteur obtenue de 46px (16 + 16 + 12 + 2) ≥ 44 (SC 2.5.8).
+   La hauteur n'est jamais fixée à la main — c'est l'exception 3 de la
+   trame de 4 : les hauteurs sont RÉSULTANTES.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-6);
+  border: var(--trait-filet) solid var(--accent);
+  border-radius: var(--r-2);
+  background: var(--accent);
+  color: var(--accent-texte);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-l);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--tr-reaction),
+    border-color var(--tr-reaction),
+    color var(--tr-reaction),
+    transform var(--tr-reaction);
+}
+
+/* La flèche du bouton — elle avance quand l'instrument répond. */
+.btn__f { transition: transform var(--tr-reaction); }
+
+/* Le fantôme garde le contour d'accent hérité de `.btn` : c'est une
+   couleur PLEINE, 10,04 sur clair et 9,72 sur acier. Le § 0.9 n'exige
+   pas `--bordure-forte`, il exige de sortir des filets en alpha, qui
+   plafonnent à 2,96. Ce que la maquette faisait — `--acier-400` sur
+   fond clair, 1,95 — est le seul vrai échec, et il disparaît ici. */
+.btn--fantome {
+  background: transparent;
+  color: var(--accent);
+}
+
+.btn--bloc {
+  inline-size: 100%;
+  justify-content: center;
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  background: var(--surface-3);
+  border-color: var(--bordure-forte);
+  color: var(--texte-tertiaire);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:active {
+  transform: scale(.98);
+  transition-duration: var(--dur-declic);
+}
+
+.btn:active .btn__f {
+  transform: translateX(var(--dist-poussee));
+  transition-duration: var(--dur-declic);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6 · OBJETS D'ÉTAT PARTAGÉS — `.etat` · `.jeton` · `.mention`
+
+   Ces trois noms sont EXÉCUTOIRES, pas décoratifs : `99-preferences.css`
+   compense `forced-colors: active` sur eux et sur aucun autre. Un état
+   réécrit localement (`.chap__e`, `.notice__m span`) devient
+   indistinguable en couleurs forcées, sans aucune erreur visible.
+
+   Et surtout : LE MOT RESTE PORTEUR DE L'ÉTAT. « Ouvert », « Fermé »,
+   « En ligne » sont écrits en toutes lettres, jamais suggérés par une
+   couleur (SC 1.4.1).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.etat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  border: var(--trait-filet) solid currentColor;
+  border-radius: var(--r-2);
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.etat--ouvert,
+.etat--enligne { color: var(--succes); }
+
+.etat--verrouille,
+.etat--horsligne { color: var(--verrouille); }
+
+/* Le jeton : un outil, un mot-clé, une entrée de nomenclature. */
+.jeton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-2);
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+}
+
+/* La mention de mise en avant — l'ex-`.badge` « Recommandé » (§ 0.12).
+   `.badge` est réservé au palier ; celui-ci ne peut pas s'appeler ainsi. */
+.mention {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--trait-filet) solid var(--accent);
+  border-radius: var(--r-2);
+  background: var(--accent);
+  color: var(--accent-texte);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7 · LÉGENDE SUR IMAGE — `.legende` · ARC · CMP — 45 · socle § 0.23
+
+   Un seul composant remplace les cinq plaques concurrentes du système —
+   `.hero-cap`, `.t-legende`, `.marque-photo`, `.mat-verre--nuit` porteur
+   de texte, `.cap-plate` — dont quatre échouaient AA (2,34 · 2,80 ·
+   3,75 · 3,80). Il absorbe aussi les trois plaques locales de la
+   maquette : `.hero__cap`, `.notice__cap`, `.atelier__sig`.
+
+   La plaque est SOMBRE dans tous les contextes : c'est pour cela, et
+   pour cela seulement, qu'elle lit trois pas d'échelle au lieu de rôles.
+   Mesure dans le pire cas — image entièrement blanche sous la plaque —
+   10,64 avec `--blanc-50`. `--acier-400` y est INTERDIT en texte (4,65)
+   et une légende n'a jamais deux niveaux de texte.
+
+   Pas de `backdrop-filter` : la plaque est opaque, le flou ne sert plus
+   la lisibilité et coûte une passe de peinture. `.verre` reste le seul
+   composant du système à en porter un, et il n'écrit jamais de texte.
+
+   La typographie (Space Mono, `--fs-mono-xs`, `--ls-m`, capitales) vient
+   de `.legende` en 02-tokens-typo.css. Elle n'est pas réécrite ici.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.legende {
+  position: absolute;
+  z-index: 3;
+  max-inline-size: calc(100% - 2 * var(--sp-7));
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--trait-filet) solid var(--rule-light-3);  /* § — plaque sombre */
+  border-radius: var(--r-2);
+  background: var(--plaque-legende);
+  color: var(--blanc-50);                                /* § — plaque sombre */
+  font-variant-ligatures: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.legende--hg { inset-inline-start: var(--sp-4); inset-block-start: var(--sp-4); }
+.legende--bg { inset-inline-start: var(--sp-4); inset-block-end:   var(--sp-4); }
+.legende--bd { inset-inline-end:   var(--sp-4); inset-block-end:   var(--sp-4); }
+
+/* La signature pleine largeur. Le dégradé va de `--voile-scene` (.55) à
+   `--plaque-legende` (.78) : au niveau du texte, qui vit dans le tiers
+   bas, l'opacité dépasse .66, soit 5,87 dans le pire cas contre une
+   image blanche. Un `--voile-scene` plat n'y arriverait pas (3,46). */
+.legende--pied {
+  inset-inline: 0;
+  inset-block-end: 0;
+  max-inline-size: none;
+  padding: var(--sp-4) var(--sp-5);
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(var(--voile-scene), var(--plaque-legende));
+  white-space: normal;
+}
+
+/* Une commande posée sur une scène — bouton de zoom, bouton de lecture.
+   Même plaque, contour à 3:1, et elle redevient cliquable. */
+a.legende,
+button.legende {
+  border-color: var(--acier-400);   /* § — 4,65 contre la plaque composée */
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8 · ENCART — `.encart` · ARC · CMP — 12
+   La règle descendante `.acier .encart { background: rgba(255,255,255,.06) }`
+   de la maquette est supprimée : `--surface-2` bascule déjà tout seul en
+   contexte acier, et `--accent` avec lui (§ 0.11).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.encart {
+  padding: var(--sp-5) var(--sp-6);
+  border-inline-start: var(--trait-lisere) solid var(--accent);
+  border-start-end-radius: var(--r-3);
+  border-end-end-radius: var(--r-3);
+  background: var(--surface-2);
+}
+
+.encart__t {
+  margin-block-end: var(--sp-2);
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-l);
+  text-transform: uppercase;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9 · CARTES SIMPLES — `.cartes` · `.carte`
+   Le titre est `.carte-titre` (02-tokens-typo.css), pas un `.carte__t`
+   local : les deux déclarations étaient identiques au caractère près.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--sp-4);
+}
+
+.carte {
+  padding: var(--pad-2);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  background: var(--surface-carte);
+}
+
+.carte__d {
+  margin: 0;
+  max-inline-size: var(--me-corps-s);
+  color: var(--texte-secondaire);
+  font-size: var(--fs-corps-s);
+  line-height: var(--lh-lede);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10 · LISTE À ICÔNES — `.liste`
+   La règle `section.acier .liste svg { color: var(--neon) }` est
+   supprimée : l'icône porte `.ico--action`, qui lit `--accent`, et
+   `.acier` fait déjà basculer `--accent` vers le néon.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.liste {
+  display: grid;
+  gap: var(--sp-3);
+  margin: var(--sp-4) 0 0;
+  font-size: var(--fs-corps-s);
+  line-height: var(--lh-lede);
+}
+
+.liste li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-3);
+  align-items: start;
+}
+
+/* Alignement optique : l'icône descend d'un pas pour s'asseoir sur la
+   première ligne de texte. C'est du placement, pas du dessin — la taille
+   et la couleur de l'icône restent au chapitre 06. */
+.liste .ico { margin-block-start: var(--sp-1); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   11 · NOTICE DE MODULE — `.notice`
+   Le catalogue à un module : le panneau de gauche décrit, la scène de
+   droite montre. Voisine de la carte de module (ARC · CMP — 23) mais
+   d'un autre gabarit : elle est seule sur sa ligne.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.notice {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  overflow: hidden;
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  background: var(--surface-carte);
+  box-shadow: var(--elev-2);
+}
+
+/* Compose `.pilier-email` : le montant d'émail est une matière, il n'est
+   pas recopié en dégradé local (sinon `forced-colors` ne le voit plus). */
+.notice__g { padding: var(--pad-5); }
+
+/* Compose `.h3`. Ce composant ne pose que sa mesure et sa place. */
+.notice__t {
+  margin-block-start: var(--sp-3);
+  max-inline-size: var(--me-h2);
+}
+
+/* Le sous-titre en italique de Fraunces — la même figure que `.h1 em`,
+   un cran plus bas dans la hiérarchie. */
+.notice__t em {
+  display: block;
+  margin-block-start: var(--sp-2);
+  color: var(--texte-secondaire);
+  font-style: italic;
+  font-size: var(--fs-lede);
+  font-weight: var(--fw-normal);
+  letter-spacing: var(--ls-lede);
+  line-height: var(--lh-h4);
+}
+
+.notice__d {
+  margin-block-start: var(--sp-5);
+  max-inline-size: var(--me-lede);
+  color: var(--texte-secondaire);
+}
+
+/* Les outils du module. Chaque enfant est un `.jeton`. */
+.notice__m {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-block-start: var(--sp-5);
+}
+
+.notice__v {
+  position: relative;
+  min-block-size: var(--sp-14);
+  background: var(--encre-950);   /* § — « la scène », sans token sémantique */
+}
+
+.notice__v img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   12 · SOMMAIRE DE MODULE — `.sommaire` · ARC · CMP — 04
+   `.toc` et `.chapitres` deviennent `.sommaire`, nom unique (§ 0.11).
+
+   ── LE SEUL MOMENT ANIMÉ QUE LA PAGE S'AUTORISE ─────────────────────────
+   « Le relevé se remplit, il n'apparaît pas. » Un filet d'émail court de
+   gauche à droite en 900 ms, puis les lignes basculent l'une après
+   l'autre à 80 ms d'écart, après une amorce de 260 ms. La mesure se
+   construit sous les yeux ; c'est ce qui la rend crédible.
+
+   Le retard cumulé est PLAFONNÉ à 560 ms (04-tokens-motion.css) : au
+   huitième chapitre on cesse d'échelonner. Le rang est posé par
+   `:nth-child`, jamais par un `style="--i:3"` en ligne — le socle § 0.21
+   interdit le style en ligne, et c'est ainsi que la maquette le faisait.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sommaire {
+  position: relative;
+  display: grid;
+  gap: var(--sp-2);
+  margin-block-start: var(--sp-6);
+  padding-block-start: var(--sp-4);
+}
+
+.sommaire::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  block-size: var(--trait-marque);
+  inline-size: 0;
+  background: var(--accent);
+  transition: inline-size var(--tr-remplissage);
+}
+
+.sommaire.rempli::before { inline-size: 100%; }
+
+.chap {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--sp-4);
+  align-items: center;
+  padding: var(--sp-4) var(--sp-5);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  background: var(--surface-carte);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color var(--tr-reaction),
+    transform var(--tr-reaction),
+    background-color var(--tr-bascule),
+    color var(--tr-bascule);
+}
+
+.sommaire.rempli > .chap {
+  transition-delay: calc(var(--amorce-sommaire) + var(--chap-rang, 0) * var(--pas-bloc));
+}
+
+.sommaire > .chap:nth-child(1) { --chap-rang: 0; }
+.sommaire > .chap:nth-child(2) { --chap-rang: 1; }
+.sommaire > .chap:nth-child(3) { --chap-rang: 2; }
+.sommaire > .chap:nth-child(4) { --chap-rang: 3; }
+.sommaire > .chap:nth-child(5) { --chap-rang: 4; }
+.sommaire > .chap:nth-child(6) { --chap-rang: 5; }
+.sommaire > .chap:nth-child(7) { --chap-rang: 6; }
+.sommaire > .chap:nth-child(n+8) { --chap-rang: 7; }   /* plafond : 560 ms */
+
+.chap__n {
+  min-inline-size: 11ch;
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-s);
+}
+
+.chap__t {
+  display: block;
+  font-family: var(--f-display);
+  font-size: var(--fs-carte);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-serre);
+}
+
+.chap__s {
+  display: block;
+  margin-block-start: var(--sp-1);
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-m);
+  letter-spacing: var(--ls-xxs);
+  text-transform: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   13 · TABLEAU — `.tableau` · ARC · CMP — 40
+   Le mot porte l'état dans chaque cellule — « Ouvert », « Fermé »,
+   « En production » — donc SC 1.4.1 est satisfait sans la couleur.
+   Les sélecteurs d'élément nus `table`, `th`, `td` de la maquette sont
+   portés dans le composant : ils repeignaient tous les tableaux du site.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tableau {
+  overflow-x: auto;
+  margin-block-start: var(--sp-6);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+}
+
+.tableau table {
+  inline-size: 100%;
+  background: var(--surface-carte);
+  font-size: var(--fs-corps-s);
+}
+
+.tableau th,
+.tableau td {
+  padding: var(--sp-3) var(--sp-4);
+  border-block-end: var(--trait-filet) solid var(--bordure);
+  text-align: start;
+  vertical-align: top;
+}
+
+.tableau th {
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--ls-s);
+  text-transform: uppercase;
+}
+
+/* La colonne d'intitulés tient sa mesure en `ch`, pas en px : elle suit
+   la fonte et survit au repli (§ 0.13, « colonnes du relevé »). C'est
+   elle qui rend le tableau plus large que l'écran d'une poche, donc qui
+   déclenche le défilement de `.tableau` au lieu d'un écrasement. */
+.tableau th[scope="row"] { min-inline-size: var(--me-h2); }
+
+.tableau tr:last-child th,
+.tableau tr:last-child td { border-block-end: 0; }
+
+.tableau__oui { color: var(--succes); }
+.tableau__non { color: var(--texte-tertiaire); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   14 · RÉSEAUX — `.reseaux` · `.reseau`
+   Un lien hors texte suivi n'est pas souligné : sa cible est identifiée
+   par sa forme. Il porte alors OBLIGATOIREMENT un état de survol qui ne
+   repose pas sur la couleur seule (socle § 0.22). La maquette déclarait
+   la transition sans jamais déclarer l'état : il est posé ici.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.reseaux {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--sp-4);
+}
+
+.reseau {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--pad-2);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  background: var(--surface-carte);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform var(--tr-reaction),
+    box-shadow var(--tr-reaction),
+    border-color var(--tr-reaction);
+}
+
+.reseau__n {
+  font-family: var(--f-display);
+  font-size: var(--fs-carte);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-h3);
+}
+
+.reseau__h {
+  margin-block-start: var(--sp-1);
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-m);
+}
+
+.reseau__d {
+  margin-block-start: var(--sp-1);
+  color: var(--texte-secondaire);
+  font-size: var(--fs-corps-xs);
+  line-height: var(--lh-lede);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   15 · FORMULAIRE — `.champ` · ARC · CMP — 34
+   Contour de contrôle en couleur pleine (§ 0.9). Le `:focus-visible`
+   local de la maquette et son `outline-offset:2px` sont supprimés :
+   l'anneau du système est déclaré UNE fois, à 3px, dans
+   `05-tokens-socle.css`. Le `outline:none` sur `:focus` l'est aussi —
+   posé ici, il aurait battu l'anneau par la cascade de couches.
+   Hauteur obtenue : 12 + 12 + 28 + 2 = 54px ≥ 44 (SC 2.5.8).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.champ {
+  display: grid;
+  gap: var(--sp-2);
+  margin-block-end: var(--sp-5);
+}
+
+.champ label {
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+}
+
+.champ input,
+.champ select,
+.champ textarea {
+  padding: var(--sp-3);
+  border: var(--trait-filet) solid var(--bordure-forte);
+  border-radius: var(--r-2);
+  background: var(--surface-carte);
+  color: var(--texte);
+  font-family: var(--f-corps);
+  font-size: var(--fs-corps);
+  transition: border-color var(--tr-reaction);
+}
+
+/* Le contour d'accent s'ajoute à l'anneau de focus, il ne le remplace
+   jamais (§ 0.15). */
+.champ input:focus,
+.champ select:focus,
+.champ textarea:focus { border-color: var(--accent); }
+
+.champ input::placeholder,
+.champ textarea::placeholder { color: var(--texte-tertiaire); }
+
+.champ textarea { min-block-size: var(--sp-13); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   16 · FICHE DE SERVEUR — `.serveur` · ARC · CMP — 46 · socle § 0.25
+   Forme courte : l'adresse copiable et son intitulé. `.serveur__adresse`
+   est un champ en lecture seule, donc un contrôle : le socle § 0.9 le
+   nomme explicitement dans la liste des contours en couleur pleine.
+
+   Trois règles du § 0.25 qui n'appartiennent pas au CSS mais qui
+   commandent le balisage : l'état est ÉCRIT (`.etat--enligne` /
+   `.etat--horsligne`, jamais une pastille seule) ; l'appel réseau suit
+   le motif d'attente ARC · MOT — 11 ; aucun chiffre de communauté n'est
+   affiché sans source branchée.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.serveur {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  background: var(--surface-carte);
+}
+
+.serveur__libelle {
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+}
+
+.serveur__adresse {
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--trait-filet) solid var(--bordure-forte);
+  border-radius: var(--r-2);
+  background: var(--surface-2);
+  color: var(--texte);
+  font-family: var(--f-mono);
+  font-size: var(--fs-corps);
+  letter-spacing: var(--ls-xxs);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   17 · PORTRAIT DE L'ATELIER — `.atelier` · ARC · CMP — 18
+   Compose `.split` (90-utilitaires.css) : la grille, la gouttière et le
+   repli en une colonne y vivent une seule fois. Ce composant ne pose que
+   le rapport de ses deux colonnes et son alignement.
+   La signature sur l'image est `.legende.legende--pied`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.atelier {
+  --split-gauche: .8fr;
+  --split-droite: 1.2fr;
+  --split-aligne: center;
+  margin-block-start: var(--sp-6);
+}
+
+.atelier__p {
+  position: relative;
+  overflow: hidden;
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+}
+
+.atelier__p img {
+  inline-size: 100%;
+  aspect-ratio: var(--ar-portrait);
+  object-fit: cover;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   18 · SIGNATURE — LE PLAN AU SOL — `.plan` · Amendement A1.3
+
+   « Quand une page a besoin d'une métaphore de navigation, elle emprunte
+     au plan, pas à un menu de site. » (Fondations § 1.1, rendu
+     exécutoire par A1.3.)
+
+   Le sommaire de l'accueil EST le plan au sol des quatre zones, tracé au
+   filet, en bande d'acier sous le hero. Chaque pièce est un lien ; le
+   disque numéroté porte le rang, le libellé porte la destination. Une
+   rangée de pastilles numérotées ne le remplace pas.
+
+   C'est le seul objet de ce site que personne d'autre ne peut copier :
+   il est relevé du décor, et le décor n'existe que dans ces images.
+
+   Les cinq classes d'un seul mot de la maquette — `.piece`, `.paillasse`,
+   `.pt`, `.num`, `.nom` — sont préfixées (§ 0.12) : globales, elles
+   entraient en collision avec le breakpoint `--bp-paillasse`, avec le
+   boîtier `--pad-5` et avec la cellule chiffrée d'un tableau.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.plan-bande {
+  padding-block: var(--sp-8);
+  border-block-end: var(--trait-filet) solid var(--bordure);
+}
+
+.plan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  gap: var(--gap-4);
+  align-items: center;
+}
+
+.plan__svg {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 32rem;
+  block-size: auto;
+}
+
+.plan__piece {
+  fill: none;
+  stroke: var(--bordure-forte);
+  stroke-width: 1;
+  transition: fill var(--tr-reaction);
+}
+
+.plan__paillasse {
+  fill: none;
+  stroke: var(--bordure);
+  stroke-width: 1;
+}
+
+.plan__pt {
+  fill: var(--surface);
+  stroke: var(--bordure-forte);
+  stroke-width: 1;
+  transition: fill var(--tr-reaction), stroke var(--tr-reaction);
+}
+
+.plan text {
+  fill: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  letter-spacing: var(--ls-m);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.plan__num {
+  fill: var(--texte-secondaire);
+  font-size: var(--fs-mono-xs);
+  transition: fill var(--tr-reaction);
+}
+
+.plan__nom {
+  font-size: var(--fs-mono-xs);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+}
+
+.plan a { cursor: pointer; }
+
+.plan a:active .plan__pt {
+  fill: var(--accent-actif);
+  stroke: var(--accent-actif);
+}
+
+.plan__lg {
+  margin: 0;
+  max-inline-size: var(--me-citation);
+  color: var(--texte-secondaire);
+  font-family: var(--f-corps);
+  font-size: var(--fs-corps-s);
+  line-height: var(--lh-lede);
+}
+
+.plan__lg b {
+  display: block;
+  margin-block-end: var(--sp-2);
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  font-weight: var(--fw-normal);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   19 · PIED DE PAGE DU SITE — `.sitefoot` · ARC · CMP — 43
+   Il porte `class="acier"` : les quatre redéfinitions locales de token de
+   la maquette — `--texte-tertiaire`, `--accent`, `--focus`, `color` —
+   sont supprimées (§ 0.3, interdit 3). Le contexte fait le travail.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sitefoot { padding-block: var(--rythme-m) var(--sp-8); }
+
+.sitefoot__g {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: var(--sp-8);
+}
+
+.sitefoot h4 {
+  margin: 0 0 var(--sp-4);
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--ls-l);
+  text-transform: uppercase;
+}
+
+.sitefoot ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-corps-s);
+}
+
+/* Cible tactile : 12 + 12 de rembourrage + 21 de ligne = 45px
+   (addendum 08 § 8.8.2, ligne `.sitefoot .nav a`). La gouttière de la
+   liste passe donc à zéro : c'est le rembourrage qui espace, et il est
+   cliquable, ce que la gouttière n'était pas. */
+.sitefoot ul a {
+  display: block;
+  padding-block: var(--sp-3);
+  color: var(--texte-secondaire);
+  text-decoration: none;
+  transition: color var(--tr-reaction);
+}
+
+.sitefoot ul a:hover {
+  color: var(--texte);
+  text-decoration: underline;
+  text-underline-offset: .18em;
+}
+
+/* Compose `.legal` : la mesure de 74ch, l'interligne et la couleur
+   viennent du chapitre 04. Ce composant ne pose que le filet et le
+   rythme qui l'attachent au pied. */
+.sitefoot__legal {
+  margin-block-start: var(--sp-9);
+  padding-block-start: var(--sp-5);
+  border-block-start: var(--trait-filet) solid var(--bordure);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   20 · SURVOL — seulement là où il existe un dispositif de pointage
+   Regroupé pour que rien de tout ceci ne se déclenche au premier
+   effleurement d'un écran tactile, où un « survol » est un clic manqué.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (hover: hover) and (pointer: fine) {
+
+  /* Le bouton avance ; la flèche avance un peu plus. L'instrument
+     réagit, il ne rebondit pas — aucun ressort, aucun dépassement. */
+  .btn:hover {
+    background: var(--accent-survol);
+    border-color: var(--accent-survol);
+    transform: translateX(var(--dist-poussee));
+  }
+  .btn:hover .btn__f { transform: translateX(var(--dist-fleche)); }
+
+  .btn--fantome:hover {
+    background: var(--accent);
+    color: var(--accent-texte);
+  }
+
+  .btn[disabled]:hover,
+  .btn[aria-disabled="true"]:hover {
+    background: var(--surface-3);
+    transform: none;
+  }
+
+  /* La ligne de sommaire se pousse, et son filet se renforce : deux
+     signaux, dont un qui ne dépend pas de la couleur. */
+  .chap:hover {
+    border-color: var(--bordure-forte);
+    transform: translateX(var(--dist-poussee));
+  }
+
+  /* La carte de réseau se soulève de 4px et prend son ombre de contact. */
+  .reseau:hover {
+    border-color: var(--bordure-forte);
+    transform: translateY(var(--dist-carte));
+    box-shadow: var(--elev-2);
+  }
+
+  /* Le plan : la pièce s'éclaire, le disque prend l'accent, le numéro
+     bascule sur la couleur de texte de l'accent. Trois changements pour
+     une seule intention — que la zone survolée soit sans ambiguïté. */
+  .plan a:hover .plan__piece { fill: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .plan a:hover .plan__pt    { fill: var(--accent); stroke: var(--accent); }
+  .plan a:hover .plan__num   { fill: var(--accent-texte); }
+  .plan a:hover .plan__nom   { fill: var(--texte); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   21 · RESPONSIVE — deux paliers, ceux du chapitre 05
+   `--bp-paillasse` 980 et `--bp-planche` 620, écrits en `.98` pour ne
+   pas laisser le trou d'un pixel que le chapitre 05 identifie (§ 0.20).
+   Les paliers 820 et 1040 de la maquette n'existent pas dans le système.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 979.98px) {
+
+  /* Le split du hero se déplie : la photo passe AU-DESSUS du panneau.
+     C'est le seul ordre qui garde la promesse d'A1.2 — on voit le lieu
+     avant de lire ce qu'on y fait. */
+  .hero { grid-template-columns: 1fr; }
+  .hero__v {
+    order: -1;
+    min-block-size: 52vw;
+  }
+
+  .notice { grid-template-columns: 1fr; }
+  .notice__v {
+    order: -1;
+    aspect-ratio: var(--ar-scene);
+  }
+
+  /* Le plan passe sous sa légende, qui reprend toute la largeur. */
+  .plan { grid-template-columns: 1fr; }
+  .plan__lg { max-inline-size: none; }
+
+  /* Le portrait de l'atelier ne s'étale pas sur toute la colonne : un
+     portrait carré de 384px de large suffit, et il se centre. */
+  .atelier__p {
+    max-inline-size: min(100%, 24rem);
+    margin-inline: auto;
+  }
+
+  .sitefoot__g { grid-template-columns: 1fr 1fr; }
+
+  /* La barre passe au menu déroulant. Le `.burger` porte `aria-expanded`
+     et `aria-controls` ; `.ouvert` est posée par le script, et c'est la
+     seule classe d'état nue de ce composant. */
+  .sitenav__in { position: relative; }
+  .sitenav__burger { display: block; }
+  .sitenav__l { display: none; }
+  .sitenav__l.ouvert {
+    display: flex;
+    position: absolute;
+    inset-block-start: var(--h-nav);
+    inset-inline: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-1);
+    margin: 0;
+    padding: var(--sp-3);
+    background: var(--surface-2);
+    border-block-end: var(--trait-filet) solid var(--bordure);
+  }
+}
+
+@media (max-width: 619.98px) {
+
+  /* La ligne de sommaire s'empile : le rang, le titre, puis l'état, qui
+     se range à gauche au lieu de flotter au bout d'une ligne vide. */
+  .chap {
+    grid-template-columns: 1fr;
+    gap: var(--sp-2);
+  }
+  .chap .etat { justify-self: start; }
+
+  .sitefoot__g { grid-template-columns: 1fr; }
+}

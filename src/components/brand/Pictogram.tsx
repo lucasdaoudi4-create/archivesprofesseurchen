@@ -70,13 +70,19 @@ const PATHS: Record<PictoName, JSX.Element> = {
       <path d="M9 13h4" />
     </>
   ),
-  // Pastille (collection) — clin d'œil discret
+  // Casier d'archives — deux tiroirs et leurs poignées.
+  //
+  // REDESSINÉ. Le tracé précédent était un cercle traversé d'une bande
+  // médiane avec un disque au centre. Le chapitre 02 § 14.2 l'avait déjà
+  // condamné — « le picto `collection` devra être redessiné : il duplique
+  // l'emblème » — et le chapitre 07 § 7.14 range cette forme parmi les
+  // « emblèmes » qu'on ne reprend jamais à un univers sous licence.
+  // L'auteur a tranché : la forme sort de l'identité, ici comme partout.
   collection: (
     <>
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M3.5 12h6.2" />
-      <path d="M14.3 12h6.2" />
-      <circle cx="12" cy="12" r="2.5" />
+      <rect x="3.5" y="4.5" width="17" height="7" rx="1.2" />
+      <rect x="3.5" y="12.5" width="17" height="7" rx="1.2" />
+      <path d="M10.5 8h3M10.5 16h3" />
     </>
   ),
 };

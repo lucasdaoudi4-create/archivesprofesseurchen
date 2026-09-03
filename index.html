@@ -2,31 +2,53 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#16130D" />
+
+    <!-- Socle § 0.29 : #2A2F32 (--acier-900) remplace le #16130D de l'ancienne charte. -->
+    <meta name="theme-color" content="#2A2F32" />
+
+    <!-- La charte mesure 126 paires de contraste (charte/reference/matrice-contraste.md)
+         et arbitre chaque valeur au centième. Une extension qui réinverse la page
+         détruit ce travail en silence : le verrou était déjà posé dans la maquette
+         validée, il est repris ici. Le site n'a pas de thème sombre système — le
+         contexte sombre est porté par la seule classe `.acier` (socle § 0.11). -->
+    <meta name="darkreader-lock" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://archivesprofesseurchen.com/" />
+
+    <title>Les Archives du Professeur Chen</title>
     <meta
       name="description"
-      content="Les Archives du Professeur Chen — le monde Pokémon, archivé. Formation création de contenu, communauté Discord, serveur Minecraft Cobblemon et vidéos sur YouTube et TikTok. Savoir · Partage · Passion."
+      content="Une formation à la création de contenu, une communauté Discord, un serveur Minecraft Cobblemon et des vidéos, tenus comme on tient des archives."
     />
-    <meta property="og:title" content="Les Archives du Professeur Chen — Le monde Pokémon, archivé." />
+
+    <!-- Socle § 0.29 : og:title et og:description sont identiques au title
+         et à la description. Le titre de l'accueil est le nom seul. -->
+    <meta property="og:title" content="Les Archives du Professeur Chen" />
     <meta
       property="og:description"
-      content="Formation, communauté Discord, serveur Minecraft Cobblemon et contenus Pokémon. Explorer. Archiver. Partager."
+      content="Une formation à la création de contenu, une communauté Discord, un serveur Minecraft Cobblemon et des vidéos, tenus comme on tient des archives."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://archivesprofesseurchen.com" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Les Archives du Professeur Chen" />
+    <meta property="og:url" content="https://archivesprofesseurchen.com/" />
+    <!-- À REMPLACER AU LOT L2 — § 0.29 impose un JPEG 1200×630 nommé
+         arc-og-accueil-1200x630-vNN.jpg. Il n'existe pas encore ; la
+         référence reste sur le favicon pour ne pas pointer dans le vide. -->
     <meta property="og:image" content="https://archivesprofesseurchen.com/favicon.svg" />
-    <meta name="twitter:card" content="summary" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap"
-      rel="stylesheet"
-    />
-    <title>Les Archives du Professeur Chen</title>
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Fontes auto-hébergées — plus aucun appel à googleapis.com ni à
+         gstatic.com (§ 0.32). Les @font-face sont dans
+         src/styles/00-fontes.css ; on précharge les deux faces que toute
+         page emploie, parce qu'elles ne sont découvertes qu'après le
+         téléchargement de la feuille. -->
+    <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/fraunces-roman.woff2" as="font" type="font/woff2" crossorigin />
   </head>
-  <body class="bg-creme text-encre antialiased">
+  <body>
     <div id="root"></div>
     <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input type="text" name="subject" />
