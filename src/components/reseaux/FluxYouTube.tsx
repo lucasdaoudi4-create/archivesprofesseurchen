@@ -1,54 +1,93 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { reseaux, routes, sas, site } from "../../data/site";
+import {
+  TAILLES_AFFICHE,
+  chemin,
+  jeuSources,
+  plateauLarge,
+  repli,
+  secours,
+} from "../../data/visuels";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   LE FIL DE LA CHAÎNE — façade de consentement
-   Les Archives du Professeur Chen — charte v1.0.0, lot L4
+   LE FIL DE LA CHAÎNE — `.player` · ARC · CMP — 46 · addendum 08 § B-25
+   Les Archives du Professeur Chen — charte v1.0.0
 
-   Reprise de `src/components/home/YouTubeFeed.tsx`. Ce qui est PRÉSERVÉ,
-   à l'identique : la déduction de la playlist « envois » à partir du
-   `channelId` — chaque chaîne en a une, dont l'identifiant se lit en
-   remplaçant le préfixe `UC` par `UU`. C'est la seule mécanique du
-   composant d'origine, et elle ne change pas.
+   Ce composant portait déjà une façade de consentement, composée faute de
+   mieux avec `.carte` et deux réglages Tailwind locaux : `src/styles/` ne
+   déclarait alors ni `.player` ni aucune classe `.pl-*`. Elles existent
+   désormais (30-composants.css §22) et la façade bascule sur l'anatomie
+   normative. La note « ce n'est pas `.player` » de l'ancienne version est
+   caduque : c'est `.player`.
 
-   ── CE QUI CHANGE, ET POURQUOI ────────────────────────────────────────────
+   ── CE QUI EST PRÉSERVÉ, À LA LIGNE PRÈS ──────────────────────────────────
 
-   1. LE CADRE NE SE CHARGE PLUS TOUT SEUL.
-      Le socle § 0.32 range YouTube parmi les tiers à consentement
-      (« YouTube en `nocookie` et chargé après consentement ») et le
-      08-composants-addendum B-25 en donne le principe : « tant que
-      personne n'a cliqué, aucun octet ne part chez YouTube ». Le composant
-      d'origine posait l'`iframe` au premier rendu : l'adresse IP du
-      visiteur partait chez Google avant qu'il ait rien demandé. Ici,
-      l'`iframe` n'est créée qu'au clic.
+   1. RIEN NE PART AVANT LE CLIC (socle §0.32, B-25). L'`iframe` n'existe
+      pas dans l'arbre tant que personne ne l'a demandée. L'affiche est
+      servie DEPUIS NOTRE DOMAINE — jamais `i.ytimg.com`, qui rendrait la
+      façade décorative et lui ferait perdre sa seule raison d'être.
+   2. LE DOMAINE RESTE `youtube-nocookie.com` : c'est le seul `frame-src`
+      que la politique de sécurité du §0.32 autorisera.
+   3. LA PLAYLIST « ENVOIS » se déduit du `channelId` en remplaçant le
+      préfixe `UC` par `UU`. C'est la seule mécanique du composant, elle
+      ne change pas.
+   4. `cc_load_policy=1&hl=fr` — sous-titres français à l'ouverture.
+   5. PAS D'`autoplay`. B-25 l'autorise parce que « le clic sur la façade
+      EST la demande de lecture » — mais ici le clic demande LE FIL, pas
+      une vidéo précise. Ouvrir la playlist en lançant d'autorité sa
+      première entrée serait une lecture que personne n'a demandée.
+   6. LE FOCUS SUIT LE CADRE (B-25, ligne « Chargé ») : sans ce
+      déplacement, la personne au clavier se retrouve AVANT le lecteur
+      qu'elle vient d'ouvrir. L'`iframe` reste tabulable — le
+      `tabindex="-1"` du patron la sortirait de l'ordre de tabulation une
+      fois le focus reparti.
 
-   2. LE DOMAINE PASSE EN `youtube-nocookie.com`.
-      C'est le seul `frame-src` que la politique de sécurité du § 0.32
-      autorise. `www.youtube.com` y serait bloqué le jour où l'en-tête
-      sera posé.
+   ── L'ANATOMIE, ET LES DEUX ÉCARTS QU'ELLE IMPOSE ─────────────────────────
 
-   3. `cc_load_policy=1&hl=fr` s'ajoutent aux paramètres.
-      B-25 : les sous-titres français sont activés à l'ouverture. Pas
-      d'`autoplay` en revanche — le clic ici demande le fil, pas la lecture
-      immédiate d'une vidéo précise.
+     figure.player
+       .pl-facade   img.pl-poster · .pl-veil · button.pl-play · .pl-meta
+                    · .pl-consent          → remplacée par l'iframe au clic
+       figcaption.pl-caption
 
-   4. LE FOCUS SUIT LE CADRE.
-      B-25, tableau des états, ligne « Chargé » : sans ce déplacement, la
-      personne au clavier se retrouve AVANT le lecteur qu'elle vient
-      d'ouvrir. L'`iframe` reste tabulable — le `tabindex="-1"` du patron
-      la sortirait de l'ordre de tabulation une fois le focus reparti.
+   `.pl-transcript` n'est pas rendu : il n'y a pas de transcription d'une
+   playlist, et un accordéon vide serait la promesse d'un texte absent.
 
-   ── CE QUE CE COMPOSANT N'EST PAS ─────────────────────────────────────────
+   `.pl-meta` est déclaré « titre + durée » par B-25. La durée n'est pas
+   rendue : un fil de playlist n'en a pas, et aucune n'est relevée dans
+   `site.ts`. Rien n'est inventé pour remplir un emplacement — §0.36. La
+   feuille sert un `.pl-meta` à un seul enfant sans réglage particulier.
 
-   Ce n'est pas `.player` (B-25) : ce composant-là suppose une affiche
-   servie depuis notre domaine, et `src/styles/` ne déclare aujourd'hui ni
-   `.player` ni aucune classe `.pl-*`. La façade est donc composée avec les
-   composants qui existent — `.carte`, `.carte__d`, `.hero__b`, `.btn` — et
-   deux réglages de mise en page locaux qui ne lisent que des jetons
-   (`--ar-scene`, la scène 16:9 ; `--encre-950`, que 01-tokens-couleur.css
-   nomme littéralement « LA SCÈNE : visionneuses 16:9 »).
+   L'`iframe` prend la PREMIÈRE des deux places que B-25 décrit : elle
+   remplace `.pl-facade` et devient enfant direct de `.player`, où le
+   sélecteur `.player > iframe` lui donne le ratio, le rayon et le fond de
+   la scène. Aucun conteneur intermédiaire, donc aucun réglage local.
+
+   ── LE NOM DU BOUTON DIT CE QU'IL FAIT ET CE QU'IL CHARGE ─────────────────
+
+   « Lire », seul, ne dit rien de ce qu'un clic déclenche chez un tiers.
+   Le nom accessible nomme les deux : l'action (charger le fil) et sa
+   conséquence (le lecteur de YouTube, appelé depuis youtube-nocookie.com).
+   Le triangle est `aria-hidden` — il ne porte aucun nom, il est le dessin
+   du bouton.
+
+   ── DEUX MANQUES DÉCLARÉS, PAS CONTOURNÉS ─────────────────────────────────
+
+   · L'état « Chargement » de B-25 remplace le triangle par un `.skel`
+     circulaire. `.skel` n'existe pas dans `src/styles/`, et le
+     remplacement est de toute façon synchrone ici : il n'y a pas de
+     fenêtre à habiller. La règle `.pl-play[aria-busy="true"]` de la
+     feuille reste donc sans emploi dans ce composant.
+   · Le triangle de lecture n'est pas dans la famille d'icônes : `NomIcone`
+     de `components/ui/Icones.tsx` ne connaît que `coche`, `copier` et
+     `lien-externe`. Le tracé est posé ici, sur la grille 24 et sous les
+     classes `.ico .ico--32`, pour que l'épaisseur et la taille servies
+     restent celles du chapitre 06 et non des valeurs locales.
+     Voir « À signaler ».
    ═══════════════════════════════════════════════════════════════════════════ */
+
+/* L'affiche occupe toute la largeur du `.wrap`. La phrase vit avec les
+   dérivées qu'elle sert, dans `src/data/visuels.ts`. */
 
 export default function FluxYouTube() {
   const chaine = reseaux.youtube;
@@ -60,7 +99,7 @@ export default function FluxYouTube() {
   }, [charge]);
 
   // Aucun `channelId` relevé : pas de fil, et surtout pas de cadre vide.
-  // L'addendum 08 § 8.11.2 est explicite — « jamais un cadre 16:9 noir sans
+  // L'addendum 08 §8.11.2 est explicite — « jamais un cadre 16:9 noir sans
   // explication ». La page garde ses quatre cartes, qui suffisent.
   if (!chaine.channelId) return null;
 
@@ -68,58 +107,112 @@ export default function FluxYouTube() {
   const source =
     "https://www.youtube-nocookie.com/embed/videoseries" +
     `?list=${listeEnvois}&rel=0&modestbranding=1&cc_load_policy=1&hl=fr`;
-  const titreCadre = `Les dernières vidéos de la chaîne ${chaine.label} — ${site.name}`;
 
-  if (charge) {
-    return (
-      <div className="carte">
-        <div className="relative overflow-hidden rounded-[var(--r-2)] aspect-[var(--ar-scene)] bg-[var(--encre-950)]">
-          <iframe
-            ref={cadre}
-            src={source}
-            title={titreCadre}
-            loading="lazy"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
-        </div>
-        <p className="carte__d mt-[var(--sp-4)]">
-          Le fil est servi par YouTube, sur youtube-nocookie.com.{" "}
-          <a href={chaine.url} target="_blank" rel="noopener">
-            Ouvrir la chaîne
-            <span className="sr-only"> (nouvel onglet)</span>
-          </a>
-        </p>
-      </div>
-    );
-  }
+  const titreFil = `Les dernières vidéos de la chaîne ${chaine.label}`;
+  const titreCadre = `${titreFil} — ${site.name}`;
+  const nomBouton =
+    "Charger le fil des dernières vidéos — le lecteur de " +
+    `${chaine.label} est alors appelé sur youtube-nocookie.com et reçoit ` +
+    "votre adresse IP";
 
   return (
-    <div className="carte">
-      <p className="carte__d">
-        Le fil des dernières vidéos est servi par YouTube. Le charger ouvre le lecteur de
-        Google et lui transmet votre adresse IP{" "}: rien n’est appelé tant que
-        vous ne l’avez pas demandé.
-      </p>
-      <p className="carte__d mt-[var(--sp-3)]">
-        <Link to={routes.confidentialite}>{sas.lienDonnees}</Link>
-      </p>
-      <div className="hero__b">
-        <button className="btn" type="button" onClick={() => setCharge(true)}>
-          Charger le fil{" "}
-          <span className="btn__f" aria-hidden="true">
-            →
-          </span>
-        </button>
-        <a className="btn btn--fantome" href={chaine.url} target="_blank" rel="noopener">
+    <figure className="player">
+      {charge ? (
+        <iframe
+          ref={cadre}
+          src={source}
+          title={titreCadre}
+          loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : (
+        // `--aplat` : la façade porte le plateau, elle attend donc sur l'aplat
+        // du plateau (§ 7.13.5) et non sur le noir de scène.
+        <div
+          className="pl-facade"
+          style={{ "--aplat": plateauLarge.aplat } as CSSProperties}
+        >
+          {/* `alt=""` : l'affiche est décorative, `.pl-meta` nomme le fil
+              juste à côté. Le chemin n'est pas composé à la main —
+              `src/data/visuels.ts` est le seul accès aux dérivées.
+
+              `contents` sur le `<picture>` : la feuille écrit
+              `.pl-poster{block-size:100%}`, et ce pourcentage se résout
+              contre le PARENT DE BOÎTE. Un `<picture>` en ligne, de hauteur
+              automatique, couperait la chaîne et l'affiche retomberait à sa
+              hauteur intrinsèque. `display: contents` retire le wrapper de
+              l'arbre de boîtes : l'image redevient enfant direct de
+              `.pl-facade`, exactement ce que la feuille suppose. Mise en
+              page locale, donc Tailwind (§0.21). */}
+          <picture className="contents">
+            <source
+              type="image/avif"
+              srcSet={jeuSources(plateauLarge, "avif")}
+              sizes={TAILLES_AFFICHE}
+            />
+            <source
+              type="image/webp"
+              srcSet={jeuSources(plateauLarge, "webp")}
+              sizes={TAILLES_AFFICHE}
+            />
+            <img
+              className="pl-poster"
+              src={chemin(plateauLarge, secours(plateauLarge), "jpg")}
+              srcSet={jeuSources(plateauLarge, "jpg")}
+              sizes={TAILLES_AFFICHE}
+              width={repli(plateauLarge).l}
+              height={repli(plateauLarge).h}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+
+          {/* Le voile. Il ne prend pas le pointeur : le bouton est dessous
+              dans l'ordre du document, mais au-dessus dans la pile. */}
+          <div className="pl-veil" />
+
+          <button
+            type="button"
+            className="pl-play"
+            aria-label={nomBouton}
+            onClick={() => setCharge(true)}
+          >
+            {/* Le triangle, sur la grille 24 du chapitre 06. Fermé par un
+                `Z` pour que les trois sommets prennent la jointure ronde
+                de `.ico`. */}
+            <svg className="ico ico--32" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M9 6.8 18 12l-9 5.2Z" />
+            </svg>
+          </button>
+
+          <div className="pl-meta">
+            <b>{titreFil}</b>
+          </div>
+
+          {/* Une phrase, et pas deux : la ligne de consentement est posée en
+              bas de la scène, en mono, et doit tenir sans repousser le
+              bouton de lecture sur une façade étroite. */}
+          <p className="pl-consent">
+            Rien n’est appelé avant votre clic&nbsp;: charger le fil ouvre le
+            lecteur de {chaine.label} et lui transmet votre adresse IP.{" "}
+            <Link to={routes.confidentialite}>{sas.lienDonnees}</Link>
+          </p>
+        </div>
+      )}
+
+      {/* La légende reste dans les deux états : c'est elle qui garde la
+          sortie vers la chaîne une fois la façade remplacée, et qui dit
+          d'où le fil est servi. Compose `.meta` — la fonte, la taille et
+          la couleur du relevé viennent du chapitre 04. */}
+      <figcaption className="pl-caption meta">
+        Fil servi par {chaine.label}, sur youtube-nocookie.com.{" "}
+        <a href={chaine.url} target="_blank" rel="noopener">
           Ouvrir la chaîne
-          <span className="sr-only"> (nouvel onglet)</span>{" "}
-          <span className="btn__f" aria-hidden="true">
-            →
-          </span>
+          <span className="sr-only"> (nouvel onglet)</span>
         </a>
-      </div>
-    </div>
+      </figcaption>
+    </figure>
   );
 }

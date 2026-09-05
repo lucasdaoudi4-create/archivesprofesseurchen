@@ -20,10 +20,12 @@ import { useState, type FormEvent } from "react";
    ── CE QUI A ÉTÉ PORTÉ ────────────────────────────────────────────────────
 
    Le fichier portait à lui seul TOUTES les classes mortes qui restaient dans
-   `src/` après la migration : `bg-creme`, `text-rouge-700`, `bg-vert-50`,
-   `text-vert-700`, `placeholder-encre-400`, `.btn-primary`, et le dernier
-   `sm:` du dépôt — six familles que le § 0.36 range dans les « suppressions
-   de code de l’ancienne charte ». Toutes rendaient déjà du vide.
+   `src/` après la migration : quatre utilitaires de couleur de l’ancienne
+   palette (fond crème, texte d’alerte, fond et texte de succès), un
+   utilitaire de couleur d’invite, l’ancien bouton primaire, et le dernier
+   point d’arrêt Tailwind par défaut du dépôt — six familles que le § 0.36
+   range dans les « suppressions de code de l’ancienne charte ». Toutes
+   rendaient déjà du vide.
 
    Il est réécrit sur les composants de la charte, à l’identique de ce que
    `Contact.tsx` fait pour le formulaire de contact : `.champ`, `.encart`,

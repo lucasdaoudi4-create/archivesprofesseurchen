@@ -116,11 +116,41 @@
   --rule-light-3: rgba(244, 245, 246, .24);
   --rule-light-4: rgba(244, 245, 246, .32);  /* séparation entre deux blocs acier */
 
-  /* ── Voiles et plaques ──────────────────────────────────────────────── */
-  --plaque-legende: rgba(11, 14, 15, .78);   /* légende posée sur photo           */
+  /* ── Voiles et plaques ────────────────────────────────────────────────
+     LES VALEURS SONT ARBITRÉES, PAS CHOISIES. Le socle §0.23 abroge cinq
+     composants de légende et n'en retient qu'un, avec UNE valeur de plaque :
+     « plaque --plaque-legende rgba(11,14,15,.82), texte --blanc-50 plein.
+     Mesures dans le pire cas, image entièrement blanche sous la plaque :
+     10,64 avec --blanc-50 ». La feuille portait .78, qui n'est pas la
+     valeur de la plaque mais celle à laquelle le chapitre 07 mesure le
+     texte NÉON (7,14:1) — deux mesures d'une même table, dont une seule
+     est le token. .82 est rétabli.                                       */
+  --plaque-legende: rgba(11, 14, 15, .82);   /* légende posée sur photo · 10,64:1 */
   --voile-scene:    rgba(11, 14, 15, .55);   /* assombrissement d'une scène       */
+  /* Le dégradé de bas de cadre du § 7.13.2, mesuré 14,81:1 avec --blanc-50.
+     C'est LUI que le § 0.23 suppose sous une signature `.legende--pied` :
+     « le texte restant dans le tiers bas où le voile atteint au moins .88 ».
+     Un dégradé qui monte de .55 à .82 n'y arrive pas ; celui-ci si.         */
+  --scrim-bottom:   linear-gradient(180deg, transparent 38%, rgba(11, 14, 15, .92));
   --voile-lateral:  linear-gradient(90deg, rgba(23, 26, 28, .35), transparent 32%);
   --scrim-verrou:   rgba(42, 47, 50, .82);   /* écran d'un contenu verrouillé     */
+  --scrim-og:       rgba(58, 17, 24, .90);   /* plaque bordeaux, carte OG · 11,44 */
+
+  /* ── Aplats de chargement (LQIP) — 07-imagerie §7.13.5 ────────────────
+     « Placeholder : aplat de couleur pris dans la table LQIP des tokens,
+     pas de flou progressif, pas d'effet de balayage. » Les deux valeurs
+     ci-dessous SONT cette table (bloc Tokens du chapitre 07) : elles ne se
+     recalculent pas depuis les images, elles se lisent. Un aplat ne coûte
+     pas un octet de réseau, ne peut pas se décaler du cadrage, et n'a rien
+     à fondre — la photo se peint par-dessus, et c'est tout.
+
+     À SIGNALER — la moyenne mesurée des dérivées livrées est #A8A8A8 pour
+     le plateau et #989898 pour le narrateur, soit deux crans plus sombres
+     que les jetons. L'écart est celui de la charte, qui aligne ses aplats
+     sur --blanc-200 (surface verrouillée) plutôt que sur la photo ; il est
+     signalé, pas corrigé ici.                                            */
+  --lqip-dec01:     #DCE0E2;   /* plateau principal — zone DEC — 01        */
+  --lqip-nar:       #9EA5A9;   /* narrateur — portrait et plan de face     */
   --hachure-verrou: repeating-linear-gradient(
                       45deg,
                       rgba(23, 26, 28, .06) 0 6px,

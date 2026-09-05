@@ -47,8 +47,18 @@
     background: var(--verre-clair);
     backdrop-filter: none;
   }
-  .enseigne,
-  .halo { box-shadow: var(--halo-neon-doux); }
+
+  /* La règle visait aussi `.enseigne` et `.halo` pour rabattre `--halo-neon`
+     sur `--halo-neon-doux` (§ 0.30). Aucune des deux classes n'existe dans
+     ce dépôt, et `--halo-neon` n'y est employé nulle part : la déclaration
+     ne compensait rien. Elle est retirée plutôt que gardée comme une
+     promesse. Ce qui reste à compenser sous cette préférence, ce sont les
+     voiles en alpha posés sur les photos — ils deviennent opaques, pour la
+     même raison qu'en contraste renforcé. */
+  .legende,
+  .legende--pied,
+  .pl-meta { background: var(--encre-950); }
+  .pl-veil { background: none; }
 }
 
 /* ── Contraste renforcé ────────────────────────────────────────────────────
@@ -59,8 +69,21 @@
   .mat-papier            { background-image: none; }
   :root                  { --bordure: var(--rule-5); }
   .acier                 { --bordure: var(--rule-light-4); }
-  .voile,
-  .scrim                 { background: var(--surface); }
+
+  /* ── LES VOILES POSÉS SUR LES PHOTOS DEVIENNENT OPAQUES ────────────────
+     La règle visait `.voile` et `.scrim`. Ces deux classes n'existent nulle
+     part dans le dépôt : la compensation ne s'appliquait à rien, et qui
+     demande du contraste renforcé continuait de lire du texte blanc sur une
+     photo à travers un voile en alpha. Les surfaces réellement concernées
+     sont les trois qui écrivent sur une image — la plaque de légende, sa
+     variante en pied, et le titre du lecteur vidéo. Elles passent à un fond
+     PLEIN : le § 0.31 vise 1.4.6 (contraste renforcé, 7:1), et un aplat
+     `--encre-950` sous `--blanc-50` donne 16,0:1 quelle que soit la photo.
+     Le voile du lecteur devient alors inutile et n'assombrit plus rien. */
+  .legende,
+  .legende--pied,
+  .pl-meta               { background: var(--encre-950); }
+  .pl-veil               { background: none; }
 }
 
 /* ── Couleurs forcées ─────────────────────────────────────────────────────
@@ -74,6 +97,24 @@
    écrits en toutes lettres partout dans le système, jamais suggérés par
    une seule couleur.                                                    */
 @media (forced-colors: active) {
+
+  /* ── LE TEXTE POSÉ SUR UNE PHOTO EST LE SEUL À N'AVOIR AUCUN FOND ──────
+     En couleurs forcées, le système impose sa paire fond/texte à chaque
+     boîte — mais une PHOTO n'est pas une couleur : elle reste peinte. Les
+     trois surfaces qui écrivent par-dessus une image tenaient leur
+     lisibilité d'un voile en alpha ou d'un dégradé, deux choses que le mode
+     forcé n'honore pas. Le texte se retrouvait nu sur l'image, jusqu'à
+     1,00:1 sur un pixel clair.
+
+     La règle leur rend un fond OPAQUE du système et un contour, pour que la
+     plaque se voie comme une plaque et non comme du texte flottant. Le
+     voile du lecteur, lui, ne sert plus à rien une fois la plaque opaque :
+     il ne fait plus qu'assombrir l'affiche, on le retire.                 */
+  .legende,
+  .pl-meta               { background: Canvas; color: CanvasText;
+                           border: 1px solid CanvasText;
+                           forced-color-adjust: none; }
+  .pl-veil               { display: none; }
 
   .etat,
   .badge,

@@ -26,6 +26,8 @@
 // espace ordinaire : le contrôle avant publication du §4.7 les vérifie.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { chemin, narrateurPortrait, plateauLarge, secours } from "./visuels";
+
 /* ═══════════════════════ 0 · TYPES PARTAGÉS ═════════════════════════════ */
 
 /** Un lien de navigation interne. */
@@ -970,13 +972,37 @@ export const accueil: Accueil = {
 
 /* ── Les photos, et l’interrupteur qui décide de leur publication ────────── */
 
-/** Photo du plateau pour le hero (A1.2). null = panneau sans photo.
- *  La validation juridique de l’enseigne du décor n’est pas rendue
- *  (07-imagerie.md §7.14) : tant qu’elle ne l’est pas, on ne publie pas la photo. */
-export const heroPhoto: Photo | null = null;
+/**
+ * Photo du plateau pour le hero (A1.2). `null` = panneau sans photo.
+ *
+ * L’auteur a tranché : la réserve juridique de 07-imagerie §7.14 lui
+ * appartient, il l’a levée en connaissance de cause (voir l’en-tête de
+ * `visuels.ts`). L’interrupteur reste un interrupteur — le type est toujours
+ * `Photo | null`, et remettre `null` ici suffit à dépublier les deux images
+ * sans toucher à une seule page : l’accueil retombe sur `PanneauMatiere`,
+ * `/formation` retire sa colonne d’image.
+ *
+ * Ce que porte `Photo`, et ce qu’il ne porte pas : le couple `src`/`alt` est
+ * le REPLI, celui que reçoit un navigateur sans `srcset`. Les dérivées, les
+ * encodages et l’aplat de chargement ne sont PAS recopiés ici — ils vivent dans
+ * `visuels.ts`, seule source autorisée, et l’accueil les lit là-bas pour
+ * composer son `<picture>`. Aucun chemin n’est écrit à la main, des deux
+ * côtés : `chemin()` et `repli()` les construisent.
+ */
+export const heroPhoto: Photo | null = {
+  src: chemin(plateauLarge, secours(plateauLarge), "jpg"),
+  alt: plateauLarge.alt,
+};
 
-/** Portrait du narrateur. Même réserve que heroPhoto. */
-export const portraitPhoto: Photo | null = null;
+/**
+ * Portrait du narrateur. Même interrupteur, même réserve levée.
+ * Le texte de remplacement vient de `visuels.ts` et n’est jamais réécrit :
+ * §0.38 laisse le statut du narrateur ouvert, donc l’alt ne nomme personne.
+ */
+export const portraitPhoto: Photo | null = {
+  src: chemin(narrateurPortrait, secours(narrateurPortrait), "jpg"),
+  alt: narrateurPortrait.alt,
+};
 
 /* ═══════════════════════ 10 · ME JOINDRE ════════════════════════════════ */
 
@@ -1210,6 +1236,10 @@ export const CONTRAT_OUVERT: ChampOuvert[] = [
   { champ: "kit.outils[].url", motif: "Adresses affiliées exactes, à fournir par LHM Studio." },
   { champ: "contact.email", motif: "Adresse de contact publique, à fournir." },
   { champ: "legal.pages.*", motif: "Faits d’entreprise et rédaction juridique, à fournir par LHM Studio." },
-  { champ: "heroPhoto", motif: "Photo du plateau. Publication suspendue à la validation juridique du décor." },
-  { champ: "portraitPhoto", motif: "Portrait du narrateur. Même réserve que la photo du plateau." },
 ];
+
+/* `heroPhoto` et `portraitPhoto` ne figurent plus dans ce registre : l’auteur
+   a tranché, les deux visuels sont publiés et déclarés dans `visuels.ts`. Le
+   registre liste ce qui MANQUE, pas ce qui est révocable — et la révocation
+   reste possible d’un mot (remettre les deux constantes à `null`), ce que la
+   réserve de 07-imagerie §7.14 exige et que le typage `Photo | null` garantit. */

@@ -11,6 +11,23 @@ import Marque from "../brand/Marque";
 
    ── CE QUE LE BALISAGE DOIT PORTER, ET POURQUOI ──────────────────────────
 
+   ── LES DEUX POINTS DE REPÈRE ─────────────────────────────────────────────
+
+   Le chapitre 08 B-01 décrit l'anatomie sans ambiguïté :
+   `header.sitenav > .wrap > .brand + nav.links + .actions + .burger`, et son
+   volet Accessibilité la répète : « `<header>` + `<nav
+   aria-label="Navigation principale">` ».
+
+   La racine était un `<nav>` qui enveloppait la marque ET le bouton de menu :
+   le site n'avait donc aucun point de repère `banner`, et le point de repère
+   `navigation` englobait des éléments qui n'en sont pas. La racine passe en
+   `<header>` (elle est fille directe de la coquille, donc bien un `banner`),
+   et c'est le GROUPE DE LIENS qui porte `<nav aria-label>`.
+
+   Rien n'est accroché à un nom d'élément dans la feuille de styles : `.sitenav`,
+   `.sitenav__in`, `.sitenav__l` sont toutes des classes, et `.sitenav ul a`
+   n'existe pas. Le changement d'élément est donc invisible au rendu.
+
    `class="sitenav acier mat-acier"` — les trois, et dans cet ordre
    (30-composants.css, « Composition : ce que le balisage doit porter ») :
 
@@ -47,6 +64,30 @@ import Marque from "../brand/Marque";
    `NavLink` : il ne doit pas prendre l'état courant, sans quoi la règle
    d'état écraserait son fond d'accent. C'est exactement ce que faisait le
    script de la maquette, qui excluait `.sitenav__cta` de sa boucle.
+
+   ── LE MENU DÉROULANT ET SON BOUTON ───────────────────────────────────────
+
+   Sous 980 px (`paillasse`, la seule valeur d'arrêt admise ici), le CSS
+   masque `.sitenav__l` et affiche `.sitenav__burger`. Le balisage doit donc
+   tenir trois choses, et il les tient :
+
+     · `aria-expanded` suit l'état réel, à toute largeur. Au-dessus de
+       980 px le bouton est en `display:none` : il sort de l'ordre de
+       tabulation et n'est pas restitué, la valeur qu'il porte alors est
+       sans conséquence ;
+     · `aria-controls` désigne le groupe de liens par un identifiant PROPRE
+       au composant. L'ancien `id="menu"` était un mot générique posé dans
+       l'espace de noms global du document — `menu-principal` ne peut plus
+       entrer en collision avec l'ancre d'une page ;
+     · le groupe fermé est en `display:none`, jamais seulement masqué à
+       l'œil : ses liens sortent réellement de l'ordre de tabulation, sans
+       quoi la tabulation traverserait un menu invisible.
+
+   LE BOUTON « REJOINDRE » vit DANS le groupe de liens, et pas à côté : c'est
+   `.sitenav__l a.sitenav__cta` qui l'habille dans `30-composants.css`, et
+   l'en sortir le déshabillerait. Il reste donc atteignable à toute largeur —
+   directement au-dessus de 980 px, en un appui sur « Menu » en dessous, et
+   toujours par la même touche de tabulation que les autres liens.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** Les sept liens de page. `fin` marque la racine, qui ne doit pas rester
@@ -88,7 +129,7 @@ export default function Navbar() {
   }, [ouvert, fermer]);
 
   return (
-    <nav className="sitenav acier mat-acier" aria-label="Navigation principale">
+    <header className="sitenav acier mat-acier">
       <div className="sitenav__in wrap">
         <Marque />
 
@@ -100,13 +141,17 @@ export default function Navbar() {
           className="sitenav__burger"
           type="button"
           aria-expanded={ouvert}
-          aria-controls="menu"
+          aria-controls="menu-principal"
           onClick={() => setOuvert((v) => !v)}
         >
           Menu
         </button>
 
-        <div className={ouvert ? "sitenav__l ouvert" : "sitenav__l"} id="menu">
+        <nav
+          className={ouvert ? "sitenav__l ouvert" : "sitenav__l"}
+          id="menu-principal"
+          aria-label="Navigation principale"
+        >
           {LIENS.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.fin}>
               {l.libelle}
@@ -115,8 +160,8 @@ export default function Navbar() {
           <Link className="sitenav__cta" to="/laboratoire/paliers">
             Rejoindre
           </Link>
-        </div>
+        </nav>
       </div>
-    </nav>
+    </header>
   );
 }

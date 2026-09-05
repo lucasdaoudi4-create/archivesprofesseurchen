@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import {
   blocReseaux,
   meta,
@@ -8,8 +8,9 @@ import {
   routes,
   site,
 } from "../data/site";
-import SocialIcon from "../components/ui/SocialIcon";
+import { LogoReseau } from "../components/ui/Icones";
 import FluxYouTube from "../components/reseaux/FluxYouTube";
+import { useRevelation } from "../hooks/useRevelation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LES RÉSEAUX — route `/reseaux` · gabarit « grille de cartes » (§ 0.27)
@@ -51,12 +52,18 @@ import FluxYouTube from "../components/reseaux/FluxYouTube";
    tiers « au style maison » : silhouette pleine, prise au kit de son
    propriétaire, normalisée en `viewBox 0 0 24 24`. La maquette, elle, les
    avait retracés au trait 1,5 des Archives — c'est la déformation de
-   marque que le § 6.4 nomme. `SocialIcon` porte les silhouettes pleines :
-   il est conservé, et reçoit `.ico .ico--marque .ico--32 .ico--action`,
-   qui neutralise le trait de `.ico` et lit `--accent`. `31-icones.css`
-   ayant supprimé le `.reseau svg{width:26px}` de la maquette, c'est bien
-   la page qui donne à l'icône sa taille servie — 32 px, un pas de la liste
-   du § 0.13, là où 26 n'en est pas un.
+   marque que le § 6.4 nomme.
+
+   Cette page servait pour cela un SECOND jeu de tracés, `SocialIcon`,
+   distinct de celui de l'accueil et teinté en accent : les quatre mêmes
+   réseaux avaient donc deux visages sur le même site. Le second jeu est
+   supprimé. `LogoReseau`, du jeu partagé `components/ui/Icones`, porte
+   désormais les marques officielles ici comme sur l'accueil, et sa couleur
+   est HÉRITÉE — le § 6.4 ne teinte pas une marque tierce.
+
+   `31-icones.css` ayant supprimé le `.reseau svg{width:26px}` de la
+   maquette, c'est bien le composant qui donne à l'icône sa taille servie —
+   32 px, un pas de la liste du § 0.13, là où 26 n'en est pas un.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const FICHE = meta.reseaux;
@@ -103,7 +110,16 @@ function poserCanonique(href: string) {
 }
 
 export default function Socials() {
-  const racine = useRef<HTMLDivElement>(null);
+  /* ── La révélation au défilement — `src/hooks/useRevelation.ts` ─────────
+     Cette page réimplémentait l'observateur en ligne et posait `.rv` dans
+     son JSX : elle masquait donc AVANT de savoir si quelqu'un viendrait
+     démasquer, ce que `04-tokens-motion.css` interdit en toutes lettres.
+     Les blocs portent `data-rv`, le crochet partagé fait le reste — seuil,
+     désabonnement, repli sans observateur, reprise au remontage.
+
+     Rien ici pour `prefers-reduced-motion` : `99-preferences.css` remet
+     déjà `.rv` à `opacity:1`, sans passer par le JavaScript.           */
+  useRevelation();
 
   /* ── Le titre et les métadonnées, § 0.29 ────────────────────────────────
      Le § 0.28 exige que le titre soit posé « par la page, EN AMONT » :
@@ -128,45 +144,12 @@ export default function Socials() {
     return () => script.remove();
   }, []);
 
-  /* ── La révélation au défilement — `.rv` / `.rv.on` ─────────────────────
-     `04-tokens-motion.css` masque `.rv` et ne le rend qu'avec `.on`. Sans
-     observateur, une page entière resterait invisible. L'observation
-     émettant une première fois pour TOUT ce qu'elle observe, ce qui est
-     déjà dans le cadre à l'arrivée de route reçoit `.on` immédiatement :
-     aucun traitement séparé n'est nécessaire.
-
-     Rien ici pour `prefers-reduced-motion` : `99-preferences.css` remet
-     déjà `.rv` à `opacity:1`, sans passer par le JavaScript. */
-  useEffect(() => {
-    const cibles = racine.current?.querySelectorAll<HTMLElement>(".rv");
-    if (!cibles) return;
-
-    if (!("IntersectionObserver" in window)) {
-      cibles.forEach((cible) => cible.classList.add("on"));
-      return;
-    }
-
-    const observateur = new IntersectionObserver(
-      (entrees) => {
-        entrees.forEach((entree) => {
-          if (!entree.isIntersecting) return;
-          entree.target.classList.add("on");
-          observateur.unobserve(entree.target);
-        });
-      },
-      { threshold: 0.12 },
-    );
-
-    cibles.forEach((cible) => observateur.observe(cible));
-    return () => observateur.disconnect();
-  }, []);
-
   return (
-    <div ref={racine}>
+    <div>
       {/* ═══════════ OÙ L'ON PUBLIE ═══════════ */}
       <section className="bande" aria-labelledby="t-reseaux">
         <div className="wrap">
-          <div className="tete rv">
+          <div className="tete" data-rv>
             <p className="eyebrow">{FICHE.titre}</p>
             <h1 className="h2" id="t-reseaux">
               {blocReseaux.titre}
@@ -174,7 +157,7 @@ export default function Socials() {
             <p className="lede">{blocReseaux.lede}</p>
           </div>
 
-          <div className="reseaux rv">
+          <div className="reseaux" data-rv>
             {reseauxOrdre.map((cle) => {
               const compte = reseaux[cle];
               return (
@@ -185,7 +168,7 @@ export default function Socials() {
                   target="_blank"
                   rel="noopener"
                 >
-                  <SocialIcon type={cle} className="ico ico--marque ico--32 ico--action" />
+                  <LogoReseau reseau={cle} />
                   <div>
                     <div className="reseau__n">{compte.label}</div>
                     <div className="reseau__h">{compte.handle}</div>
@@ -206,14 +189,14 @@ export default function Socials() {
       {reseaux.youtube.channelId && (
         <section className="bande bande--teinte" aria-labelledby="t-fil">
           <div className="wrap">
-            <div className="tete rv">
+            <div className="tete" data-rv>
               <p className="eyebrow">{reseaux.youtube.label}</p>
               <h2 className="h2" id="t-fil">
                 {reseaux.youtube.description}
               </h2>
             </div>
 
-            <div className="rv">
+            <div data-rv>
               <FluxYouTube />
             </div>
           </div>

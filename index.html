@@ -34,11 +34,35 @@
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:site_name" content="Les Archives du Professeur Chen" />
     <meta property="og:url" content="https://archivesprofesseurchen.com/" />
-    <!-- À REMPLACER AU LOT L2 — § 0.29 impose un JPEG 1200×630 nommé
-         arc-og-accueil-1200x630-vNN.jpg. Il n'existe pas encore ; la
-         référence reste sur le favicon pour ne pas pointer dans le vide. -->
-    <meta property="og:image" content="https://archivesprofesseurchen.com/favicon.svg" />
+    <!-- LA CARTE DE PARTAGE — § 0.29 et 07-imagerie § 7.10.1 (`ARC · FMT — 08`).
+         « og:image : arc-og-<page>-1200x630-vNN.jpg, JPEG obligatoire » ; et
+         le § 7.10.1 dit pourquoi : « ARC · FMT — 08 est en JPEG, pas en AVIF
+         ni en WebP : beaucoup d'aspirateurs de métadonnées sociales ne
+         décodent pas ces formats et n'afficheraient aucune vignette ».
+         La référence pointait sur `favicon.svg` — un SVG, qu'AUCUN des
+         aspirateurs de X, Facebook, LinkedIn, Discord, WhatsApp et Slack ne
+         rend : tout lien partagé du site sortait sans vignette.
+
+         ELLE EST DÉCLARÉE ICI, ET NON PAR PAGE, PARCE QUE LES ASPIRATEURS
+         N'EXÉCUTENT PAS DE JAVASCRIPT. `useMetaPage` pose bien un `og:title`
+         et un `og:description` par route, mais il les pose APRÈS le montage
+         de React : un aspirateur ne voit jamais que ce fichier. Servir une
+         carte par page demanderait un pré-rendu, qui n'est pas une décision
+         de recette. Une carte, celle de l'accueil, pour toutes les routes.
+
+         Composition — § 7.10.3 : « sur les cartes OG, le texte est toujours
+         composé en HTML/CSS ou en design par-dessus l'image ». Le nom du
+         site n'y est PAS recomposé : il est dans la photo, en néon, et A1.2
+         n'admet qu'une enseigne par écran. La plaque porte l'offre, sur
+         `--scrim-og rgba(58,17,24,.90)` mesuré 11,44:1 par le chapitre 07.
+         Recette : `outils/carte-og.mjs`. Poids 147 ko, plafond 300 ko. -->
+    <meta property="og:image" content="https://archivesprofesseurchen.com/img/arc-og-accueil-1200x630-v01.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Le narrateur, de dos, travaille à la paillasse ovale du laboratoire, sous l'enseigne au néon des Archives." />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://archivesprofesseurchen.com/img/arc-og-accueil-1200x630-v01.jpg" />
 
     <!-- Fontes auto-hébergées — plus aucun appel à googleapis.com ni à
          gstatic.com (§ 0.32). Les @font-face sont dans

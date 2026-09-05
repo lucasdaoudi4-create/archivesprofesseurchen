@@ -26,9 +26,25 @@ import { planAuSol } from "../../data/site";
       n'aurait rien à y faire.
 
    3. LE NOM DE LA PIÈCE VIT DANS L'ÉTIQUETTE, LA DESTINATION DANS LE DESSIN.
-      `aria-label="{pièce} — {destination}"`, exactement comme l'exige A1.3 :
-      c'est le seul endroit où « Le plateau principal » est dit, et le dessin
-      n'affiche, lui, que « La formation ».
+      `aria-label="{rang} — {pièce} → {destination}"`, dans l'ordre exact du
+      tableau d'A1.3 : c'est le seul endroit où « Le plateau principal » est
+      dit, et le dessin n'affiche, lui, que « 01 » et « La formation ».
+
+      LE RANG EN FAIT PARTIE, et ce n'est pas un ornement. Le disque affiche
+      « 01 » ; sans lui dans l'étiquette, le nom accessible ne contiendrait
+      pas tout le texte visible du lien — SC 2.5.3 « Étiquette dans le nom ».
+      Les deux libellés visibles du lien, « 01 » et « La formation », sont
+      donc l'un et l'autre repris tels quels, et dans leur ordre de lecture.
+
+   3 bis. UN LIEN DE SVG DOIT ÊTRE DIT LIEN, ET ATTEIGNABLE AU CLAVIER.
+      `<a href>` dans un `<svg>` n'est pas exposé comme lien par toutes les
+      paires navigateur/lecteur d'écran, et n'entre pas partout dans l'ordre
+      de tabulation — c'est le seul endroit du site où la question se pose,
+      puisque c'est le seul lien tracé. `role="link"` et `tabindex="0"` sont
+      donc écrits À LA MAIN sur les quatre. Sur un `<a href>` du HTML ils
+      seraient redondants ; ici ils sont ce qui garantit les quatre arrêts
+      de tabulation et les quatre entrées du relevé de liens. Le dessin ne
+      doit JAMAIS pouvoir se réduire à un tracé décoré.
 
    4. LE DESSIN RESTE ENTIER EN REPLI. À 979,98 px `.plan` passe en une
       colonne et la légende reprend toute la largeur — le plan ne se dégrade
@@ -105,7 +121,9 @@ export default function PlanAuSol() {
               <a
                 key={zone.rang}
                 href={zone.ancre}
-                aria-label={`${zone.piece} — ${zone.libelle}`}
+                role="link"
+                tabIndex={0}
+                aria-label={`${zone.rang} — ${zone.piece} → ${zone.libelle}`}
               >
                 {geo.forme}
                 <circle className="plan__pt" cx={geo.pt.cx} cy={geo.pt.cy} r="10" />

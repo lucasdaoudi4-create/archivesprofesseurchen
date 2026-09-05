@@ -17,13 +17,21 @@
    composant agnostique de son fond : posé dans un bloc `.acier`, il
    bascule seul, sans une seule règle descendante (socle § 0.11).
 
-   Quatre valeurs seulement échappent au rôle, chacune sur arbitrage
+   Trois FAMILLES de valeurs échappent au rôle, chacune sur arbitrage
    nommé du socle. Elles sont marquées « § » à leur ligne :
-     · `--encre-950` sur `.hero__v` / `.notice__v` — « la scène »
-       (01-tokens-couleur.css la nomme ainsi ; aucun token sémantique) ;
-     · `--blanc-50`, `--rule-light-3`, `--acier-400` sur `.legende` —
-       la plaque de légende est TOUJOURS sombre, quel que soit le
-       contexte de la page (socle § 0.23, mesure 10,64 pire cas).
+     · `--encre-950` sur `.hero__v` / `.notice__v` / `.pl-facade` —
+       « la scène » (01-tokens-couleur.css la nomme ainsi ; aucun token
+       sémantique) ;
+     · `--blanc-50`, `--rule-light-3`, `--acier-400` sur `.legende`, et
+       les mêmes sur la façade du lecteur vidéo (`.pl-play`, `.pl-meta`,
+       `.pl-consent`) — la plaque de légende et la scène vidéo sont
+       TOUJOURS sombres, quel que soit le contexte de la page (socle
+       § 0.23, mesure 10,64 pire cas) ;
+     · `--neon`, `--neon-clair`, `--neon-braise`, `--encre-900` sur
+       `.btn--acier` — la variante que le socle § 0.11 nomme pour un
+       bouton posé sur acier alors que son parent est clair. Elle
+       reproduit à l'identique les rôles que `.acier` déclare dans
+       01-tokens-couleur.css, ce qui la rend idempotente en contexte.
 
    ── Ce que ce fichier NE contient PAS ───────────────────────────────────
      · aucune icône, aucun `svg { width }` — chapitre 06, `31-icones.css`.
@@ -53,6 +61,10 @@
        .plan-bande     →  class="plan-bande acier mat-acier"
        .hero__g        →  class="hero__g mat-panneau pilier-email"
        .notice__g      →  class="notice__g pilier-email"
+       .invitation     →  class="invitation acier mat-acier"
+       .syspage.e500   →  class="syspage e500 acier mat-acier"
+       .syspage.maint  →  class="syspage maint acier mat-acier"
+       .sp-panel       →  class="sp-panel pilier-email"
 
    Et cinq composants délèguent leur type aux styles nommés du
    chapitre 04, plutôt que de le réécrire :
@@ -63,17 +75,28 @@
        .notice__code   →  n'existe plus : c'est `class="code-arc"`
        .sitefoot__legal → class="sitefoot__legal legal"
        .atelier        →  class="atelier split"   (grille en 90-utilitaires)
+       .invitation__t  →  class="invitation__t h2"
+       .pl-caption     →  class="pl-caption meta"
+       .copyline__btn  →  class="btn copyline__btn"
+       .lb-act > a     →  class="btn"
+       .syspage h1     →  class="h2"               (B-27 : 28→40px = --fs-h2)
+       .syspage .cat   →  n'existe plus : c'est `class="code-arc"`
+       .sp-panel .emb  →  class="emb emb--52"      (B-27 disait 56px)
+       .pl-transcript  →  class="pl-transcript accordion"
 
    ── Valeurs sans token, assumées et signalées ───────────────────────────
-   Quatre plafonds de largeur n'ont aucun `--w-*` ni `--sp-*` qui les
-   approche ; ils sont écrits en `rem` (§ 0.14, règle 2 : toute distance
-   est en rem) et reportent la valeur exacte de la maquette validée :
-       40rem (640px) hauteur haute de la photo du hero
-       32rem (512px) largeur maximale du plan au sol   — maquette : 520px
-       24rem (384px) portrait de l'atelier en colonne  — maquette : 380px
-       17rem / 14rem  minima de colonne de `.cartes` et `.reseaux`
-   Une proposition d'ouverture de pas `--w-*` intermédiaires est à
-   déposer ; d'ici là ces quatre valeurs sont ici, et nulle part ailleurs.
+   Sept plafonds de largeur n'ont aucun `--w-*`, `--me-*` ni `--sp-*` qui
+   les approche ; ils sont écrits en `rem` (§ 0.14, règle 2 : toute
+   distance est en rem) et reportent la valeur exacte de la charte :
+       40rem    (640px) hauteur haute de la photo du hero
+       32rem    (512px) largeur maximale du plan au sol  — maquette : 520px
+       24rem    (384px) portrait de l'atelier en colonne — maquette : 380px
+       17rem / 14rem     minima de colonne de `.cartes` et `.reseaux`
+       26,25rem (420px) largeur du lecteur vidéo vertical — addendum B-25
+       35rem    (560px) largeur du panneau de page système — addendum B-27
+       16ch              mesure du titre d'invitation      — socle § 0.25
+   Une proposition d'ouverture de pas `--w-*` et `--me-*` intermédiaires
+   est à déposer ; d'ici là ces valeurs sont ici, et nulle part ailleurs.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 
@@ -274,24 +297,102 @@
   padding-inline: calc(var(--pad-5) + var(--trait-pilier)) var(--pad-5);
 }
 
+/* ── LE CADRE PHOTO DE LA SCÈNE ───────────────────────────────────────────
+   DEUX CHEMINS, tous les deux servis, et aucun des deux n'est le repli
+   de l'autre : ou bien `heroPhoto` porte un `<picture>` déclaré dans
+   `src/data/visuels.ts`, ou bien il vaut `null` et `PanneauMatiere`
+   remplit la scène avec les matières du système. La réserve juridique de
+   07-imagerie § 7.14 est révocable à tout instant — elle est rappelée en
+   tête de `visuels.ts` — donc aucune règle d'ici ne suppose que l'image
+   existe, et aucune ne casse quand elle disparaît.
+
+   `--cadrage` est le point d'ancrage du sujet. Il est déclaré UNE fois et
+   lu par l'image, et par elle seule depuis que l'aplat de chargement a
+   remplacé la vignette floutée qui le lisait aussi. La valeur
+   tient compte de ce qu'il y a dans le cadre — et depuis que la dérivée
+   4:3 est recadrée sur l'enseigne au lieu de l'être sur le bord gauche du
+   master (voir `outils/derivees-visuels.mjs`), ce qu'il y a dans le cadre
+   est CENTRÉ : le narrateur au milieu de la paillasse ovale, l'enseigne au
+   néon au-dessus de lui, un pilier d'émail de chaque côté. La valeur est
+   donc celle de la table des points focaux du § 7.13.1 pour
+   `ARC · DEC — 01`, sans amendement local : `50 % 44 %`, « cale l'enseigne
+   néon au tiers haut ». En bande large (16:9, `plateauLarge`), la même
+   scène perd de la hauteur et non de la largeur : le cadrage remonte de
+   deux points, voir le repli de la section 27.
+
+   `--ratio` réserve la place AVANT le décodage, donc supprime le saut de
+   mise en page. Le balisage y passe `ratio(plateauHaut)` — la fonction de
+   `visuels.ts` existe précisément pour cela, et c'est la seule source
+   autorisée : on ne recompose jamais un rapport de forme à la main. Sans
+   elle, `auto` : la scène retombe sur son plancher de hauteur et le
+   comportement d'aujourd'hui ne bouge pas d'un pixel.                   */
 .hero__v {
+  --cadrage: 50% 44%;
+
   position: relative;
   min-inline-size: 0;
   min-block-size: min(72vh, 40rem);
+  aspect-ratio: var(--ratio, auto);
   overflow: hidden;
-  background: var(--encre-950);   /* § — « la scène », sans token sémantique */
+  /* L'aplat de chargement du § 7.13.5, posé par le balisage depuis
+     `visuels.ts` (`--aplat`). Sans photo — `heroPhoto` à `null` — la scène
+     est une composition de matières et reprend le noir de scène. */
+  background: var(--aplat, var(--encre-950));
 }
 
+/* `display: contents` : le `<picture>` sort de la mise en page et c'est
+   l'`<img>` qui reste l'enfant de la scène. Sans cela, la boîte inline du
+   `<picture>` s'intercale et le `block-size: 100%` de l'image ne mesure
+   plus rien — elle retombe à sa hauteur intrinsèque et déborde. */
+.hero__v picture { display: contents; }
+
+/* L'opacité reste à 1 — premier interdit d'A1.2 tenu par une valeur qu'on
+   n'écrit pas : rien ici ne la touche, ni au repos, ni au chargement. */
 .hero__v img {
+  position: relative;
+  z-index: 1;
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
-  object-position: 52% 46%;
+  object-position: var(--cadrage);
 }
 
-.hero__v::after {
+/* ── L'APLAT DE CHARGEMENT ────────────────────────────────────────────────
+   Il n'y a rien ici, et c'est la règle.
+
+   § 7.13.5 : « Placeholder : aplat de couleur pris dans la table LQIP des
+   tokens, pas de flou progressif, pas d'effet de balayage. » Le bloc de
+   jetons du chapitre 07 le redit en une ligne de commentaire à côté de
+   `.fig` : « LQIP : aplat, jamais de flou progressif ».
+
+   La feuille portait jusqu'ici un `::before` qui étirait une vignette
+   floutée de 20 px en data URI, puis la fondait à l'opacité quand la page
+   posait une classe `.chargee`. Trois choses tombent avec elle :
+     · la vignette (≈ 300 octets par visuel dans le bundle JS) ;
+     · le pseudo-élément et sa passe de peinture ;
+     · le crochet React qui écoutait `load` et rattrapait le cas du cache.
+
+   L'aplat est un `background-color` sur le cadre lui-même. La photo se
+   peint par-dessus : il n'y a rien à fondre, donc rien à synchroniser,
+   et aucun chemin où l'amorce resterait posée sur une image déjà peinte.
+
+   ── LE VOILE — deuxième interdit d'A1.2, tenu à la lettre ────────────────
+   `--voile-lateral` est un dégradé de 90° qui s'éteint à 32 % : il ne
+   couvre QUE la lisière intérieure, celle qui touche le panneau clair, et
+   c'est là que vit `.legende--bg`. Les deux tiers droits de la photo — le
+   narrateur, la paillasse, l'enseigne — ne reçoivent rien. Ce voile
+   n'assombrit donc pas la photo pour pouvoir écrire dessus : il raccorde
+   deux surfaces et il porte une plaque de légende, ce qu'A1.2 autorise
+   nommément et exclusivement.
+
+   `:has(img)` : sur le chemin sans photo, la scène est une composition de
+   matières que `PanneauMatiere` pose lui-même, et qui ne porte aucune
+   légende — le composant le dit en tête, et c'est sa troisième règle. Un
+   voile y serait un assombrissement sans objet.                        */
+.hero__v:has(img)::after {
   content: "";
   position: absolute;
+  z-index: 2;
   inset: 0;
   background: var(--voile-lateral);
 }
@@ -356,6 +457,38 @@
 .btn--bloc {
   inline-size: 100%;
   justify-content: center;
+}
+
+/* ── LE BOUTON POSÉ SUR L'ACIER — `.btn--acier` ───────────────────────────
+   Socle § 0.11, quatrième ligne du tableau de renommage : `.on-dark`
+   employée en VARIANTE DE COMPOSANT — « objet posé sur acier alors que
+   son parent est clair » — devient `.btn--acier`. Le § 0.25 l'exige
+   nommément pour le bouton du bandeau d'invitation (section 24).
+
+   Elle ne redéclare RIEN d'autre que les rôles d'accent, et elle les
+   redéclare avec les valeurs exactes que `.acier` leur donne dans
+   `01-tokens-couleur.css`. Ce sont donc cinq pas d'échelle lus dans la
+   couche `composants` : c'est le seul écart de ce fichier hors des quatre
+   déjà déclarés en tête, et il est le prix de la variante que le socle
+   nomme. Marqués « § » ligne à ligne, comme les autres.
+
+   Conséquence utile, et c'est la raison de cette forme : la variante est
+   IDEMPOTENTE. Posée dans une section `.acier`, elle réécrit ce que le
+   contexte a déjà écrit, et ne change donc rien ; posée sur une plaque
+   d'acier dont le parent est resté clair, elle donne au bouton les
+   couleurs de l'acier sans que la page ait à basculer un contexte entier.
+   Un même balisage sert les deux cas — ce que ne permettrait pas un
+   `.btn` qui écrirait `background` et `color` en dur.
+
+   Mesures reportées de `.acier` : néon sur acier-900 = 9,72 ; encre-900
+   sur néon, en sens inverse, 9,72 également. `--focus` suit, sans quoi
+   l'anneau de focus resterait bordeaux, où il vaut 1,62 (§ 0.15).      */
+.btn--acier {
+  --accent:        var(--neon);         /* § — valeurs de `.acier` */
+  --accent-survol: var(--neon-clair);   /* § */
+  --accent-actif:  var(--neon-braise);  /* § */
+  --accent-texte:  var(--encre-900);    /* § */
+  --focus:         var(--neon);         /* § */
 }
 
 .btn[disabled],
@@ -445,6 +578,44 @@
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   6 bis · LA MENTION QUI EST UN LIEN — `a.meta`
+
+   `.meta` est un RÔLE DE TEXTE du chapitre 04 (02-tokens-typo.css) : une
+   étiquette, une source, un relevé. Sa boîte de ligne vaut
+   `--fs-mono-m` × `--lh-mono` = 11,5 × 1,80 = 20,7 px, et c'est la bonne
+   valeur — tant que la mention est un `<span>`, un `<p>` ou un `<time>`.
+
+   Portée par un `<a>`, la même déclaration donne un CONTRÔLE de 21 px de
+   haut, sous le minimum 24 × 24 de SC 2.5.8. Mesuré au navigateur, au
+   poste de travail comme sur téléphone, sur les trois liens « Comparer
+   les trois paliers » du pied des cartes de palier de l'accueil — les
+   trois seules occurrences de `.meta` sur un `<a>` dans le site.
+
+   Ce fichier ne REDÉCLARE pas `.meta` : il ne touche à aucune de ses cinq
+   propriétés typographiques, ni à son soulignement, qui reste celui du
+   navigateur (§ 0.22 : le lien est souligné, donc il n'a pas besoin d'un
+   état de survol hors couleur). Il n'ajoute que la géométrie de cible que
+   la forme `<a>` exige — exactement ce que la section 7 fait déjà pour
+   `a.legende` / `button.legende`.
+
+   Le calcul est celui de `.sitefoot ul a` (addendum 08 § 8.8.2), repris
+   au caractère près pour que le système n'ait qu'une seule arithmétique
+   de cible : 12 + 12 de rembourrage + 21 de ligne = 45 px ≥ 44.
+   La hauteur reste RÉSULTANTE (exception 3 de la trame de 4) : elle n'est
+   pas écrite, elle est obtenue.
+
+   `display: block` et non `inline-flex` : le rembourrage doit couvrir
+   toute la piste, et le `text-center` que la page pose doit continuer de
+   centrer le libellé — ce qu'un conteneur de flex ne ferait plus.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+a.meta {
+  display: block;
+  padding-block: var(--sp-3);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
    7 · LÉGENDE SUR IMAGE — `.legende` · ARC · CMP — 45 · socle § 0.23
 
    Un seul composant remplace les cinq plaques concurrentes du système —
@@ -487,10 +658,17 @@
 .legende--bg { inset-inline-start: var(--sp-4); inset-block-end:   var(--sp-4); }
 .legende--bd { inset-inline-end:   var(--sp-4); inset-block-end:   var(--sp-4); }
 
-/* La signature pleine largeur. Le dégradé va de `--voile-scene` (.55) à
-   `--plaque-legende` (.78) : au niveau du texte, qui vit dans le tiers
-   bas, l'opacité dépasse .66, soit 5,87 dans le pire cas contre une
-   image blanche. Un `--voile-scene` plat n'y arriverait pas (3,46). */
+/* La signature pleine largeur. Le § 0.23 pose la condition en toutes
+   lettres : « `--pied` signature pleine largeur sur `--voile-scene`, le
+   texte restant dans le tiers bas où le voile atteint AU MOINS .88 (13,96
+   avec `--blanc-50`) ». La feuille montait de .55 à .82 : sous le texte,
+   l'opacité plafonnait entre .65 et .72, soit 5,7:1 au lieu des 13,96 que
+   son propre commentaire annonçait — un ratio qui passe AA, mais qui n'est
+   pas celui que la charte a arbitré, et que le fichier affirmait quand même.
+
+   `--scrim-bottom` est le dégradé que le § 7.13.2 mesure pour ce cas exact :
+   `transparent 38%` puis `rgba(11,14,15,.92)`. Sous le texte, il dépasse .88
+   partout, et la condition du § 0.23 est tenue par construction. */
 .legende--pied {
   inset-inline: 0;
   inset-block-end: 0;
@@ -498,7 +676,7 @@
   padding: var(--sp-4) var(--sp-5);
   border: 0;
   border-radius: 0;
-  background: linear-gradient(var(--voile-scene), var(--plaque-legende));
+  background: var(--scrim-bottom);
   white-space: normal;
 }
 
@@ -543,9 +721,16 @@ button.legende {
    local : les deux déclarations étaient identiques au caractère près.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* `min(100%, 17rem)` et non `17rem` seul : c'est le motif que `.paliers`
+   (32-membre.css) documente comme obligatoire. Sous 272 px de piste — une
+   poche de 320 px moins la gouttière de `.wrap`, moins le rembourrage d'un
+   bloc — une piste bornée à 17rem ne peut plus se réduire, et la grille
+   déborde de la page au lieu de retomber sur une colonne. `min()` rend le
+   minimum de la piste égal à la piste elle-même dès qu'elle est plus
+   étroite que 17rem. */
 .cartes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
   gap: var(--sp-4);
 }
 
@@ -650,13 +835,24 @@ button.legende {
 .notice__v {
   position: relative;
   min-block-size: var(--sp-14);
-  background: var(--encre-950);   /* § — « la scène », sans token sémantique */
+  /* Même aplat de chargement que le héros (§ 7.13.5) : la scène est la
+     même, elle n'a pas deux couleurs d'attente. Sans photo, on retombe sur
+     le noir de scène que `PanneauMatiere` suppose. */
+  background: var(--aplat, var(--encre-950));
 }
 
 .notice__v img {
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+  /* § 7.13.1 — le point focal est fixé par ZONE, et la notice ne sert pas la
+     même zone sur les deux pages qui l'emploient : l'accueil y met le
+     plateau (`ARC · DEC — 01`, `50% 44%`), `/formation` y met le narrateur
+     (`30% 34%`, « cale le visage, pas le buste »). Le défaut est celui de
+     l'accueil ; `/formation` redéfinit `--cadrage` sur son propre cadre.
+     Sans cette valeur, le centrage par défaut décapitait l'enseigne néon de
+     la planche dès que la boîte se resserrait en 16:9 sur téléphone. */
+  object-position: var(--cadrage, 50% 44%);
 }
 
 
@@ -815,9 +1011,11 @@ button.legende {
    la transition sans jamais déclarer l'état : il est posé ici.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Même motif que `.cartes` et `.paliers` : `min()` avant le minimum de
+   piste, sans quoi la grille déborde sous 224 px de piste. */
 .reseaux {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: var(--sp-4);
 }
 
@@ -941,7 +1139,40 @@ button.legende {
   text-transform: uppercase;
 }
 
+/* L'adresse est servie sous DEUX formes, et les deux passent ici :
+   un `<code>` sur l'accueil, un `<input readonly size={31}>` sur la fiche
+   longue. Les deux sont des enfants de flex, donc `min-width: auto` par
+   défaut : leur taille minimale est leur taille INTRINSÈQUE, et une
+   adresse de domaine n'a aucun point de coupure.
+
+   Mesure du débordement corrigé ici — `play.archivesprofesseurchen.com`,
+   31 caractères, Space Mono à `--fs-corps` (17 px), chasse 0,6 em plus
+   `--ls-xxs` 0,04 em, soit 0,64 em par caractère :
+       31 × 0,64 × 17          = 337 px de texte
+       + 2 × `--sp-3`          =  24 px de rembourrage
+       + 2 × `--trait-filet`   =   2 px de filet
+       = 363 px incompressibles
+   Sur une poche de 320 px, `.wrap` vaut 92vw = 294 px et `.serveur`
+   en retire 2 × `--sp-5` : il reste 254 px de piste. La fiche poussait
+   donc la page de ~109 px, et la barre de défilement horizontale
+   apparaissait sur /minecraft ET sur l'accueil, à toute largeur
+   jusqu'à ~415 px (au-delà, 0,92 V − 40 ≥ 363).
+
+   Trois propriétés, et pas une de plus :
+     · `min-inline-size: 0` lève le plancher intrinsèque de l'enfant de
+       flex — c'est LUI qui bloquait le rétrécissement, `max-inline-size`
+       seul n'y suffit pas ;
+     · `max-inline-size: 100%` borne la forme `<input>`, dont l'attribut
+       `size` fixe une largeur préférée de 31 caractères ; le texte y
+       défile dans le champ, et il reste sélectionnable d'un clic
+       (`onFocus` → `select()`), donc recopiable en entier ;
+     · `overflow-wrap: anywhere` donne à la forme `<code>` un point de
+       coupure partout. C'est `anywhere` et non `break-word` : seul le
+       premier abaisse aussi la taille MIN-CONTENT de la boîte, ce qui
+       est précisément ce que la piste de flex mesure.               */
 .serveur__adresse {
+  min-inline-size: 0;
+  max-inline-size: 100%;
   padding: var(--sp-2) var(--sp-3);
   border: var(--trait-filet) solid var(--bordure-forte);
   border-radius: var(--r-2);
@@ -950,6 +1181,7 @@ button.legende {
   font-family: var(--f-mono);
   font-size: var(--fs-corps);
   letter-spacing: var(--ls-xxs);
+  overflow-wrap: anywhere;
 }
 
 
@@ -973,12 +1205,21 @@ button.legende {
   overflow: hidden;
   border: var(--trait-filet) solid var(--bordure);
   border-radius: var(--r-3);
+  /* L'aplat du narrateur (§ 7.13.5). Il tient aussi la boîte avant que le
+     ratio de l'image ne soit connu : le cadre n'est jamais un trou blanc
+     sur la surface claire. */
+  background: var(--aplat, transparent);
 }
 
 .atelier__p img {
   inline-size: 100%;
   aspect-ratio: var(--ar-portrait);
   object-fit: cover;
+  /* Le portrait est carré dans un cadre carré : `cover` n'a rien à couper
+     aujourd'hui. Le point focal du narrateur est posé quand même — § 7.13.1,
+     « jamais laissé au défaut » — pour que le jour où le cadre change de
+     rapport, ce soit le visage qui reste et non le buste. */
+  object-position: var(--cadrage, 30% 34%);
 }
 
 
@@ -1015,33 +1256,111 @@ button.legende {
   align-items: center;
 }
 
+/* ── LA COMPENSATION D'ÉCHELLE — pourquoi le plan ne lit pas un pas de
+      l'échelle typographique directement ────────────────────────────────
+   Le relevé est tracé dans un `viewBox 0 0 460 156`. Tout ce que le CSS
+   écrit à l'intérieur est en UNITÉS DE TRACÉ, que le navigateur multiplie
+   ensuite par l'échelle du viewBox :
+
+       échelle = largeur rendue ÷ 460
+       largeur rendue = min(100%, 32rem) = min(0,92 V, 512 px)
+
+   `--fs-mono-xs` (10) valait donc 10 unités de tracé, et non 10 px :
+
+       V = 320 px   →  W = 294 px  →  échelle 0,640  →  6,4 px rendus
+       V = 420 px   →  W = 386 px  →  échelle 0,840  →  8,4 px rendus
+       V ≥ 557 px   →  W = 512 px  →  échelle 1,113  → 11,1 px rendus
+
+   Six virgule quatre pixels : c'est la mesure du défaut, et elle tient
+   à toutes les largeurs, y compris au poste de travail où le libellé
+   plafonnait encore sous 12 px.
+
+   La correction lit `--fs-mono-l` (12 — le plus petit pas de l'échelle
+   qui atteigne le plancher de lisibilité) et le multiplie par l'inverse
+   de l'échelle. `--plan-compense` EST cet inverse, borné aux paliers de
+   la charte — 460 ÷ 512 = 0,898 au-dessus de la planche, 460 ÷ 386 =
+   1,190 en dessous :
+
+       ≥ 620 px   compense 0,95  →  11,4 unités  → 12,7 px rendus
+       < 620 px   compense 1,20  →  14,4 unités  → 12,1 px rendus à 420
+
+   ── LE PLAFOND, QUI N'EST PAS NÉGOCIABLE EN CSS ─────────────────────────
+   1,20 est le maximum que le DESSIN accepte. La pièce 03 mesure 118
+   unités de large et porte « LES RÉSEAUX », 11 caractères de Space Mono
+   à 0,6 em de chasse plus `--ls-xs` 0,10 em, soit 7,7 em :
+       7,7 × 14,4 = 110,9 unités  <  118      ✓  (3,5 unités de marge)
+   Au-delà de 1,23 le libellé sort de sa pièce.
+
+   Conséquence honnête : SOUS le palier poche (420 px) la compensation est
+   déjà à son plafond et le libellé retombe à 9,2 px rendus sur une poche
+   de 320 px. Aller plus bas exige de SORTIR les libellés du SVG, où ils
+   ne subiraient plus l'échelle du viewBox — c'est `PlanAuSol.tsx`, et ce
+   n'est pas ce fichier. Signalé tel quel.                             */
 .plan__svg {
+  --plan-compense: .95;
   display: block;
   inline-size: 100%;
   max-inline-size: 32rem;
   block-size: auto;
+  font-size: calc(var(--fs-mono-l) * var(--plan-compense));
 }
 
+/* ── LA PIÈCE EST LA CIBLE, PAS SON TRAIT ───────────────────────────────
+   `fill: none` sort l'intérieur de la forme du test de survol : la valeur
+   par défaut de `pointer-events` en SVG est `visiblePainted`, et une
+   forme dont le fond n'est PAS peint ne capture rien. Il ne restait donc
+   que le filet d'une unité comme cible — sur la navigation exécutoire de
+   l'accueil (Amendement A1.3).
+
+   `transparent` est une COULEUR, pas `none` : la forme est peinte, donc
+   testée. Et le survol redevient interpolable — `fill` ne sait pas
+   s'animer depuis `none`, la transition déclarée ci-dessous était muette.
+   `pointer-events: all` double la garantie, quel que soit l'état du fond.
+
+   Cible obtenue, mesurée aux deux bouts (échelle 0,640 sur une poche de
+   320 px · échelle 1,113 dès 557 px) :
+       01 · rect 180 × 84   → 115 × 54 px   ·  200 × 93 px
+       02 · rect 180 × 44   → 115 × 28 px   ·  200 × 49 px
+       03 · rect 118 × 112  →  76 × 72 px   ·  131 × 125 px
+       04 · cercle r 56     →  72 × 72 px   ·  125 × 125 px
+   Le minimum 24 × 24 de SC 2.5.8 est tenu à toute largeur. Le 44 × 44
+   que le reste du système s'impose est tenu dès 500 px de largeur de
+   fenêtre — la bande de la zone 02 fait 44 unités, donc 44 px dès que
+   l'échelle atteint 1. En dessous, aucune règle CSS ne peut l'élargir :
+   la pièce 01 commence 8 unités plus bas, et grandir le rectangle
+   redessinerait le plan. `PlanAuSol.tsx`, là encore.                  */
 .plan__piece {
-  fill: none;
+  fill: transparent;
   stroke: var(--bordure-forte);
   stroke-width: 1;
+  pointer-events: all;
   transition: fill var(--tr-reaction);
 }
 
+/* La paillasse est un meuble dessiné DANS la pièce 01, pas une cible :
+   elle laisse passer le pointeur vers le rectangle qui la porte. */
 .plan__paillasse {
   fill: none;
   stroke: var(--bordure);
   stroke-width: 1;
+  pointer-events: none;
 }
 
+/* Le disque du rang était tracé à `r="10"` pour un rang de 10 unités,
+   soit exactement `1em`. Écrit en `em`, il suit la compensation au lieu
+   d'être laissé derrière par elle, et le rapport disque/chiffre du relevé
+   est conservé. `.9em` et non `1em` : la pièce 02 ne fait que 44 unités
+   de haut, et son libellé est ancré 20 unités sous le disque. */
 .plan__pt {
+  r: .9em;
   fill: var(--surface);
   stroke: var(--bordure-forte);
   stroke-width: 1;
   transition: fill var(--tr-reaction), stroke var(--tr-reaction);
 }
 
+/* Les deux textes n'écrivent plus de taille : ils héritent celle de
+   `.plan__svg`, déjà compensée. */
 .plan text {
   fill: var(--texte-tertiaire);
   font-family: var(--f-mono);
@@ -1052,12 +1371,10 @@ button.legende {
 
 .plan__num {
   fill: var(--texte-secondaire);
-  font-size: var(--fs-mono-xs);
   transition: fill var(--tr-reaction);
 }
 
 .plan__nom {
-  font-size: var(--fs-mono-xs);
   letter-spacing: var(--ls-xs);
   text-transform: uppercase;
 }
@@ -1153,7 +1470,798 @@ button.legende {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   20 · SURVOL — seulement là où il existe un dispositif de pointage
+   20 · ADRESSE COPIABLE — `.copyline` · ARC · CMP — 56 · addendum 08 § B-34
+
+   « Un champ qu'on ne remplit pas : on le copie. » L'adresse du serveur
+   Minecraft, une clé, un identifiant.
+
+   Anatomie : `.copyline` > `.copyline__val` (la valeur) + le bouton.
+
+   LE BOUTON EST UN `.btn` DU SYSTÈME, pas un bouton local. Sa hauteur
+   RÉSULTANTE de 46 px (§ 0.13 : 16 + 16 + 12 + 2) est exactement celle
+   que B-34 demande pour la ligne entière, et `align-items: stretch` la
+   propage à la valeur. Aucune hauteur n'est donc écrite — exception 3 de
+   la trame de 4 : les hauteurs sont obtenues, jamais fixées.
+
+   B-34 demande un `.btn.sm`. Le système n'a pas de `.btn--sm` et ce lot
+   n'est pas autorisé à en ouvrir un ; le `.btn` de plein pied donne la
+   même ligne de 46 px et une cible plus grande. Voir « À signaler ».
+
+   L'ÉTAT « COPIÉ » — SC 1.4.1, trois retours et non un seul :
+     · le MOT change (« Copier » → « Copié »), porté par le balisage —
+       c'est lui qui satisfait le critère ;
+     · l'annonce part dans un `<span class="sr-only" aria-live="polite">` ;
+     · la couleur du bouton n'arrive qu'en troisième, jamais seule.
+   Le retour dure 2 s, puis le bouton reprend son libellé.
+
+   Deux règles qui appartiennent au balisage et pas au CSS :
+     · si l'API presse-papiers est indisponible, le bouton est RETIRÉ ; la
+       valeur reste sélectionnable à la main (`user-select: all`) ;
+     · si la valeur n'est pas encore décidée, elle affiche « À venir » et
+       porte `.t-tertiaire` (90-utilitaires.css), et le bouton est retiré.
+       Jamais un bouton qui copie un texte vide.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.copyline {
+  display: flex;
+  align-items: stretch;
+  max-inline-size: 100%;
+  border: var(--trait-filet) solid var(--bordure-forte);
+  border-radius: var(--r-2);
+  background: var(--surface-carte);
+}
+
+/* `min-inline-size: 0` lève le plancher intrinsèque de l'enfant de flex —
+   même correction et même motif que `.serveur__adresse` (section 16) :
+   une adresse de domaine n'a aucun point de coupure, et sans cela la
+   ligne pousse la page sur une poche. Ici la valeur ne se coupe pas, elle
+   DÉFILE : une adresse cassée sur deux lignes se recopie mal à la main,
+   et `user-select: all` doit rendre une chaîne d'un seul tenant.       */
+.copyline__val {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding-inline: var(--sp-4);
+  overflow-x: auto;
+  color: var(--texte);
+  font-family: var(--f-mono);
+  font-size: var(--fs-corps-xs);
+  letter-spacing: var(--ls-xxs);
+  white-space: nowrap;
+  user-select: all;
+}
+
+/* Le bouton est collé : la marge négative d'un filet le fait mordre sur
+   le contour de la ligne, ce qui donne la couture unique de B-34 au lieu
+   de deux filets superposés. Le rayon ne subsiste que du côté extérieur.
+
+   AUCUN `overflow: hidden` sur la racine, bien qu'il simplifierait le
+   rognage des coins : il rognerait l'anneau de focus du bouton, et le
+   § 0.15 interdit de le rogner. Avec un rayon de 2 px, il n'y a de toute
+   façon rien à rogner.                                                 */
+.copyline__btn {
+  flex: none;
+  margin: calc(-1 * var(--trait-filet));
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+/* Troisième signal, jamais le premier. `--texte-inverse` tient dans les
+   deux contextes : blanc sur le vert plein en clair, encre sur le vert
+   clair en acier. La spécificité de 3 classes passe devant `.btn:hover`
+   de la section 26, sinon un pointeur resté sur le bouton effacerait le
+   retour au moment même où il doit se voir.                            */
+.copyline .copyline__btn.copiee {
+  background: var(--succes);
+  border-color: var(--succes);
+  color: var(--texte-inverse);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   21 · BLOC D'ÉTAT EN DIRECT — `.livebox` · ARC · CMP — 55 · addendum § B-33
+
+   Le compteur Discord et le statut du serveur Minecraft.
+
+   Anatomie tenue au mot :
+     `.livebox` > `.lb-head` (`.dot` + libellé) + `.lb-figure` (chiffre)
+                + `.lb-sub` (précision) + `.lb-act` (bouton).
+
+   `.dot` est un nom très général : il n'est déclaré QUE sous `.livebox`,
+   parce qu'une classe globale n'appartient qu'à un composant (§ 0.12).
+
+   QUATRE ÉTATS, et le MOT porte chacun d'eux (SC 1.4.1). Le point est
+   `aria-hidden="true"` : ce n'est jamais lui qui informe.
+
+     `.livebox--enligne`    point `--succes`, halo pulsé · le chiffre ·
+                            « membres connectés »
+     `.livebox--horsligne`  point `--verrouille`, fixe · « — » ·
+                            « Le serveur ne répond pas »
+     `.livebox--muet`       point `--alerte`, fixe · « — » ·
+                            « Le compteur ne répond pas pour l'instant »
+                            — et le lien d'invitation RESTE
+     `.livebox--attente`    point `--verrouille` · « — » · bouton
+                            « Afficher le compteur en direct » (consente-
+                            ment, addendum § 8.11.3)
+
+   TOKENS ABROGÉS DE B-33, remplacés par leur rôle : `--wait` → § 0.7 le
+   renvoie à `--papier-profond`, que le rôle `--alerte` sert dans les deux
+   contextes (7,79 sur clair, 9,42 sur acier) · `--ok` → `--succes` ·
+   `--steel-2` → `--verrouille`, celui-là même que porte `.etat--horsligne`
+   en section 6 · `--steel-text` → `--texte-tertiaire`.
+
+   Actualisation toutes les 60 s en `aria-live="off"` — un compteur qui
+   parle toutes les minutes est insupportable — et seul le CHANGEMENT
+   d'état est annoncé, une fois, en `polite`. Rien de cela n'est du CSS.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.livebox {
+  /* Le rôle d'état, déclaré une fois et lu par le point comme par son
+     halo : une variante ne touche qu'à cette ligne. */
+  --lb-etat: var(--texte-tertiaire);
+
+  position: relative;
+  overflow: hidden;
+  padding: var(--sp-5) var(--sp-6);
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  background: var(--surface-carte);
+}
+
+/* La plaque d'émail de 4 px : `--trait-chant`, l'épaisseur de chant du
+   système. Ce n'est PAS `.pilier-email`, qui vaut 10 px et n'appartient
+   qu'au hero, à la notice et à la page système. */
+.livebox::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--trait-chant);
+  background: var(--accent);
+}
+
+.livebox--enligne   { --lb-etat: var(--succes); }
+.livebox--horsligne { --lb-etat: var(--verrouille); }
+.livebox--muet      { --lb-etat: var(--alerte); }
+.livebox--attente   { --lb-etat: var(--verrouille); }
+
+.lb-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+}
+
+/* 5 px : la pastille de l'exception 4 de la trame de 4 (§ 0.13). B-33
+   écrivait 7 px, qui n'est dans aucune échelle du système. */
+.livebox .dot {
+  flex: none;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: var(--r-pastille);
+  background: var(--lb-etat);
+}
+
+/* Le halo pulsé de l'état « en ligne », et de lui seul. Il ne porte
+   AUCUNE information : « En ligne » est écrit à côté, en toutes lettres.
+   Le bloc unique de `99-preferences.css` le ramène à une itération de
+   1 ms sous `prefers-reduced-motion` — c'est pourquoi il n'y a ici aucun
+   bloc `prefers-*`, que la règle de couche (c) interdirait de toute façon.
+
+   B-33 demande 2 s. Le système plafonne à `--dur-remplissage` (900 ms) et
+   n'a pas de pas de respiration : la seule expression sans littéral qui
+   approche 2 s est deux fois ce pas, soit 1,8 s. Voir « À signaler ».  */
+.livebox--enligne .dot {
+  animation: pouls-etat calc(2 * var(--dur-remplissage)) var(--ease-continu) infinite;
+}
+
+@keyframes pouls-etat {
+  0%, 100% { box-shadow: 0 0 0 0 var(--lb-etat); }
+  70%      { box-shadow: 0 0 0 var(--sp-2) transparent; }
+}
+
+/* Le chiffre. `clamp(34px, 4vw, 46px)` de B-33 est recalé sur `--fs-h2`
+   (30 → 50 px), le palier du chapitre 04 qui le contient — § 0.14,
+   règle 1 : aucune taille de texte hors des quatorze paliers.        */
+.lb-figure {
+  margin: var(--sp-3) 0 0;
+  color: var(--texte);
+  font-family: var(--f-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-titre);
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-sub {
+  margin: var(--sp-1) 0 0;
+  color: var(--texte-tertiaire);
+  font-size: var(--fs-corps-xs);
+}
+
+.lb-act { margin-block-start: var(--sp-5); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   22 · LECTEUR VIDÉO — `.player` · ARC · CMP — 46 · addendum 08 § B-25
+
+   COLLISION DE CODE, signalée et non tranchée ici : le socle § 0.25
+   attribue `ARC · CMP — 46` à la fiche de serveur (section 16) et
+   `— 47` au bandeau d'invitation (section 24), là où l'addendum 08 les
+   donne au lecteur vidéo et à la carte vidéo. Le socle prime (§ 0.1),
+   mais il ne réattribue pas les deux codes de l'addendum : les quatre
+   composants existent et deux numéros manquent. Voir « À signaler ».
+
+   LE PRINCIPE : LA FAÇADE. Tant que personne n'a cliqué, aucun octet ne
+   part chez YouTube. Ce qui est affiché est une image servie DEPUIS NOTRE
+   DOMAINE, un bouton, et une phrase qui dit ce qui va se passer.
+
+   Anatomie :
+     `figure.player` > `.pl-facade` [ `img.pl-poster` · `.pl-veil` ·
+       `.pl-play` (bouton) · `.pl-meta` (titre + durée) · `.pl-consent`
+       (phrase + lien) ]  → remplacée par l'`iframe` au clic
+     puis `.pl-caption` (légende) et `.pl-transcript` (un `.accordion`,
+     section 23).
+
+   CORRECTION D'ANATOMIE. B-25 pose le ratio, le fond et le débordement
+   « sur la racine ». Or la racine est un `<figure>` qui contient AUSSI la
+   légende et la transcription : un ratio de 16/9 posé là les écraserait
+   dans la boîte de la vidéo. La scène est donc `.pl-facade`, et c'est
+   elle qui porte le ratio, le fond, le rayon et le débordement.
+
+   LES DEUX PLACES DE L'IFRAME sont servies, parce que B-25 les décrit
+   toutes les deux : « l'iframe remplace `.pl-facade` dans le DOM » (elle
+   devient alors enfant direct de `.player` et porte le ratio elle-même)
+   et « `position: absolute; inset: 0` » (elle est alors posée DANS la
+   façade). Le composant ne choisit pas à la place du balisage.
+
+   PAS DE `backdrop-filter` sur `.pl-play` : le § 0.23 réserve le flou à
+   `.verre`, qui ne porte jamais de texte. `--plaque-legende` est opaque à
+   78 %, elle n'a besoin d'aucune aide.
+
+   Les couleurs de la façade sont les pas d'échelle de la plaque sombre
+   déjà déclarés en tête de fichier, marqués « § » : une scène vidéo est
+   sombre dans tous les contextes, exactement comme une légende.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.player { margin: 0; }
+
+/* La scène. Le ratio est réservé AVANT tout chargement : aucun saut de
+   mise en page, ni au poster, ni à l'iframe qui le remplace. */
+.pl-facade,
+.player > iframe {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: var(--ar-scene);
+  overflow: hidden;
+  border: var(--trait-filet) solid var(--bordure);
+  border-radius: var(--r-3);
+  /* La façade porte une affiche : elle attend donc sur l'aplat de cette
+     affiche (§ 7.13.5), pas sur le noir de scène. L'iframe, elle, n'a pas
+     d'aplat — le lecteur tiers peint son propre fond — et retombe sur le
+     noir de scène par le repli de la variable. */
+  background: var(--aplat, var(--encre-950));
+}
+
+/* L'iframe pose son propre contour ; celui du système ferait un double
+   filet avec le chrome du lecteur tiers. */
+.player > iframe { border-width: 0; }
+
+.pl-facade iframe {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+}
+
+/* Image LOCALE, jamais `i.ytimg.com` : c'est toute la raison d'être de la
+   façade. Elle porte `alt=""`, parce que `.pl-meta` la décrit à côté. */
+.pl-poster {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  /* § 7.13.1 : « Quand `object-fit:cover` est inévitable, le point focal est
+     fixé par zone, jamais laissé au défaut. » L'affiche est le plateau, zone
+     `ARC · DEC — 01` : `50% 44%`, « cale l'enseigne néon au tiers haut ». */
+  object-position: var(--cadrage, 50% 44%);
+}
+
+/* ── LE VOILE DE LA FAÇADE — MESURÉ, PAS ESTIMÉ ───────────────────────────
+   `.pl-meta` écrit le titre du fil EN HAUT de l'affiche, sans plaque à lui :
+   c'est ce voile, et lui seul, qui tient son contraste. Il partait de
+   `--voile-scene` (.55). Sur l'affiche réellement servie — le plateau, dont
+   le tiers haut est un plafond lumineux entre deux panneaux blanc mat — un
+   voile à .55 donne 4,03:1 dans le pire cas et tombe à 2,84:1 sur les pixels
+   du plafond. Le § 0.31 demande 4,5:1 pour du texte courant : la bande du
+   titre échouait sur plus d'un tiers de son empreinte.
+
+   Le correctif n'invente aucune valeur : il MIROITE `--scrim-bottom`, le
+   dégradé de bas de cadre que le § 7.13.2 mesure à 14,81:1 avec
+   `--blanc-50`. Le titre vit entre 4 % et 12 % de la hauteur du cadre, où
+   l'alpha reste au-dessus de .64 : 5,5:1 dans le pire cas d'une affiche
+   blanche, davantage sur l'affiche réelle.
+
+   Le milieu reste transparent — le sujet garde sa pleine lumière — et le bas
+   garde `--plaque-legende`, où deux lignes de mono doivent rester lisibles. */
+.pl-veil {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(
+    rgba(11, 14, 15, .92),
+    transparent 38%,
+    transparent 62%,
+    var(--plaque-legende));
+  pointer-events: none;
+}
+
+/* 72 px : ni un pas de `--sp-*`, ni une dimension d'objet dessiné de
+   l'exception 4. Écrit en somme de deux pas de la trame — 48 + 24 — pour
+   qu'aucun littéral n'entre dans le fichier, et parce que la somme de
+   deux multiples de 4 en est un. La cible dépasse largement les 44 px de
+   SC 2.5.8.
+
+   Le triangle est une ICÔNE du chapitre 06 : ce fichier ne fait que la
+   placer (règle de tête, « aucun `svg { width }` »). Le balisage porte
+   `<svg class="ico ico--32" aria-hidden="true">`, et le nom accessible
+   complet est sur le `<button>` : « Lire la vidéo : La boîte à outils —
+   12 min 40 s », jamais « Lire ».                                      */
+.pl-play {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--sp-9) + var(--sp-6));
+  block-size: calc(var(--sp-9) + var(--sp-6));
+  padding: 0;
+  /* § 0.23, troisième conséquence : « Une commande posée sur une scène
+     (bouton de zoom, bouton de lecture) utilise la même plaque, avec un
+     contour `1px solid var(--acier-400)` pour tenir les 3:1 du composant ».
+     La feuille portait `--rule-light-3`, un filet en alpha à .24 mesuré
+     1,94:1 contre sa propre plaque, quand SC 1.4.11 en exige 3. Le socle le
+     redit ailleurs : « aucun filet en alpha n'atteint 3:1 ; dès qu'un
+     contour délimite un composant interactif, il passe en couleur pleine ».
+     C'est déjà ce que fait `button.legende` dans ce même fichier. */
+  border: var(--trait-filet) solid var(--acier-400);
+  border-radius: var(--r-pastille);
+  background: var(--plaque-legende);
+  color: var(--blanc-50);                                /* § — plaque sombre */
+  cursor: pointer;
+  transition:
+    background var(--tr-reaction),
+    border-color var(--tr-reaction),
+    scale var(--tr-reaction);
+}
+
+/* Chargement : le bouton ne répond plus, et c'est `aria-busy` qui le dit.
+   Il n'est pas masqué — un bouton qui disparaît sous le doigt est un
+   bouton qu'on cherche. */
+.pl-play[aria-busy="true"] { pointer-events: none; }
+
+.pl-meta {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: var(--sp-4);
+  inset-inline-start: var(--sp-4);
+  display: grid;
+  gap: var(--sp-1);
+  max-inline-size: calc(100% - 2 * var(--sp-4));
+  color: var(--blanc-50);          /* § — plaque sombre */
+}
+
+.pl-meta b {
+  font-family: var(--f-display);
+  font-size: var(--fs-lede);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-h4);
+}
+
+/* La durée est ÉCRITE EN CLAIR, jamais seulement dans une pastille. Elle
+   se distingue par sa fonte et sa taille, jamais par une opacité : le
+   § 0.10 a mis fin à l'opacité sur le texte, et le § 0.23 interdit deux
+   niveaux de texte sur une plaque sombre. */
+.pl-meta span {
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-xs);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+}
+
+.pl-consent {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  inset-block-end: 0;
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  color: var(--blanc-50);          /* § — plaque sombre */
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  line-height: var(--lh-lede);
+}
+
+/* Le lien de la phrase de consentement garde la couleur de la plaque et
+   son soulignement de base : sur une plaque sombre, il n'y a qu'un seul
+   niveau de texte, et c'est le soulignement qui signale le lien (§ 0.22). */
+.pl-consent a { color: inherit; }
+
+/* Compose `.meta` : la fonte, la taille et la couleur du relevé viennent
+   du chapitre 04. Ce composant ne pose que le rythme qui l'attache à la
+   scène, aux mêmes règles qu'un `figcaption`. */
+.pl-caption { margin-block-start: var(--sp-3); }
+
+.pl-transcript { margin-block-start: var(--sp-5); }
+
+/* ── LA VARIANTE VERTICALE — le format court ──────────────────────────────
+   `aspect-ratio: 9/16` EST `--ar-vertical`. La largeur maximale de 420 px
+   n'a pas de token de mesure : 26,25 rem, cinquième valeur assumée de ce
+   fichier (voir l'en-tête et « À signaler »). Elle est posée sur la
+   FIGURE et pas sur la seule façade, pour que la légende et la
+   transcription se calent sur la même colonne que la vidéo — sans quoi
+   une légende de 60 caractères déborderait d'un lecteur de 420 px.    */
+.player.vertical {
+  max-inline-size: 26.25rem;
+  margin-inline: auto;
+}
+
+.player.vertical .pl-facade,
+.player.vertical > iframe { aspect-ratio: var(--ar-vertical); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   23 · ACCORDÉON FAQ — `.accordion` · ARC · CMP — 39 · 08-composants § B-20
+
+   « Ouverture multiple autorisée : on ne referme pas une réponse pour en
+     lire une autre. » Le composant ne connaît donc aucun état de groupe.
+
+   Anatomie : `.accordion` > n × `.acc` [ `button.acc-q` (texte + `.sign`)
+   · `.acc-a` ]. L'en-tête est un vrai `<button>` DANS un `<h3>` :
+   `<h3><button class="acc-q" aria-expanded="false" aria-controls="a1"
+   id="q1">`, et le panneau porte `id`, `role="region"` et
+   `aria-labelledby`.
+
+   LE SIGNE NE DÉPEND PAS DE LA COULEUR. C'est la contrainte principale de
+   ce composant, et la raison pour laquelle le signe est DESSINÉ ici plutôt
+   qu'écrit dans le balisage : deux barres croisées forment un « + », la
+   barre verticale se rétracte et il reste un « − ». Le changement est une
+   FORME, il tient sous `forced-colors` (les barres sont en `currentColor`)
+   et il tient pour qui ne distingue pas le bordeaux du gris.
+
+   `font-size: 0` sur `.sign` : si un balisage suit l'exemple HTML de B-20
+   et écrit un « + » littéral dans le `<span>`, il ne se superpose pas au
+   signe dessiné. Le `<span class="sign" aria-hidden="true">` peut donc
+   être vide ou non, sans conséquence.
+
+   OUVERTURE par transition de `grid-template-rows: 0fr → 1fr`, la seule
+   technique fiable sans hauteur codée en dur. Deux conséquences que le
+   balisage doit connaître :
+
+     · `.acc-a` prend EXACTEMENT UN élément enfant, qui porte le
+       débordement. Avec deux enfants, le second tombe dans une piste
+       implicite en `auto` et ne se replie pas ;
+     · `.acc-a` ne porte PAS l'attribut `hidden` de l'exemple de B-20 :
+       `display: none` supprime la transition. Le repli est assuré par
+       `visibility: hidden`, qui sort le panneau du parcours de tabulation
+       et de l'arbre d'accessibilité tout aussi complètement. Si un
+       balisage pose quand même `hidden`, rien ne casse : le panneau se
+       ferme, sans animation.
+
+   Chaque question reste atteignable par ancre (`#faq-tarifs`) et s'ouvre
+   si l'ancre la cible — cela relève du script, pas du CSS.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.acc { border-block-start: var(--trait-filet) solid var(--bordure); }
+.acc:last-child { border-block-end: var(--trait-filet) solid var(--bordure); }
+
+/* Le `<h3>` n'est qu'un porteur de niveau : tout le type est sur le
+   bouton, qui est le seul élément interactif. */
+.acc :is(h2, h3, h4) { margin: 0; }
+
+/* B-20 réserve 44 px à droite par un rembourrage, et pose le signe en
+   absolu à `right: 6px; top: 22px`. Ces trois valeurs sont hors trame.
+   Une rangée de flex donne le même dessin sans en écrire aucune : le
+   texte prend la place qu'il lui faut, le signe se range au bout.
+
+   Hauteur obtenue : 20 + 20 de rembourrage + la ligne de `--fs-corps` à
+   `--lh-h4`, soit ~ 60 px — très au-dessus des 44 px de SC 2.5.8, et
+   elle n'est pas écrite (exception 3 de la trame de 4).                */
+.acc-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  inline-size: 100%;
+  padding: var(--sp-5) 0;
+  border: 0;
+  background: none;
+  color: var(--texte);
+  font-family: var(--f-display);
+  font-size: var(--fs-corps);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-h4);
+  text-align: start;
+  cursor: pointer;
+  transition: color var(--tr-reaction);
+}
+
+.acc-q[aria-expanded="true"] { color: var(--accent); }
+
+/* 16 px : pas de l'échelle des icônes (exception 4 de la trame de 4).
+   `.sign` est un nom très général : comme `.dot` en section 21, il n'est
+   déclaré QUE sous son composant (§ 0.12). */
+.acc-q .sign {
+  position: relative;
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+  color: var(--accent);
+  font-size: 0;
+}
+
+/* La barre horizontale : elle ne bouge jamais, elle est le « − ». */
+.acc-q .sign::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 50%;
+  block-size: var(--trait-marque);
+  translate: 0 -50%;
+  background: currentColor;
+}
+
+/* La barre verticale : elle complète le « + », et se rétracte à
+   l'ouverture. `scale` seul, jamais `rotate` : un « + » retourné de 180°
+   est un « + ». */
+.acc-q .sign::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: var(--trait-marque);
+  translate: -50% 0;
+  background: currentColor;
+  transition: scale var(--tr-reaction);
+}
+
+.acc-q[aria-expanded="true"] .sign::after { scale: 1 0; }
+
+.acc-a {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  max-inline-size: var(--me-corps);
+  color: var(--texte-secondaire);
+  font-size: var(--fs-corps);
+  transition:
+    grid-template-rows var(--tr-reaction),
+    visibility var(--dur-0) linear var(--dur-reaction);
+}
+
+/* Le seul enfant porte le débordement et le rembourrage de pied : mis sur
+   `.acc-a`, ce rembourrage l'empêcherait de se replier à zéro. */
+.acc-a > * {
+  min-block-size: 0;
+  overflow: hidden;
+  padding-block-end: var(--sp-6);
+}
+
+/* `:has()` parce que le panneau est le FRÈRE du `<h3>`, pas du bouton :
+   aucun sélecteur d'adjacence ne peut remonter du bouton au panneau. */
+.acc:has(.acc-q[aria-expanded="true"]) > .acc-a {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: var(--dur-0), var(--dur-0);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   24 · BANDEAU D'INVITATION — `.invitation` · ARC · CMP — 47 · socle § 0.25
+
+   « Bande pleine largeur, matière ACIER, JAMAIS bordeaux : la seule bande
+     bordeaux d'une page est le kit affilié. »
+
+   LE FOND N'EST DONC PAS ÉCRIT ICI : il vient de la COMPOSITION, comme
+   pour `.sitenav` et `.sitefoot` (voir l'en-tête du fichier) —
+
+       <section class="invitation acier mat-acier">
+
+   `.acier` bascule tous les rôles d'un coup et ferme le filet de pied
+   (`.bande.acier`, section 1, si la page compose aussi `.bande`) ;
+   `.mat-acier` donne la trame que `99-preferences.css` sait éteindre en
+   contraste renforcé et remplacer en couleurs forcées. Une seule règle
+   descendante ici et tout cela cesserait de fonctionner.
+
+   Le bandeau ne porte AUCUNE règle de couleur : c'est ce qui garantit
+   l'interdit du § 0.25. Il ne peut pas devenir bordeaux par accident,
+   puisqu'il n'écrit aucune couleur du tout.
+
+   CONTENU IMPOSÉ, dans cet ordre : sur-titre (`.eyebrow`), titre `h2` en
+   16 ch, deux phrases, un bouton `.btn--acier` (section 5), et les règles
+   du serveur en trois lignes au plus.
+
+   INTERDITS DU § 0.25 — règles d'auteur, pas du CSS : pas de compteur,
+   pas d'urgence, pas de « rejoins-nous ». Le compteur vit dans `.livebox`
+   (section 21), sur la page de destination, et n'a rien à faire dans une
+   invitation : une invitation dit ce qu'on trouve, pas combien on est.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.invitation { padding-block: var(--rythme-m); }
+
+.invitation__c {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-5);
+  max-inline-size: var(--me-corps);
+}
+
+/* Compose `.h2`. Le § 0.25 impose 16 ch là où `.h2` porte `--me-h2`
+   (22 ch) : un titre d'invitation est plus court qu'un titre de section,
+   il doit tenir en deux lignes hautes. 16 ch n'a pas de token de mesure —
+   sixième valeur assumée de ce fichier, voir « À signaler ».          */
+.invitation__t { max-inline-size: 16ch; }
+
+.invitation__p { margin: 0; }
+
+/* Les règles du serveur. TROIS LIGNES AU PLUS : c'est une règle d'auteur,
+   pas un `line-clamp`. On ne tronque pas une règle de serveur — on en
+   écrit trois. */
+.invitation__r {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  line-height: var(--lh-mono);
+  letter-spacing: var(--ls-xxs);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   25 · GABARIT DE PAGE SYSTÈME — `.syspage` · ARC · CMP — 48 · § B-27
+
+   « Les pages qu'on ne conçoit jamais et qui sont vues tous les jours. »
+   404, 500, hors ligne, maintenance.
+
+   Anatomie : `.syspage` > `.sp-panel` [ emblème · `.code-arc` · `.sp-code`
+   (chiffre décoratif) · `h1` · `p` · `.sp-acts` (DEUX actions au plus) ·
+   `.sp-help` ] + `.sp-aside` (planche de décor, décorative, masquée sous
+   980 px).
+
+   TROIS RECALAGES, tous imposés par le socle, tous documentés :
+     · `.cat` de B-27 est le code ARC. Ce système l'appelle `.code-arc`
+       (02-tokens-typo.css) ; l'en-tête du fichier a déjà acté la même
+       équivalence pour `.notice__code`. Le balisage porte donc
+       `<p class="code-arc">ARC · SYS — 404</p>`.
+     · l'emblème de 56 px n'est dans aucune échelle : la série des logos
+       est 20 · 28 · 36 · 44 · 52 · 62 · 80 (exception 4 de la trame de 4).
+       Le balisage porte `.emb--52` (31-icones.css).
+     · le `h1` de B-27 est en `clamp(28px, 3.6vw, 40px)` : recalé sur
+       `--fs-h2` (30 → 50 px), le palier qui le contient. Le balisage
+       porte donc `<h1 class="h2" tabindex="-1">`, comme `.hero__t` porte
+       `.h1` (§ 0.14, règle 1).
+
+   LES QUATRE VARIANTES sont des CONTEXTES, pas des règles :
+     `.syspage.e404` fond clair · `.syspage.e500` acier · `.syspage.off`
+     clair · `.syspage.maint` acier. Les deux fonds d'acier sont obtenus en
+     composant `acier mat-acier` sur la racine, jamais par une couleur
+     écrite ici. Aucune de ces quatre classes n'a donc besoin d'une règle,
+     et c'est voulu : le gabarit est un, les fonds sont des contextes.
+
+   RÈGLES D'AUTEUR de B-27, qui ne sont pas du CSS : pas d'humour, pas de
+   mascotte désolée ; jamais un code d'erreur seul — le chiffre est
+   décoratif et la phrase porte l'information ; deux actions au maximum,
+   la première étant toujours la sortie la plus probable ; le `<title>`
+   dit l'erreur. `.sp-code` est `aria-hidden="true"`, sans quoi le lecteur
+   d'écran annonce « quatre cent quatre » avant le titre. La planche est
+   en `alt=""`. « Réessayer » est un `<button>` qui recharge, jamais un
+   lien vers la même URL.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.syspage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-block-size: calc(100vh - var(--h-nav));
+  overflow: hidden;
+}
+
+/* Compose `.pilier-email` : le montant de 10 px est le rappel du hero, et
+   c'est une matière (03-tokens-grille.css), pas une bordure d'accent. Le
+   rembourrage de tête de ligne le compte, sinon le texte s'appuierait
+   dessus — même calcul que `.hero__g`.
+
+   560 px de B-27 : 35 rem, septième valeur assumée de ce fichier. Le
+   système n'a que `--w-fiche` (680) au-dessus et rien en dessous.     */
+.sp-panel {
+  position: relative;
+  z-index: 1;
+  max-inline-size: 35rem;
+  padding-block: var(--pad-4);
+  padding-inline: calc(var(--pad-4) + var(--trait-pilier)) var(--pad-4);
+}
+
+/* Le chiffre décoratif, posé DERRIÈRE le titre. `--surface-3` est le rôle
+   du creux : `--blanc-200` sur clair, `--acier-800` sur acier. Il se
+   comporte donc correctement dans les quatre variantes sans qu'aucune ne
+   le redéclare. `z-index: -1` le range sous tout le contenu du panneau,
+   qui est lui-même au-dessus de la planche de décor. */
+.sp-code {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: 0;
+  inset-inline-start: calc(var(--pad-4) + var(--trait-pilier));
+  margin: 0;
+  color: var(--surface-3);
+  font-family: var(--f-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-noir);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  user-select: none;
+}
+
+/* 46 ch de B-27 recalés sur `--me-lede` (50 ch), la mesure du système la
+   plus proche — le chapitre 04 prime sur les largeurs semées ailleurs. */
+.syspage p {
+  max-inline-size: var(--me-lede);
+  color: var(--texte-secondaire);
+}
+
+/* DEUX actions au plus. Le CSS ne peut pas l'imposer ; il ne fait que
+   n'en supposer aucune de plus. */
+.sp-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-7);
+}
+
+.sp-help {
+  margin-block-start: var(--sp-6);
+  color: var(--texte-tertiaire);
+  font-family: var(--f-mono);
+  font-size: var(--fs-mono-s);
+  letter-spacing: var(--ls-xxs);
+}
+
+/* La planche de décor. Purement décorative : elle ne porte aucune
+   information que la phrase ne porte déjà, donc elle disparaît sous 980
+   px (section 27) sans rien retirer à la page. */
+.sp-aside {
+  position: relative;
+  align-self: stretch;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.sp-aside img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  /* § 7.13.1, point focal du narrateur. La planche de la 404 est servie dans
+     une colonne plus haute que large : sans cette valeur, le cadrage par
+     défaut coupait le pilier d'émail gauche dans sa largeur, ce que le même
+     § interdit nommément. */
+  object-position: var(--cadrage, 30% 34%);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   26 · SURVOL — seulement là où il existe un dispositif de pointage
    Regroupé pour que rien de tout ceci ne se déclenche au premier
    effleurement d'un écran tactile, où un « survol » est un clic manqué.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -1201,15 +2309,85 @@ button.legende {
   .plan a:hover .plan__pt    { fill: var(--accent); stroke: var(--accent); }
   .plan a:hover .plan__num   { fill: var(--accent-texte); }
   .plan a:hover .plan__nom   { fill: var(--texte); }
+
+  /* La question de l'accordéon prend l'accent — et elle n'a pas besoin de
+     lui : le signe dessiné change de forme au même instant (section 23),
+     et c'est cette forme qui porte l'état. */
+  .acc-q:hover { color: var(--accent); }
+
+  /* Le bouton de lecture : deux changements pour une seule intention, et
+     aucun ne dépend de la seule couleur. B-25 demande `scale(1.06)` —
+     c'est un facteur, pas une distance : la trame de 4 ne s'y applique
+     pas. Le disque grandit, il ne rebondit pas. */
+  .pl-play:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    scale: 1.06;
+  }
 }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   21 · RESPONSIVE — deux paliers, ceux du chapitre 05
-   `--bp-paillasse` 980 et `--bp-planche` 620, écrits en `.98` pour ne
-   pas laisser le trou d'un pixel que le chapitre 05 identifie (§ 0.20).
-   Les paliers 820 et 1040 de la maquette n'existent pas dans le système.
+   27 · RESPONSIVE — trois paliers, ceux du chapitre 05
+   `--bp-atelier` 1280, `--bp-paillasse` 980 et `--bp-planche` 620, écrits
+   en `.98` pour ne pas laisser le trou d'un pixel que le chapitre 05
+   identifie (§ 0.20). Les paliers 820 et 1040 de la maquette n'existent
+   pas dans le système — et 1105 non plus : « cinq paliers de rupture, et
+   cinq seulement ».
    ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── LA BARRE PASSE AU MENU DÉROULANT SOUS L'ATELIER, PAS SOUS LA
+      PAILLASSE ───────────────────────────────────────────────────────────
+   La bascule était posée à 980. Or la barre complète ne TIENT pas à 980,
+   et le bouton « Rejoindre » sortait du cadre. Le relevé, mesuré et non
+   supposé — Space Mono, chasse 0,6 em, `--fs-mono-s` 11 px, `--ls-s`
+   0,14 em, soit 0,74 em = 8,14 px par caractère ; chaque entrée ajoute
+   2 × `--sp-4` de rembourrage et 2 × `--trait-filet` de contour, soit
+   34 px :
+
+       ACCUEIL · PALIERS · DISCORD · RÉSEAUX · CONTACT   7 car. → 91 px ×5
+       FORMATION · MINECRAFT · REJOINDRE                 9 car. → 107 px ×3
+       7 gouttières de `--sp-1`                                 →  28 px
+       ──────────────────────────────────────────────────────────────────
+       `.sitenav__l`                                            → 805 px
+       `.marque` — emblème 36 + `--sp-3` + « DU PROFESSEUR CHEN »,
+       18 car. de mono à 11 px et `--ls-xs`, soit 139 px        → 187 px
+       gouttière de `.sitenav__in`, `--sp-6`                    →  24 px
+       ──────────────────────────────────────────────────────────────────
+       LARGEUR EXIGÉE                                           →1016 px
+
+   `.wrap` vaut `min(--w-standard, 92vw)`. La barre complète exige donc
+   une fenêtre de 1016 ÷ 0,92 = 1104 px. Entre 980 et 1104 elle débordait
+   de 114 px au plus étroit (901 px de piste à 980) jusqu'à 0 — et c'est
+   le CTA, dernier de la ligne, qui sortait.
+
+   Le seuil juste est 1105 px. Ce n'est pas un palier de la charte, et le
+   § 0.20 n'en admet aucun autre que les cinq : la bascule monte donc au
+   palier ATELIER, 1280. À 1280 px de fenêtre, `.wrap` est déjà plafonné
+   à `--w-standard` (1140 px) et laisse 124 px de jeu sur les 1016 exigés.
+   Aucune largeur ne produit plus de débordement.                      */
+@media (max-width: 1279.98px) {
+
+  /* Le `.sitenav__burger` porte `aria-expanded` et `aria-controls` ;
+     `.ouvert` est posée par le script, et c'est la seule classe d'état
+     nue de ce composant. */
+  .sitenav__in { position: relative; }
+  .sitenav__burger { display: block; }
+  .sitenav__l { display: none; }
+  .sitenav__l.ouvert {
+    display: flex;
+    position: absolute;
+    inset-block-start: var(--h-nav);
+    inset-inline: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-1);
+    margin: 0;
+    padding: var(--sp-3);
+    background: var(--surface-2);
+    border-block-end: var(--trait-filet) solid var(--bordure);
+  }
+}
 
 @media (max-width: 979.98px) {
 
@@ -1217,9 +2395,85 @@ button.legende {
      C'est le seul ordre qui garde la promesse d'A1.2 — on voit le lieu
      avant de lire ce qu'on y fait. */
   .hero { grid-template-columns: 1fr; }
+
+  /* Le split du hero se déplie et la scène passe au-dessus du panneau —
+     et elle change de cadrage en même temps que de forme. En bande large
+     (`plateauLarge`, 16:9) la scène perd de la hauteur et non de la
+     largeur : le cadre remonte de deux points par rapport aux 44 % de la
+     table du § 7.13.1, pour garder l'enseigne du mur du fond dedans quand
+     la bande se resserre encore en 21:9 sous la planche. C'est la même
+     image, ce n'est pas le même cadrage — et c'est pour cela que
+     `visuels.ts` déclare deux jeux de dérivées et non un seul. */
   .hero__v {
+    --cadrage: 50% 42%;
+
     order: -1;
     min-block-size: 52vw;
+  }
+
+  /* ── LE PAYSAGE COURT, OÙ « VOIR LE LIEU D'ABORD » SE RETOURNE ─────────
+     La règle du dessus est juste sur un téléphone tenu debout : la scène
+     passe avant le panneau, on voit le lieu avant de lire ce qu'on y fait.
+     Couchez le même téléphone et elle se retourne contre elle-même. Mesuré
+     au navigateur, sur la page telle qu'elle est livrée :
+
+         844 × 390 (iPhone couché)  → photo de 844 × 633, titre à 749 px
+         932 × 430                  → photo de 932 × 699, titre à 820 px
+
+     soit 1,9 écran de photo AVANT le premier mot. Le visiteur ouvre le site
+     sur une image plein cadre, sans une ligne de texte et sans savoir où il
+     est — exactement ce que le pavé du balisage de `Home.tsx` interdit sous
+     620 px, et pour la même raison. Le plancher de `52vw` en est la cause :
+     il raisonne sur la LARGEUR, et en paysage la largeur est la grande
+     dimension.
+
+     Le correctif ne réordonne rien — la promesse d'A1.2 tient, on voit
+     toujours le lieu en premier — il PLAFONNE la scène sur la hauteur
+     disponible. À 44vh, la photo occupe 172 px d'un écran de 390 et la
+     première ligne du titre repasse au-dessus de la ligne de flottaison.
+
+     À SIGNALER — LE SEUIL DE HAUTEUR N'EST PAS DANS LA CHARTE. Le § 0.20
+     n'arbitre que cinq paliers, tous en largeur, et aucune requête
+     `max-height` n'existait dans la feuille. 560 px est choisi ici parce
+     qu'il attrape tous les téléphones couchés (430 px au plus haut) sans
+     toucher une tablette couchée (744 px, et au-delà de 980 de large de
+     toute façon). C'est un palier de plus, sur un axe que la charte n'a pas
+     ouvert : il demande un arbitrage, pas une reconduction tacite.        */
+  @media (max-height: 559.98px) {
+    .hero__v {
+      /* LE PLAFOND ET LE POINT FOCAL SONT MESURÉS SUR LA DÉRIVÉE, pas
+         estimés. L'enseigne — l'emblème ET les deux lignes de lettrage —
+         occupe 27,8 % à 47,2 % de la hauteur du cadrage 4:3. Sur un écran de
+         844 × 390, la source est mise à l'échelle de la largeur (633 px de
+         haut) et l'enseigne y tient donc la bande 176 → 299, soit 123 px.
+
+         48vh ouvre une fenêtre de 187 px : l'enseigne y entre entière, avec
+         une trentaine de pixels de part et d'autre. Un plafond à 44vh n'en
+         ouvrait que 172 et tranchait l'emblème par le haut — ce que le
+         § 7.13.1 interdit nommément (« un recadrage ne coupe jamais […] une
+         enseigne néon lisible »).
+
+         `--cadrage` à 32 % place cette fenêtre à 143 → 330, ce qui centre
+         l'enseigne dedans. La valeur du bloc parent (42 %) est réglée pour
+         un cadre 4:3 et descendait trop bas sur une bande de 4,5:1.
+
+         `inline-size: 100%` n'est pas décoratif : sans lui, `aspect-ratio`
+         déduit la LARGEUR de la hauteur plafonnée et la scène se rétrécit à
+         229 px au lieu d'occuper la colonne. Le plafond doit contraindre la
+         hauteur seule ; la largeur reste celle de la piste. */
+      --cadrage: 50% 32%;
+
+      inline-size: 100%;
+      min-block-size: 0;
+      max-block-size: 48vh;
+    }
+
+    /* Et la légende part, pour la même raison qu'elle part sous la planche :
+       sur une bande de 187 px, la plaque court sur la moitié de la largeur
+       à la hauteur exacte du lettrage au néon, et le barre. Une plaque qui
+       traverse l'enseigne est pire que pas de plaque — le nom est déjà
+       dans l'image, en lettres de deux centimètres. */
+    .hero__v .legende { display: none; }
   }
 
   .notice { grid-template-columns: 1fr; }
@@ -1239,30 +2493,41 @@ button.legende {
     margin-inline: auto;
   }
 
-  .sitefoot__g { grid-template-columns: 1fr 1fr; }
+  /* La page système passe en une colonne et la planche de décor s'en va :
+     B-27 la dit décorative et la masque sous 980 px. Elle ne porte aucune
+     information — la retirer ne retire rien. Le panneau, lui, cesse
+     d'être plafonné : il occupe la colonne. */
+  .syspage { grid-template-columns: 1fr; }
+  .sp-panel { max-inline-size: none; }
+  .sp-aside { display: none; }
 
-  /* La barre passe au menu déroulant. Le `.burger` porte `aria-expanded`
-     et `aria-controls` ; `.ouvert` est posée par le script, et c'est la
-     seule classe d'état nue de ce composant. */
-  .sitenav__in { position: relative; }
-  .sitenav__burger { display: block; }
-  .sitenav__l { display: none; }
-  .sitenav__l.ouvert {
-    display: flex;
-    position: absolute;
-    inset-block-start: var(--h-nav);
-    inset-inline: 0;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--sp-1);
-    margin: 0;
-    padding: var(--sp-3);
-    background: var(--surface-2);
-    border-block-end: var(--trait-filet) solid var(--bordure);
-  }
+  .sitefoot__g { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 619.98px) {
+
+  /* ── LA LÉGENDE DU HERO NE TIENT PAS SOUS LA PLANCHE, DONC ELLE PART ───
+     Mesuré, pas supposé. « Les Archives du Professeur Chen · plateau
+     principal » fait 51 signes — sous les 56 du § 7.13.3 — et demande
+     473 px en Space Mono 10 px à `--ls-m` (.16em). La plaque, elle, est
+     plafonnée à `100% − 2 × --sp-7` : 296 px à 360, 326 px à 390, 366 px à
+     430. Sur TOUS les téléphones courants, le texte est donc coupé par le
+     `text-overflow: ellipsis` du composant, et rend « … PLAT… ».
+
+     Une légende tronquée est pire que pas de légende : elle occupe 84 % de
+     la largeur d'une bande de 167 px pour ne pas se lire. Les trois issues
+     et leur verdict :
+       · la faire passer à deux lignes → § 7.13.3 impose « une seule ligne » ;
+       · réduire le corps ou l'interlettrage → 10 px et .16em sont le
+         plancher du chapitre 04, on ne descend pas ;
+       · la retirer sous la planche → rien n'est perdu : le nom du site est
+         DANS la photo, en néon, et le `h1` de la page est juste au-dessus.
+     C'est la troisième qui est appliquée. A1.2 n'exige pas une légende, il
+     interdit tout le reste sur la photo — n'y rien poser le respecte.
+
+     Le seuil est `--bp-planche`, pas une valeur inventée : c'est déjà là
+     que la scène change de cadrage et de forme (§ 0.20, cinq paliers). */
+  .hero__v .legende { display: none; }
 
   /* La ligne de sommaire s'empile : le rang, le titre, puis l'état, qui
      se range à gauche au lieu de flotter au bout d'une ligne vide. */
@@ -1273,4 +2538,10 @@ button.legende {
   .chap .etat { justify-self: start; }
 
   .sitefoot__g { grid-template-columns: 1fr; }
+
+  /* Sous la planche, le relevé du plan n'est plus servi à sa largeur
+     maximale de 32rem : l'échelle du viewBox tombe, et la compensation
+     monte pour la rattraper. 1,20 est le plafond du dessin — au-delà,
+     « LES RÉSEAUX » sort de la pièce 03. Voir le pavé de la section 18. */
+  .plan__svg { --plan-compense: 1.2; }
 }

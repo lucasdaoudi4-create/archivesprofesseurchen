@@ -24,3 +24,7 @@ dist-ssr
 *.tsbuildinfo
 vite.config.d.ts
 vite.config.js
+
+# Masters des visuels — 127 Mo de PNG 8192px fournis par l'auteur.
+# Seules les dérivées optimisées de public/img/ sont versionnées (2 Mo).
+/visuels/

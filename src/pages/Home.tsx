@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import {
   accueil,
@@ -21,11 +21,26 @@ import {
   routes,
   site,
 } from "../data/site";
+import {
+  CADRAGE_COLONNE,
+  TAILLES_NOTICE,
+  TAILLES_PORTRAIT,
+  TAILLES_SCENE,
+  chemin,
+  jeuSources,
+  narrateurPlanDeFace,
+  narrateurPortrait,
+  plateauHaut,
+  plateauLarge,
+  ratio,
+  repli,
+  secours,
+} from "../data/visuels";
 import PlanAuSol from "../components/accueil/PlanAuSol";
 import PanneauMatiere from "../components/accueil/PanneauMatiere";
 import EtatServeur from "../components/accueil/EtatServeur";
-import { Coche, Ecusson, LogoReseau } from "../components/accueil/Glyphes";
-import { useRevelation } from "../components/accueil/useRevelation";
+import { Ecusson, Icone, LogoReseau } from "../components/ui/Icones";
+import { useRevelation } from "../hooks/useRevelation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    L'ACCUEIL — route `/` · la page la plus normée du site
@@ -61,15 +76,22 @@ import { useRevelation } from "../components/accueil/useRevelation";
    rapport au `bg-encre` de la page précédente est la plus visible de toute
    la migration, et elle est voulue.
 
-   ── LA PHOTO N'EST PAS PUBLIABLE, ET LA PAGE LE SAIT ──────────────────────
+   ── LA PHOTO EST LÀ, ET LA PAGE GARDE SON CHEMIN SANS PHOTO ───────────────
 
-   `heroPhoto` et `portraitPhoto` valent `null` dans `src/data/site.ts` : la
-   validation juridique de l'enseigne du décor n'est pas rendue (07-imagerie
-   § 7.14). La page ne fabrique donc AUCUN repli d'image — elle compose la
-   scène avec les matières du système (`PanneauMatiere`), sans enseigne
-   redessinée et sans légende, puisqu'une légende nomme un sujet photographié.
-   Le jour où la photo arrive, les deux branches `heroPhoto ? … : …` basculent
-   toutes seules : rien d'autre n'est à toucher.
+   `heroPhoto` et `portraitPhoto` sont renseignés dans `src/data/site.ts` :
+   l'auteur a levé la réserve de 07-imagerie § 7.14, qui lui appartient. Les
+   trois branches `heroPhoto ? … : …` / `portraitPhoto ? … : …` NE SONT PAS
+   supprimées pour autant — la réserve est révocable d'un mot, les deux
+   constantes redeviennent `null`, et la page doit alors retomber sans une
+   erreur sur `PanneauMatiere` et sur l'atelier à une colonne. Les deux
+   chemins sont donc servis, et aucun n'est le brouillon de l'autre.
+
+   Ce que la page lit dans `src/data/visuels.ts`, et nulle part ailleurs :
+   les dérivées (`jeuSources`), la dérivée de tête (`repli`), le rapport de
+   forme (`ratio`), l'aplat de chargement et le texte de remplacement. Aucun
+   chemin de fichier n'est composé ici — c'est la règle du § 0.19, et c'est
+   ce qui fait qu'une image repassée en -v02 ne demande aucune retouche de
+   page.
 
    ── CE QUE § 0.36 RETIRE DE CETTE PAGE, ET NE REMPLACE PAS ────────────────
 
@@ -170,6 +192,35 @@ const PLAQUE: Record<number, string> = {
   3: "palier__plaque mat-acier acier",
 };
 
+/* ── LES LARGEURS SERVIES VIENNENT DE `visuels.ts` ────────────────────────
+   Un `sizes` faux coûte plus cher qu'un `srcset` absent : le navigateur
+   choisit sa dérivée AVANT de connaître la mise en page. Les quatre phrases
+   que cette page emploie — la condition de cadrage et les trois `sizes` —
+   ne sont donc PAS écrites ici : elles vivent dans `src/data/visuels.ts`,
+   à côté des dérivées qu'elles servent, avec le calcul de grille qui les
+   justifie. Deux raisons de les y avoir déplacées :
+
+     · `TAILLES_NOTICE` était recopié à l'identique dans `Formation.tsx`,
+       sous le nom `TAILLES_PLANCHE`, avec un commentaire de chaque côté
+       disant qu'ils ne devaient pas diverger. Un commentaire ne tient pas
+       deux fichiers d'accord ; un export, si.
+     · `vite.config.ts` fabrique le lien de préchargement du héros et a
+       besoin EXACTEMENT du même `media` et du même `sizes`. S'ils
+       divergeaient d'un caractère, le navigateur téléchargerait deux
+       dérivées au lieu d'une.                                            */
+
+/* ── L'APLAT DE CHARGEMENT ────────────────────────────────────────────────
+   Il n'y a plus de crochet ici, et c'est le § 7.13.5 qui l'enlève :
+   « Placeholder : aplat de couleur pris dans la table LQIP des tokens, pas
+   de flou progressif, pas d'effet de balayage. »
+
+   La page portait un `useSceneChargee` qui écoutait `load`, rattrapait le
+   cas de l'image déjà en cache, et posait une classe `.chargee` pour éteindre
+   une vignette floutée. Un aplat de couleur n'a rien de tout cela à faire :
+   il est déclaré en `background-color` sur le cadre, la photo se peint
+   par-dessus, et il n'existe aucun état intermédiaire à observer. Le seul
+   token que le balisage pose encore est `--aplat`, lu de `visuels.ts`.   */
+
 export default function Home() {
   useMetadonneesAccueil();
   useRevelation();
@@ -204,16 +255,147 @@ export default function Home() {
           </div>
         </div>
 
-        {/* La scène. Rien d'autre que l'image et sa plaque n'entre ici. */}
-        <div className="hero__v">
+        {/* La scène. Rien d'autre que l'image et sa plaque n'entre ici.
+            AUCUN emblème, AUCUN halo, AUCUNE étincelle : l'enseigne est DANS
+            la photo, troisième interdit d'A1.2 — une seule enseigne par
+            écran. On ne redessine pas en HTML ce que l'image contient déjà.
+
+            ── L'EMPILEMENT SOUS `planche` (620) ──────────────────────────
+            `30-composants.css` fait passer la scène AVANT le panneau dès
+            979,98 px (`.hero__v{order:-1}`) : « on voit le lieu avant de
+            lire ce qu'on y fait ». La règle tient tant que la scène EST le
+            lieu, et tant qu'elle laisse de la place au titre. Elle ne tient
+            plus sur un écran de 390 px, où la scène occuperait le premier
+            écran ENTIER avant le moindre mot : le visiteur ouvrirait la page
+            sur une image sans une ligne de texte, et sans savoir où il est.
+
+            Les trois utilitaires ci-dessous ne s'appliquent QUE sous 620 px.
+            Au-dessus, aucune classe n'est émise : l'ordre du composant reste
+            intact, et A1.2 — panneau clair à gauche, scène à droite —
+            continue de gouverner la planche, la paillasse et le poste de
+            travail. C'est de la mise en page locale, donc en utilitaires
+            (socle § 0.21), et c'est l'`order` du flux, jamais un
+            positionnement absolu.
+
+              · `order-last`      la scène passe APRÈS le panneau : le titre,
+                                  le chapô et les deux boutons sont au-dessus
+                                  de la ligne de flottaison, la photo suit ;
+              · `min-h-0`         libère le plancher de `52vw` du composant,
+                                  sans quoi le ratio ci-dessous ne pourrait
+                                  pas descendre ;
+              · `aspect-planche`  le plus plat des ratios du système — le
+                                  jeton `planche` du thème Tailwind, jumeau
+                                  déclaré de `--ar-planche` (21/9). La scène
+                                  devient une bande de pied de 167 px sur un
+                                  écran de 390, exactement comme `.notice__v`
+                                  prend `--ar-scene` au même repli. C'est
+                                  cette borne, et elle seule, qui garantit
+                                  que la photo ne repousse rien.
+
+            ── LES DEUX TOKENS QUE LE BALISAGE DÉCLARE ────────────────────
+            `--ratio` et `--aplat` sont lus par `.hero__v`. Ils ne sont posés
+            QUE sur le chemin avec photo : sans elle, `aspect-ratio` retombe
+            sur `auto`, le fond reprend le noir de scène, et la composition
+            de matières retrouve son plancher de hauteur au pixel près. Une
+            déclaration de token sur l'élément est la seule forme de style
+            local que le § 0.21 admette.
+
+            `--aplat` ne porte PAS une couleur : il porte le NOM du jeton
+            (`var(--lqip-dec01)`). La table LQIP du § 7.13.5 vit dans
+            `01-tokens-couleur.css`, et une page n'écrit jamais une couleur
+            du système en dur — pas même par la main de `visuels.ts`.      */}
+        <div
+          className="hero__v max-planche:order-last max-planche:min-h-0 max-planche:aspect-planche"
+          style={
+            heroPhoto
+              ? ({
+                  "--ratio": String(ratio(plateauHaut)),
+                  "--aplat": plateauHaut.aplat,
+                } as CSSProperties)
+              : undefined
+          }
+        >
           {heroPhoto ? (
             <>
-              <img
-                src={heroPhoto.src}
-                alt={heroPhoto.alt}
-                fetchPriority="high"
-                decoding="async"
-              />
+              {/* `<picture>` : `.hero__v picture { display: contents }` le
+                  sort de la mise en page, l'élément `img` reste l'enfant direct de
+                  la scène et son `block-size: 100%` mesure encore quelque
+                  chose. Ordre de lecture du navigateur : la PREMIÈRE source
+                  dont le `media` ET le `type` conviennent gagne — d'où les
+                  trois sources de la colonne AVANT les deux de la bande, et
+                  l'élément `img` en dernier recours.
+
+                  L'image reste à `opacity: 1` — deuxième interdit d'A1.2. Ni
+                  filtre, ni voile, ni surcouche ne sont écrits ici : le seul
+                  voile du hero est le `::after` latéral du composant, qui
+                  s'éteint à 32 % et ne sert qu'à porter `.legende--bg`. */}
+              <picture>
+                {/* La colonne haute (4:3), au-dessus de `planche`. */}
+                <source
+                  media={CADRAGE_COLONNE}
+                  type="image/avif"
+                  srcSet={jeuSources(plateauHaut, "avif")}
+                  sizes={TAILLES_SCENE}
+                />
+                <source
+                  media={CADRAGE_COLONNE}
+                  type="image/webp"
+                  srcSet={jeuSources(plateauHaut, "webp")}
+                  sizes={TAILLES_SCENE}
+                />
+                <source
+                  media={CADRAGE_COLONNE}
+                  type="image/jpeg"
+                  srcSet={jeuSources(plateauHaut, "jpg")}
+                  sizes={TAILLES_SCENE}
+                />
+
+                {/* La bande large (16:9), en dessous. Sans `media` : c'est
+                    la source attrape-tout, celle qui reste quand la colonne
+                    ne s'applique pas. */}
+                <source
+                  type="image/avif"
+                  srcSet={jeuSources(plateauLarge, "avif")}
+                  sizes={TAILLES_SCENE}
+                />
+                <source
+                  type="image/webp"
+                  srcSet={jeuSources(plateauLarge, "webp")}
+                  sizes={TAILLES_SCENE}
+                />
+
+                {/* Le JPEG de la bande large ferme la chaîne : aucun
+                    navigateur ne reste sans image. `width`/`height` sont
+                    ceux de sa plus grande dérivée — ils posent le rapport de
+                    forme intrinsèque avant le décodage, et `--ratio` pose
+                    celui de la boîte : à aucun moment la page ne saute.
+
+                    C'est l'image LCP de l'accueil : `fetchpriority="high"`
+                    la sort de la file d'attente basse où le navigateur range
+                    les images, et `loading="eager"` interdit tout report.
+                    `decoding="async"` rend la main au fil principal pendant
+                    le décodage — il ne retarde pas la peinture, il évite de
+                    bloquer le reste.
+
+                    L'alt vient de `visuels.ts` par `heroPhoto` : il n'est ni
+                    réécrit, ni complété, ni traduit ici. */}
+                <img
+                  src={heroPhoto.src}
+                  srcSet={jeuSources(plateauLarge, "jpg")}
+                  sizes={TAILLES_SCENE}
+                  alt={heroPhoto.alt}
+                  width={repli(plateauLarge).l}
+                  height={repli(plateauLarge).h}
+                  fetchPriority="high"
+                  loading="eager"
+                  decoding="async"
+                />
+              </picture>
+
+              {/* La seule chose posée sur la photo : une plaque mono d'une
+                  cinquantaine de signes, sur la lisière que le voile latéral
+                  raccorde au panneau. Aucun titre, aucun paragraphe, aucun
+                  bouton — premier interdit d'A1.2. */}
               <p className="legende legende--bg">{accueil.hero.legendePhoto}</p>
             </>
           ) : (
@@ -228,17 +410,21 @@ export default function Home() {
       {/* ══════════════════ 3 · 01 — LA FORMATION ══════════════════ */}
       <section className="bande" id="b-formation">
         <div className="wrap">
-          <div className="tete rv">
+          <div className="tete" data-rv>
             <p className="eyebrow">{formation.surtitre}</p>
             <h2 className="h2">{formation.titre}</h2>
             <p className="lede">{formation.lede}</p>
           </div>
 
           {/* ── Le module ouvert aujourd'hui ── */}
-          <h3 className="h3 sous rv">{formation.sousTitreModules}</h3>
-          <p className="corps-s t-secondaire rv">{formation.introModules}</p>
+          <h3 className="h3 sous" data-rv>{formation.sousTitreModules}</h3>
+          <p className="corps-s t-secondaire" data-rv>{formation.introModules}</p>
 
-          <div className="notice rv mt-8">
+          {/* `mt-[var(--sp-8)]` et non `mt-8` : l'échelle numérique de
+              Tailwind diverge de celle de la charte à partir du rang 7 —
+              Tailwind 8 rend 32 px, `--sp-8` en vaut 40. La trame de 4 du
+              § 0.13 ne se lit que dans les jetons. */}
+          <div className="notice mt-[var(--sp-8)]" data-rv>
             <div className="notice__g pilier-email">
               <p className="code-arc">{module01.chapo}</p>
               <h3 className="notice__t h3">
@@ -266,9 +452,73 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="notice__v">
+            {/* La scène de la notice est une BANDE dans les deux états :
+                colonne .95fr au-dessus de paillasse, `--ar-scene` (16:9) en
+                dessous. Un seul cadrage suffit donc ici — `plateauLarge` —
+                et il n'y a rien à arbitrer entre deux formes.
+
+                `contents` sur le `<picture>` : `.notice__v` n'a pas la règle
+                que `.hero__v` porte, et sans elle la boîte en ligne du
+                `<picture>` s'intercalerait entre la scène et son image, qui
+                perdrait son `block-size: 100%`. C'est de la mise en page
+                locale d'une page, donc un utilitaire (§ 0.21).
+
+                `loading="lazy"` : la notice est sous la ligne de flottaison
+                sur tous les gabarits. */}
+            {/* ── LA NOTICE NE SERT PAS LA MÊME PHOTO QUE LE HÉROS ────────
+                Elle le faisait, et c'était le défaut le plus visible de la
+                page : le plateau paraissait DEUX FOIS sur l'accueil, à un
+                écran d'intervalle, avec le même texte de remplacement mot
+                pour mot. Un lecteur d'écran annonçait deux fois la même
+                phrase de 106 signes pour deux images qui n'en sont qu'une,
+                et l'œil lisait du remplissage là où il devait lire une
+                notice.
+
+                La notice porte le MODULE 01. L'image qui le montre est le
+                plan de face — le narrateur derrière la paillasse, un carnet
+                ouvert devant lui — et c'est exactement celle que
+                `/formation` sert déjà dans SA notice, pour ce même module.
+                Les deux pages disent donc la même chose avec la même image,
+                ce qui est la définition d'une notice.
+
+                Le plateau reste ce qu'il est : le héros de la page, servi
+                une fois, et l'affiche du lecteur vidéo trois blocs plus bas.
+
+                `--cadrage` : le narrateur, `30% 34%` (§ 7.13.1, « cale le
+                visage, pas le buste »), et non le défaut de `.notice__v img`
+                qui vise le plateau. */}
+            <div
+              className="notice__v"
+              style={
+                {
+                  "--cadrage": "30% 34%",
+                  "--aplat": narrateurPlanDeFace.aplat,
+                } as CSSProperties
+              }
+            >
               {heroPhoto ? (
-                <img src={heroPhoto.src} alt={heroPhoto.alt} loading="lazy" decoding="async" />
+                <picture className="contents">
+                  <source
+                    type="image/avif"
+                    srcSet={jeuSources(narrateurPlanDeFace, "avif")}
+                    sizes={TAILLES_NOTICE}
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={jeuSources(narrateurPlanDeFace, "webp")}
+                    sizes={TAILLES_NOTICE}
+                  />
+                  <img
+                    src={chemin(narrateurPlanDeFace, secours(narrateurPlanDeFace), "jpg")}
+                    srcSet={jeuSources(narrateurPlanDeFace, "jpg")}
+                    sizes={TAILLES_NOTICE}
+                    alt={narrateurPlanDeFace.alt}
+                    width={repli(narrateurPlanDeFace).l}
+                    height={repli(narrateurPlanDeFace).h}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
               ) : (
                 <PanneauMatiere variante="scene" />
               )}
@@ -276,19 +526,56 @@ export default function Home() {
           </div>
 
           {/* ── La preuve, avant la promesse ──
+              Le bloc `.atelier` est fait pour accueillir le portrait : la
+              colonne d'image (`.atelier__p`), sa signature en pied
+              (`.legende--pied`, que la section 17 de `30-composants.css`
+              nomme explicitement), et le texte à côté.
+
+              § 0.38 — LE STATUT DU NARRATEUR N'EST PAS TRANCHÉ. Est-il le
+              Professeur Chen, ou l'archiviste qui tient ses Archives ? Tant
+              que la question n'est pas arbitrée, l'alt de `visuels.ts` dit
+              ce qu'on voit et rien de plus : il ne nomme PERSONNE, et il
+              n'est pas réécrit ici pour le faire. La signature en pied dit
+              « Le narrateur · Les Archives », ce qui est exactement le
+              statut ouvert, et pas un nom.
+
               Sans portrait publiable, le split n'a plus qu'une colonne : on
               retire la colonne d'image plutôt que d'y poser une plaque et la
               signature « Le narrateur », qui nommerait un absent. */}
-          <h3 className="h3 sous rv">{formation.atelier.titre}</h3>
+          <h3 className="h3 sous" data-rv>{formation.atelier.titre}</h3>
           {portraitPhoto ? (
-            <div className="atelier split rv">
-              <div className="atelier__p">
-                <img
-                  src={portraitPhoto.src}
-                  alt={portraitPhoto.alt}
-                  loading="lazy"
-                  decoding="async"
-                />
+            <div className="atelier split" data-rv>
+              <div
+                className="atelier__p"
+                style={{ "--aplat": narrateurPortrait.aplat } as CSSProperties}
+              >
+                {/* Carré (`--ar-portrait`), quatre dérivées de 320 à 960.
+                    `contents` pour la même raison que la notice :
+                    `.atelier__p img` attend l'image en enfant direct.
+                    `loading="lazy"` — le bloc est loin sous la ligne de
+                    flottaison, il ne dispute rien au LCP du hero. */}
+                <picture className="contents">
+                  <source
+                    type="image/avif"
+                    srcSet={jeuSources(narrateurPortrait, "avif")}
+                    sizes={TAILLES_PORTRAIT}
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={jeuSources(narrateurPortrait, "webp")}
+                    sizes={TAILLES_PORTRAIT}
+                  />
+                  <img
+                    src={portraitPhoto.src}
+                    srcSet={jeuSources(narrateurPortrait, "jpg")}
+                    sizes={TAILLES_PORTRAIT}
+                    alt={portraitPhoto.alt}
+                    width={repli(narrateurPortrait).l}
+                    height={repli(narrateurPortrait).h}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
                 <p className="legende legende--pied">{formation.atelier.signature}</p>
               </div>
               <div>
@@ -298,7 +585,7 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="atelier rv">
+            <div className="atelier" data-rv>
               {formation.atelier.paragraphes.map((paragraphe) => (
                 <p key={paragraphe}>{paragraphe}</p>
               ))}
@@ -308,18 +595,18 @@ export default function Home() {
           {/* ── Trois paliers, une progression ──
               L'ancre `#b-paliers` est portée par le titre, pas par une
               section : c'est là que mène le premier bouton du hero. */}
-          <h3 className="h3 sous rv" id="b-paliers">
+          <h3 className="h3 sous" data-rv id="b-paliers">
             {blocPaliers.titre}
           </h3>
-          <p className="corps-s t-secondaire rv">{blocPaliers.ledeAccueil}</p>
+          <p className="corps-s t-secondaire" data-rv>{blocPaliers.ledeAccueil}</p>
 
           {/* L'aveu, dit AVANT l'abonnement et pas après. */}
-          <div className="encart rv mt-6">
+          <div className="encart mt-6" data-rv>
             <div className="encart__t">{encartProduction.accueil.titre}</div>
             <p className="corps-s">{encartProduction.accueil.texte}</p>
           </div>
 
-          <div className="paliers paliers--home rv">
+          <div className="paliers paliers--home" data-rv>
             {paliersPayants.map((cle) => {
               const palier = paliers[cle];
               return (
@@ -342,6 +629,16 @@ export default function Home() {
                   </div>
 
                   <div className="palier__corps">
+                    {/* SC 1.4.1 — LA COULEUR NE PEUT PAS ÊTRE LE SEUL
+                        SIGNALEMENT. `data-mise="recommande"` n'épaissit et ne
+                        recolore que le filet ; 32-membre.css § « le seul
+                        signalement autorisé » déclare l'étiquette `.mention`
+                        OBLIGATOIRE à côté de lui, et `CartePalier` — l'autre
+                        rendu du même composant, sur /formation — la rend
+                        déjà. Deux cartes du même composant ne peuvent pas
+                        diverger : le mot est écrit ici aussi. */}
+                    {palier.phare && <span className="mention self-start">Recommandé</span>}
+
                     <div className="palier__prix">
                       {palier.prix}
                       <span>{palier.periodicite}</span>
@@ -374,7 +671,7 @@ export default function Home() {
             })}
           </div>
 
-          <div className="hero__b rv">
+          <div className="hero__b" data-rv>
             <Link className="btn" to={routes.paliers}>
               {blocPaliers.ctaComparer}{" "}
               <span className="btn__f" aria-hidden="true">→</span>
@@ -392,20 +689,21 @@ export default function Home() {
           et les composants basculent seuls. */}
       <section className="bande acier mat-acier" id="b-minecraft">
         <div className="wrap">
-          <div className="tete rv">
+          <div className="tete" data-rv>
             <p className="eyebrow">{minecraft.surtitre}</p>
             <h2 className="h2">{minecraft.titre}</h2>
             <p className="lede">{minecraft.lede}</p>
           </div>
 
-          <div className="serveur rv">
+          <div className="serveur" data-rv>
             <span className="serveur__libelle">{minecraft.labelAdresse}</span>
             <code className="serveur__adresse">{minecraft.ip}</code>
             <span className="meta">{minecraft.releve}</span>
             <EtatServeur />
           </div>
 
-          <div className="cartes rv mt-8">
+          {/* Même correction qu'au bloc 01 : `--sp-8` vaut 40 px, `mt-8` 32. */}
+          <div className="cartes mt-[var(--sp-8)]" data-rv>
             {minecraft.cartes.map((carte) => (
               <div className="carte" key={carte.titre}>
                 <h3 className="carte-titre">{carte.titre}</h3>
@@ -414,7 +712,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="hero__b rv">
+          <div className="hero__b" data-rv>
             <Link className="btn" to={routes.minecraft}>
               Voir l’adresse du serveur{" "}
               <span className="btn__f" aria-hidden="true">→</span>
@@ -436,13 +734,13 @@ export default function Home() {
       {/* ══════════════════ 5 · 03 — LES RÉSEAUX ══════════════════ */}
       <section className="bande bande--teinte" id="b-reseaux">
         <div className="wrap">
-          <div className="tete rv">
+          <div className="tete" data-rv>
             <p className="eyebrow">{blocReseaux.surtitre}</p>
             <h2 className="h2">{blocReseaux.titre}</h2>
             <p className="lede">{blocReseaux.lede}</p>
           </div>
 
-          <div className="reseaux rv">
+          <div className="reseaux" data-rv>
             {reseauxOrdre.map((cle) => {
               const reseau = reseaux[cle];
               return (
@@ -470,7 +768,7 @@ export default function Home() {
       {/* ══════════════════ 6 · 04 — ME JOINDRE ══════════════════ */}
       <section className="bande" id="b-contact">
         <div className="wrap split">
-          <div className="rv">
+          <div data-rv>
             <p className="eyebrow">{accueil.contact.surtitre}</p>
             <h2 className="h2">{accueil.contact.titre}</h2>
             <p className="lede">{accueil.contact.lede}</p>
@@ -478,7 +776,7 @@ export default function Home() {
             <ul className="liste mt-6">
               {contact.motifs.map((motif) => (
                 <li key={motif}>
-                  <Coche />
+                  <Icone nom="coche" taille={20} ton="action" />
                   <span>{motif}</span>
                 </li>
               ))}
@@ -502,7 +800,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rv">
+          <div data-rv>
             <div className="carte">
               {contact.cartes.map((carte, rang) => (
                 <Fragment key={carte.titre}>

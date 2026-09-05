@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "createdAt": "2026-09-03T10:49:05.729Z",
+        "reason": "Imposee par la charte ARC v1.0.0 ch.04 typographie 4.1 (ARC TYP-01), arretee par l'auteur le 1er sept. 2026 avec justification ecrite ; l'utilisateur a confirme la migration vers cette charte."
+      },
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-09-03T10:49:05.793Z",
+        "reason": "Imposee par la charte ARC v1.0.0 ch.04 typographie 4.1 (ARC TYP-02), choisie pour partager le squelette de Space Mono (TYP-03) ; l'utilisateur a confirme la migration vers cette charte."
+      }
+    ]
+  }
+}

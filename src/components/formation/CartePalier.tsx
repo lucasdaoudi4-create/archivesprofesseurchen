@@ -1,4 +1,5 @@
 import { blocPaliers, patreon, type Palier } from "../../data/site";
+import { Ecusson, Icone } from "../ui/Icones";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CARTE DE PALIER — ARC · CMP — 27 · chapitre 10, socle §0.26, Amendement A1.1
@@ -40,33 +41,15 @@ import { blocPaliers, patreon, type Palier } from "../../data/site";
 
    Un blason par rang, sur la grille 100 × 120 de `.ecu` (31-icones.css), qui
    pose seule la hauteur servie et l'épaisseur de trait qui va avec. Le
-   nombre de barres dit le rang, et le disque monte d'autant. Il est
-   `aria-hidden` : le nom du palier est écrit à deux centimètres de là, le
-   redire en libellé d'image ferait doubler l'annonce.
+   nombre de barres dit le rang, et le disque monte d'autant.
+
+   Le tracé était recopié ici ET dans les glyphes de l'accueil — deux copies
+   du même blason, qui n'attendaient qu'une retouche pour diverger. Il vit
+   maintenant une seule fois, dans `components/ui/Icones`, et cette carte ne
+   fait plus que le demander. Aucun `titre` n'est passé : le signe reste
+   donc `aria-hidden`, et c'est voulu — le nom du palier est écrit à deux
+   centimètres de là, le redire en libellé d'image ferait doubler l'annonce.
    ═══════════════════════════════════════════════════════════════════════════ */
-
-const CONTOUR_ECU = "M50 6 88 20v40c0 28-18 44-38 52C30 104 12 88 12 60V20z";
-
-const BARRES_ECU: Record<number, JSX.Element> = {
-  1: (
-    <>
-      <circle cx="50" cy="48" r="11" />
-      <path d="M36 76h28" />
-    </>
-  ),
-  2: (
-    <>
-      <circle cx="50" cy="46" r="11" />
-      <path d="M36 72h28M36 84h28" />
-    </>
-  ),
-  3: (
-    <>
-      <circle cx="50" cy="44" r="11" />
-      <path d="M36 68h28M36 80h28M36 92h28" />
-    </>
-  ),
-};
 
 /* La matière de la plaque, par rang. Voir le contrat de balisage ci-dessus. */
 const MATIERE_PLAQUE: Record<number, string> = {
@@ -84,10 +67,7 @@ export default function CartePalier({ palier }: { palier: Palier }) {
       data-mise={palier.phare ? "recommande" : undefined}
     >
       <div className={plaque}>
-        <svg className="ecu" viewBox="0 0 100 120" aria-hidden="true" focusable="false">
-          <path d={CONTOUR_ECU} />
-          {BARRES_ECU[palier.rang]}
-        </svg>
+        <Ecusson rang={palier.rang} />
         <div>
           <div className="palier__code">{palier.code}</div>
           <div className="palier__n">{palier.nom}</div>
@@ -110,9 +90,7 @@ export default function CartePalier({ palier }: { palier: Palier }) {
           <ul className="palier__l">
             {palier.ouvre.map((ouverture) => (
               <li key={ouverture.titre}>
-                <svg className="ico ico--20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="m5 12 5 5L19 7" />
-                </svg>
+                <Icone nom="coche" taille={20} />
                 <span>
                   <b>{ouverture.titre}</b>
                   {ouverture.texte}

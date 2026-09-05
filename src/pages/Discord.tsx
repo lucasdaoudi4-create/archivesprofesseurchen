@@ -1,6 +1,10 @@
-import { useEffect, useRef } from "react";
-import { discord, meta, routes, site } from "../data/site";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { discord, meta, minecraft, routes, site } from "../data/site";
 import EtatCommunaute from "../components/discord/EtatCommunaute";
+import { reglesAcces } from "../components/minecraft/reglesAcces";
+import { Icone } from "../components/ui/Icones";
+import { useRevelation } from "../hooks/useRevelation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LA COMMUNAUTÉ — route `/discord` · maquette `#v-discord` (l. 1170-1191)
@@ -36,47 +40,14 @@ import EtatCommunaute from "../components/discord/EtatCommunaute";
 
    `04-tokens-motion.css` pose la règle : « le contenu est visible sans
    JavaScript, c'est la classe `.rv` qui masque, et elle n'est posée que si
-   l'observateur existe ». Sans `IntersectionObserver`, les trois blocs
-   basculent donc en `.on` immédiatement : une page dont le contenu reste
-   invisible est un défaut plus grave qu'une page sans animation. Le
-   `prefers-reduced-motion` n'est pas traité ici — `99-preferences.css`
-   neutralise déjà `.rv`, et le doubler en JavaScript rouvrirait la porte
-   à deux vérités.
+   l'observateur existe ». Cette page réimplémentait l'observateur en ligne,
+   et posait `.rv` dans son JSX — donc masquait avant de savoir si quelqu'un
+   viendrait démasquer. Les deux sont partis : les blocs portent `data-rv`, et
+   `src/hooks/useRevelation.ts` est le seul endroit du site où le mécanisme
+   est écrit. Le `prefers-reduced-motion` n'est pas traité ici non plus —
+   `99-preferences.css` neutralise déjà `.rv`, et le doubler en JavaScript
+   rouvrirait la porte à deux vérités.
    ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Révélation au défilement ─────────────────────────────────────────────
-   Le seuil de 0,12 et le retrait de l'observation après le premier passage
-   viennent de la maquette. Les éléments déjà dans le cadre à l'arrivée de
-   route entrent par le premier lot de l'observateur, qui se déclenche au
-   montage : une page courte ne reste jamais vide.                        */
-function useRevelation(portee: { readonly current: HTMLElement | null }) {
-  useEffect(() => {
-    const racine = portee.current;
-    if (!racine) return;
-
-    const cibles = Array.from(racine.querySelectorAll<HTMLElement>(".rv"));
-    if (cibles.length === 0) return;
-
-    if (typeof IntersectionObserver === "undefined") {
-      cibles.forEach((cible) => cible.classList.add("on"));
-      return;
-    }
-
-    const observateur = new IntersectionObserver(
-      (entrees) => {
-        for (const entree of entrees) {
-          if (!entree.isIntersecting) continue;
-          entree.target.classList.add("on");
-          observateur.unobserve(entree.target);
-        }
-      },
-      { threshold: 0.12 }
-    );
-
-    cibles.forEach((cible) => observateur.observe(cible));
-    return () => observateur.disconnect();
-  }, [portee]);
-}
 
 /* ── Métadonnées de page — socle § 0.29 ───────────────────────────────────
    Le titre est posé PAR LA PAGE et EN AMONT : le § 0.28 fait lire
@@ -135,66 +106,112 @@ function useMetaPage() {
   }, []);
 }
 
-/* Coche de la liste — tracé relevé sur la maquette. `.ico` porte le trait,
-   `.ico--action` lit `--accent` : la même icône fonctionne sur fond clair
-   et en contexte acier, sans aucune règle descendante (§ 0.11). */
-function Coche() {
-  return (
-    <svg className="ico ico--20 ico--action" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="m5 12 5 5L19 7" />
-    </svg>
-  );
-}
-
-/* `ico-action-lien-externe` — socle § 0.25, ligne « Lien externe » : le
+/* Le signe sortant du bouton — socle § 0.25, ligne « Lien externe » : le
    pictogramme est DANS le balisage, jamais en `::after` CSS, et le libellé
    accessible dit la destination. Il prend la place de la flèche « → » de la
-   maquette, en gardant `.btn__f` : la poussée au clic est conservée. */
+   maquette, en gardant `.btn__f` : la poussée au clic est conservée.
+   Le tracé, lui, vient du jeu partagé — il n'appartient pas à cette page. */
 function FlecheSortante() {
   return (
     <span className="btn__f" aria-hidden="true">
-      <svg className="ico ico--16" viewBox="0 0 24 24">
-        <path d="M13.6 3.8h6.6v6.6" />
-        <path d="M20.2 3.8l-8.6 8.6" />
-        <path d="M17.6 13.8v5a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6V8.2a1.6 1.6 0 0 1 1.6-1.6h5" />
-      </svg>
+      <Icone nom="lien-externe" taille={16} />
     </span>
   );
 }
 
+/* ── La copie du bandeau ───────────────────────────────────────────────────
+   Comme sur /minecraft : ces deux chaînes devraient vivre dans
+   `src/data/site.ts`, le champ n'y existe pas et ce lot n'a pas la main sur
+   ce fichier. Elles sont groupées ici pour être déplacées d'un bloc. Tout le
+   reste du bandeau — titre, phrases, lignes d'accès — est LU dans `site.ts`.
+   Voir « À signaler » du lot.                                             */
+const INVITATION_SURTITRE = "Le serveur";
+const INVITATION_CTA = "Voir le serveur";
+
 export default function Discord() {
-  const page = useRef<HTMLElement>(null);
   useMetaPage();
-  useRevelation(page);
+  useRevelation();
 
   return (
-    <section className="bande" ref={page}>
-      <div className="wrap">
-        <div className="tete rv">
-          <p className="eyebrow">{discord.surtitre}</p>
-          <h1 className="h2">{discord.titre}</h1>
-          <p className="lede">{discord.lede}</p>
+    <>
+      <section className="bande" aria-labelledby="titre-discord">
+        <div className="wrap">
+          <div className="tete" data-rv>
+            <p className="eyebrow">{discord.surtitre}</p>
+            <h1 className="h2" id="titre-discord">
+              {discord.titre}
+            </h1>
+            <p className="lede">{discord.lede}</p>
+          </div>
+
+          <EtatCommunaute />
+
+          <ul className="liste max-w-[var(--me-corps-s)]" data-rv>
+            {discord.salons.map((salon) => (
+              <li key={salon}>
+                <Icone nom="coche" taille={20} ton="action" />
+                <span>{salon}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="hero__b" data-rv>
+            <a className="btn" href={discord.inviteUrl} target="_blank" rel="noopener">
+              {discord.cta}
+              <span className="sr-only"> (nouvel onglet)</span>
+              <FlecheSortante />
+            </a>
+          </div>
         </div>
+      </section>
 
-        <EtatCommunaute />
+      {/* ARC · CMP — 47 · Bandeau d'invitation — socle § 0.25, section 24 de
+          30-composants.css.
 
-        <ul className="liste rv max-w-[var(--me-corps-s)]">
-          {discord.salons.map((salon) => (
-            <li key={salon}>
-              <Coche />
-              <span>{salon}</span>
-            </li>
-          ))}
-        </ul>
+          `class="invitation acier mat-acier"` : le fond vient de la
+          COMPOSITION, jamais du composant — c'est ce qui garantit l'interdit
+          « jamais bordeaux » (`.invitation` n'écrit aucune couleur du tout)
+          et ce qui garde opérantes les compensations `prefers-contrast` et
+          `forced-colors` de 99-preferences.css, qui ne ciblent que `.mat-*`.
+          `.bande` n'est pas composée : `.invitation` porte déjà son propre
+          `padding-block: var(--rythme-m)`.
 
-        <div className="hero__b rv">
-          <a className="btn" href={discord.inviteUrl} target="_blank" rel="noopener">
-            {discord.cta}
-            <span className="sr-only"> (nouvel onglet)</span>
-            <FlecheSortante />
-          </a>
+          POURQUOI LE SERVEUR, ET PAS UN SECOND BOUTON DISCORD. Le bouton
+          d'entrée du Discord est déjà au-dessus, dans le corps de la page ;
+          le redoubler ici serait une insistance, et le § 0.25 proscrit
+          l'urgence. L'invitation ouvre donc sur l'autre lieu — le serveur —
+          et porte les trois mêmes lignes d'accès que /minecraft, parce que
+          c'est ici qu'on les cherche quand on vient d'entrer.
+
+          Ni compteur ni effectif : le relevé vit dans la `.livebox` du corps
+          de page, et une invitation dit ce qu'on trouve, pas combien on est. */}
+      <section className="invitation acier mat-acier" aria-labelledby="titre-invitation">
+        <div className="wrap">
+          <div className="invitation__c" data-rv>
+            <p className="eyebrow">{INVITATION_SURTITRE}</p>
+
+            <h2 className="invitation__t h2" id="titre-invitation">
+              {minecraft.nom}
+            </h2>
+
+            {/* Deux phrases, écrites dans `site.ts` et lues telles quelles. */}
+            <p className="invitation__p">{minecraft.lede}</p>
+
+            {/* Navigation interne : un `Link`, qui ne repart jamais sur le
+                réseau. Pas de `.btn__f` sortante — on ne quitte pas le site. */}
+            <Link className="btn btn--acier" to={routes.minecraft}>
+              {INVITATION_CTA}
+            </Link>
+
+            {/* Les trois lignes du § 0.25. Trois, jamais quatre. */}
+            <ul className="invitation__r">
+              {reglesAcces.map((regle) => (
+                <li key={regle}>{regle}</li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

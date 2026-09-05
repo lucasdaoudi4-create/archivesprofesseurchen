@@ -2,6 +2,32 @@
   command = "npm run build"
   publish = "dist"
 
+# ── En-têtes de cache ────────────────────────────────────────────────────
+# Netlify pose déjà `immutable` sur `/assets/*`, que Vite nomme par
+# empreinte. Il ne le pose PAS sur `public/`, qu'il recopie tel quel : les
+# images et les fontes y repartaient donc en revalidation à chaque visite.
+#
+# Les deux dossiers ci-dessous portent pourtant un nom stable PAR
+# CONSTRUCTION, et c'est le socle qui l'organise :
+#   · `/img/*`   — grammaire `arc-<domaine>-<sujet>-<format>-v<NN>.<ext>`
+#     (§ 0.19). « Le numéro de version ne recule jamais : une image corrigée
+#     après publication passe en -v02 et le nom change, ce qui suffit à
+#     casser les caches. » Un fichier de ce dossier ne change JAMAIS de
+#     contenu sous le même nom — c'est exactement la définition d'`immutable`.
+#   · `/fonts/*` — auto-hébergées (§ 0.32), préchargées par `index.html`, et
+#     figées : une fonte ne se corrige pas, elle se remplace.
+#
+# Un an, la valeur maximale que les navigateurs honorent en pratique.
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # ── Renvois — socle § 0.27 ───────────────────────────────────────────────
 # L'ORDRE COMPTE : Netlify applique la première règle qui correspond, et la
 # règle attrape-tout du bas correspond à tout. Toute nouvelle règle se pose

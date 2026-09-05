@@ -7,5 +7,9 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["vite.config.ts"]
+  // `src/data/visuels.ts` est listé parce que `vite.config.ts` l'importe : le
+  // greffon de préchargement lit les mêmes `srcset`, le même `media` et le
+  // même `sizes` que les pages, plutôt que d'en recopier une version qui
+  // pourrait diverger. Un projet `composite` doit lister tous ses fichiers.
+  "include": ["vite.config.ts", "src/data/visuels.ts"]
 }

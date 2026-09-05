@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="darkreader-lock" />
+<meta name="color-scheme" content="only light" />
+<title>arc-og-accueil-1200x630-v01</title>
+<style>
+  /* Les fontes du site, telles que public/fonts/ les sert. */
+  @font-face{font-family:"Fraunces";src:url("/fonts/fraunces-roman.woff2") format("woff2");font-weight:300 900;font-style:normal;font-display:block}
+  @font-face{font-family:"Space Mono";src:url("/fonts/space-mono-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+
+  :root{
+    /* Chapitre 07 · Tokens — la plaque bordeaux de la carte OG.
+       Mesures de la charte : #F4F5F6 → 11,44:1 · #FFD3A0 → 8,96:1. */
+    --scrim-og:rgba(58,17,24,.90);
+    --blanc-50:#F4F5F6;
+    --neon:#FFD3A0;
+    --ls-m:.16em;
+    /* Le facteur de suréchantillonnage : la carte est composée à 1200×630
+       puis rendue à 2×, et réduite par sharp. Le texte est rastérisé à la
+       taille agrandie, donc le 1200 final est un vrai suréchantillonnage. */
+    --k:2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:calc(1200px * var(--k));height:calc(630px * var(--k));overflow:hidden;background:#0B0E0F}
+
+  .carte{position:relative;width:1200px;height:630px;overflow:hidden;
+    transform:scale(var(--k));transform-origin:0 0}
+  .carte img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+
+  /* Dégradé de bas de cadre (§ 7.13.2), qui assoit la plaque sans toucher
+     à l'enseigne au néon ni au narrateur. */
+  .voile{position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 46%,rgba(11,14,15,.55))}
+
+  /* La plaque ne porte PAS le nom du site : le nom est DANS la photo, en
+     néon, et A1.2 n'admet qu'une enseigne par écran. Elle porte l'offre.
+     Filet de 1 px — § 7.13.5 : « la profondeur vient du filet 1 px et du
+     fond », et jamais d'un liseré épais. */
+  .plaque{position:absolute;left:56px;bottom:56px;
+    background:var(--scrim-og);border-left:1px solid var(--neon);
+    padding:26px 34px 28px}
+  .offre{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:38px;
+    line-height:1.12;letter-spacing:-.02em;color:var(--blanc-50);
+    font-optical-sizing:auto;font-variation-settings:"SOFT" 30}
+  .adresse{margin-top:16px;font-family:"Space Mono",ui-monospace,monospace;
+    font-size:15px;letter-spacing:var(--ls-m);text-transform:uppercase;
+    color:var(--neon)}
+</style>
+</head>
+<body>
+  <div class="carte">
+    <img src="/og-fond.jpg" alt="" />
+    <div class="voile"></div>
+    <div class="plaque">
+      <p class="offre">Une formation, un serveur,<br />une communauté.</p>
+      <p class="adresse">archivesprofesseurchen.com</p>
+    </div>
+  </div>
+</body>
+</html>

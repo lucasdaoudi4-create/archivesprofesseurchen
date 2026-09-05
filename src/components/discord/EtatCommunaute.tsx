@@ -1,54 +1,82 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDiscordWidget } from "../../hooks/useDiscordWidget";
 import { discord } from "../../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RELEVÉ DU SERVEUR DISCORD — socle § 0.25 · ARC · CMP — 46
+   RELEVÉ DU SERVEUR DISCORD — `.livebox` · ARC · CMP — 55 · addendum § B-33
    Les Archives du Professeur Chen — charte v1.0.0
 
-   Le § 0.25 pose trois règles pour ce composant, et les trois sont ici :
+   ── CE QUI CHANGE ─────────────────────────────────────────────────────────
 
-   1. AUCUN CHIFFRE DE COMMUNAUTÉ SANS SOURCE BRANCHÉE.
-      `discord.guildId` vaut `null` tant que l'identifiant du serveur n'a
-      pas été relevé (`CONTRAT_OUVERT`, src/data/site.ts). Tant qu'il vaut
-      `null`, ce composant ne rend RIEN — pas un compteur d'estimation, pas
-      un « 360+ », pas un repli. C'est ce que remplaçait l'ancien
-      `DiscordLiveStats` en variante « card », et c'est précisément ce que
-      le principe n° 3 des fondations interdit.
+   Ce composant rendait une ligne de jetons dans une `.serveur`, et surtout
+   il ne rendait RIEN du tout tant que `discord.guildId` valait `null` :
+   la page ne disait alors pas qu’un compteur existe, ni pourquoi il est
+   absent. Le silence total n’est pas l’état « muet » de la charte — c’est
+   son absence.
 
-   2. L'ÉTAT EST ÉCRIT, JAMAIS SEULEMENT COLORÉ.
-      `.etat--enligne` / `.etat--horsligne` portent une couleur, mais le mot
-      « En ligne » est là et reste lisible en couleurs forcées (SC 1.4.1).
-      C'est pour cette raison que `99-preferences.css` compense `forced-colors`
-      sur `.etat` et sur aucun nom réécrit localement.
+   L’anatomie normative est désormais tenue au mot (section 21 de
+   30-composants.css) : `.lb-head` (point + libellé) · `.lb-figure` (le
+   chiffre) · `.lb-sub` (la précision) · `.lb-act` (le bouton).
 
-   3. L'APPEL RÉSEAU SUIT LE MOTIF D'ATTENTE ARC · MOT — 11.
-      Rien pendant les 600 premières millisecondes — un relevé qui revient
-      en 200 ms ne doit pas faire clignoter un « chargement… ». Échec
-      déclaré à 8 s, même si la requête, elle, n'a pas encore rendu la main.
+   ── L’ÉTAT MUET, QUI EST L’ÉTAT RÉEL DU SITE AUJOURD’HUI ──────────────────
 
-   ── CE QUE CE COMPOSANT NE FAIT PAS ───────────────────────────────────────
+   `discord.guildId` vaut `null` (CONTRAT_OUVERT, src/data/site.ts) : le
+   compteur n’a AUCUNE source. `.livebox--muet` est fait pour cela — point
+   `--alerte`, chiffre « — », la phrase, et « le lien d’invitation RESTE ».
+   Ce qui n’est JAMAIS rendu : un chiffre. Pas de « 360+ », pas de repli,
+   pas d’estimation (principe n° 3 des fondations, § 0.25).
 
-   Il ne touche pas à `useDiscordWidget` : le hook et son rafraîchissement
-   de 60 s sont conservés tels quels. `/discord` est la seule surface du
-   site où il est monté (l'accueil ne l'affiche plus), parce que c'est la
-   seule page où un effectif de communauté a un sens.
+   Le même état sert l’échec du relevé, et c’est délibéré : dans les deux
+   cas c’est LE COMPTEUR qui est muet, jamais la communauté. Un widget qui
+   ne répond pas ne prouve rien sur un serveur Discord — d’où l’absence
+   totale de `.livebox--horsligne` ici, qui affirmerait ce qu’on ignore.
 
-   Il n'annonce pas « Hors ligne » quand le relevé échoue : un widget qui
-   ne répond pas ne prouve pas qu'un serveur est éteint. L'échec se dit
-   pour ce qu'il est — le relevé est indisponible, l'invitation reste
-   valable.
+   ── LE CHIFFRE NE PARLE PAS, LE CHANGEMENT D’ÉTAT SI ──────────────────────
+
+   Le relevé se rafraîchit seul toutes les 60 s et un lecteur d’écran n’en
+   savait rien (constat d’audit). Deux régions, et deux comportements :
+
+     · la `.livebox` porte `aria-live="off"` — un compteur qui s’annonce
+       toutes les minutes est insupportable ;
+     · une région `aria-live="polite"` en `.sr-only`, rendue en permanence,
+       reçoit le MOT d’état, et seulement quand il change. Le premier relevé
+       d’une page fraîchement ouverte ne dit rien : il n’y a pas de
+       changement, et le bloc est là, lisible.
+
+   ── LE MOTIF D’ATTENTE ARC · MOT — 11 ─────────────────────────────────────
+   Rien pendant les 600 premières millisecondes — un relevé qui revient en
+   200 ms ne doit pas faire clignoter un « chargement… ». Échec déclaré à
+   8 s, même si la requête, elle, n’a pas encore rendu la main. Une réponse
+   tardive reste une réponse et reprend la main sur le message.
+
+   ── LE HOOK N’EST PAS TOUCHÉ DANS SON CONTRAT ─────────────────────────────
+   `useDiscordWidget` garde sa signature, ses types et son point de
+   terminaison, et `/discord` reste la seule surface du site où il est monté.
+   Ce qui a changé chez lui — suspension du sondage en onglet caché,
+   annulation de la requête en vol au démontage — est interne.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/** Rien ne s'affiche avant ce seuil (ARC · MOT — 11). */
+/** Rien ne s’affiche avant ce seuil (ARC · MOT — 11). */
 const SEUIL_ATTENTE_MS = 600;
 
 /** Au-delà, le relevé est déclaré indisponible (ARC · MOT — 11). */
 const DELAI_ECHEC_MS = 8_000;
 
+const MOT_ATTENTE = "Vérification";
+const MOT_ENLIGNE = "En ligne";
+const MOT_MUET = "Compteur indisponible";
+
+const SUB_ATTENTE = "Relevé du serveur Discord en cours…";
+const SUB_ENLIGNE = "membres connectés";
+const SUB_MUET =
+  "Le compteur ne répond pas pour l’instant. L’invitation ci-dessous, elle, reste valable.";
+
+/** Trois états seulement : `--horsligne` affirmerait ce qu’on ne sait pas. */
+type EtatDirect = "attente" | "enligne" | "muet";
+
 /** Forme horaire de la charte (10-membre § 10.16) : « 14 h 32 », jamais « 14:32 ». */
 function heureCourte(date: Date): string {
-  return `${date.getHours()} h ${String(date.getMinutes()).padStart(2, "0")}`;
+  return `${date.getHours()} h ${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
 export default function EtatCommunaute() {
@@ -56,12 +84,13 @@ export default function EtatCommunaute() {
   const [attenteAffichee, setAttenteAffichee] = useState(false);
   const [echeanceDepassee, setEcheanceDepassee] = useState(false);
   const [verifieA, setVerifieA] = useState<string | null>(null);
+  const [annonce, setAnnonce] = useState("");
 
-  // Motif d'attente : les deux minuteries ne courent que pendant la requête,
-  // et les deux drapeaux sont remis à plat dès qu'elle a rendu la main. Sans
+  // Motif d’attente : les deux minuteries ne courent que pendant la requête,
+  // et les deux drapeaux sont remis à plat dès qu’elle a rendu la main. Sans
   // cette remise à plat, une première réponse arrivée à neuf secondes
-  // laisserait « Relevé indisponible » posé pour toute la session, alors que
-  // le compteur, lui, se rafraîchit toutes les soixante secondes.
+  // laisserait « Compteur indisponible » posé pour toute la session, alors
+  // que le compteur, lui, se rafraîchit toutes les soixante secondes.
   useEffect(() => {
     if (releve.status !== "loading") {
       setAttenteAffichee(false);
@@ -76,44 +105,93 @@ export default function EtatCommunaute() {
     };
   }, [releve.status]);
 
-  // L'heure du relevé est celle où la réponse est arrivée, pas celle du rendu.
+  // L’heure du relevé est celle où la réponse est arrivée, pas celle du rendu.
   useEffect(() => {
     if (releve.status === "ok") setVerifieA(heureCourte(new Date()));
   }, [releve]);
 
-  // Aucune source branchée : aucune fiche. Le silence est la bonne réponse.
-  if (discord.guildId === null) return null;
+  /* ── L’état du direct ────────────────────────────────────────────────────
+     `idle` est l’état du hook quand aucun identifiant ne lui est passé : il
+     ne lance alors aucun appel. C’est exactement le cas d’aujourd’hui, et
+     il tombe dans `--muet` comme un échec — dans les deux cas, il n’y a pas
+     de chiffre à montrer, et c’est tout ce que le visiteur a besoin de
+     savoir. L’échéance dépassée ne vaut échec que TANT QUE la requête
+     court : une réponse tardive reprend la main. */
+  const direct: EtatDirect =
+    releve.status === "ok"
+      ? "enligne"
+      : releve.status === "error" ||
+          releve.status === "idle" ||
+          (releve.status === "loading" && echeanceDepassee)
+        ? "muet"
+        : releve.status === "loading" && attenteAffichee
+          ? "attente"
+          : "muet";
 
-  // L'échéance dépassée ne vaut échec que TANT QUE la requête court : une
-  // réponse tardive reste une réponse, et elle reprend la main sur le message.
-  const echec =
-    releve.status === "error" || (releve.status === "loading" && echeanceDepassee);
-  const enAttente = releve.status === "loading" && attenteAffichee && !echeanceDepassee;
+  /* Avant 600 ms, il n’y a encore rien à dire : la `.livebox` ne s’affiche
+     pas du tout plutôt que de clignoter (MOT — 11). Ce cas ne concerne que
+     `loading` — l’absence de source, elle, est immédiate et définitive. */
+  const rendu = !(releve.status === "loading" && !attenteAffichee && !echeanceDepassee);
+
+  const mot =
+    direct === "enligne" ? MOT_ENLIGNE : direct === "attente" ? MOT_ATTENTE : MOT_MUET;
+
+  const chiffre =
+    releve.status === "ok" && direct === "enligne"
+      ? String(releve.data.presenceCount)
+      : "—";
+
+  /* ── L’annonce du changement d’état ──────────────────────────────────────
+     `precedent` est une référence, pas un état : la comparaison ne doit pas
+     provoquer de rendu. Le premier état observé n’est pas annoncé — il n’y
+     a pas eu de changement, et on ne vole pas la parole à qui arrive. */
+  const precedent = useRef<string | null>(null);
+  useEffect(() => {
+    if (!rendu || direct === "attente") return;
+    const ancien = precedent.current;
+    precedent.current = mot;
+    if (ancien === null || ancien === mot) return;
+    setAnnonce(mot);
+  }, [rendu, direct, mot]);
 
   return (
-    <div className="serveur rv">
-      <span className="serveur__libelle">Relevé du serveur</span>
+    <>
+      {/* Rendue en permanence et vide au départ — y compris pendant les
+          600 ms où la `.livebox`, elle, n’est pas encore là : une région
+          vive n’est annoncée de façon fiable que si elle était déjà dans le
+          document avant de recevoir son texte. */}
+      <p className="sr-only" aria-live="polite">
+        {annonce}
+      </p>
 
-      {/* Une seule région vive, présente dès le montage : un `role="status"`
-          qui apparaît en même temps que son texte n'est pas annoncé. */}
-      <div role="status" className="flex flex-wrap items-center gap-[var(--sp-3)]">
-        {releve.status === "ok" && (
-          <>
-            <span className="etat etat--enligne">En ligne</span>
-            <span className="tabl-nombre">
-              {releve.data.presenceCount} membres en ligne
-            </span>
-          </>
-        )}
+      {!rendu ? null : (
+        <div
+          className={`livebox livebox--${direct} mt-[var(--sp-5)]`}
+          data-rv
+          aria-live="off"
+        >
+          <p className="lb-head">
+            <span className="dot" aria-hidden="true" />
+            {mot}
+          </p>
 
-        {echec && <span className="etat etat--horsligne">Relevé indisponible</span>}
+          {/* « — » ne se lit pas : quand il n’y a pas de chiffre, le chiffre
+              se tait et c’est `.lb-sub` qui porte l’information. */}
+          <p className="lb-figure" aria-hidden={chiffre === "—" ? "true" : undefined}>
+            {chiffre}
+          </p>
 
-        {enAttente && <span className="etat">Relevé en cours</span>}
+          <p className="lb-sub">
+            {direct === "enligne"
+              ? SUB_ENLIGNE
+              : direct === "attente"
+                ? SUB_ATTENTE
+                : SUB_MUET}
 
-        {verifieA !== null && releve.status === "ok" && (
-          <span className="meta">Vérifié à {verifieA}</span>
-        )}
-      </div>
-    </div>
+            {direct === "enligne" && verifieA !== null ? ` · Vérifié à ${verifieA}` : null}
+          </p>
+        </div>
+      )}
+    </>
   );
 }

@@ -46,6 +46,34 @@ import Marque from "../brand/Marque";
 
    Puis la ligne de signature du § 13.2, séparateur ` · `.
 
+   ── CORRECTION 3 · LE NIVEAU DES TITRES DE COLONNE ────────────────────────
+
+   Les deux titres de colonne étaient des `<h4>`. Le pied est commun aux dix
+   routes, et sur huit d'entre elles le titre le plus profond qui précède est
+   un `h2` — sur `/discord`, c'est même le `h1` : `h2 → h4` et `h1 → h4` sont
+   des sauts de niveau, et axe-core lève `heading-order`.
+
+   Ils passent donc en `<h2>`. Le pied est un point de repère, chaque page
+   n'a qu'un seul `h1`, donc `h1 → h2` ne saute jamais, quel que soit le
+   contenu de la page. Vérifié sur les dix routes : aucun nouveau saut.
+
+   Le style, lui, ne bouge pas : `.eyebrow` (chapitre 04, l'instrument
+   monospace) porte la fonte, le corps de 11 px, les capitales et la couleur
+   d'accent. La classe est aussi ce qui EXCLUT le titre de la règle de
+   `20-base.css` qui met les titres en Fraunces — cette règle nomme
+   littéralement `<h2 class="eyebrow">` comme le motif attendu. Le sélecteur
+   `.sitefoot h4` de `30-composants.css` ne mord plus : c'est au propriétaire
+   de ce fichier de le renommer en `.sitefoot h2`, ce qui rendra son
+   interlettrage `--ls-l` et sa graisse `--fw-semi` (la couche `composants`
+   passe après `tokens`, elle reprendra donc la main sans rien casser).
+
+   ── LES COLONNES SONT DES POINTS DE REPÈRE ────────────────────────────────
+
+   Le chapitre 08 B-24 le demande mot pour mot : « `<footer>` avec
+   `<nav aria-label="…">` par colonne ». Le titre de colonne sert d'étiquette
+   par `aria-labelledby` plutôt qu'un `aria-label` recopié : le nom du point
+   de repère est alors exactement le libellé visible.
+
    ── CE QUE LE PIED NE PORTE PLUS ──────────────────────────────────────────
 
    Les six icônes de réseaux de l'ancien pied : la maquette ne les a pas, et
@@ -85,8 +113,10 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
-            <h4>Le lieu</h4>
+          <nav aria-labelledby="pied-lieu">
+            <h2 className="eyebrow" id="pied-lieu">
+              Le lieu
+            </h2>
             <ul>
               {LE_LIEU.map((l) => (
                 <li key={l.to}>
@@ -94,10 +124,12 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h4>Informations</h4>
+          <nav aria-labelledby="pied-infos">
+            <h2 className="eyebrow" id="pied-infos">
+              Informations
+            </h2>
             <ul>
               {INFORMATIONS.map((l) => (
                 <li key={l.to}>
@@ -105,7 +137,7 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
         </div>
 
         {/* `.legal` porte la mesure de 74ch, l'interligne et la couleur ;

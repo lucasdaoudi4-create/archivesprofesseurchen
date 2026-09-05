@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { accueil, contact, discord, meta, routes, site } from "../data/site";
-import { useRevelation } from "../components/contact/useRevelation";
+import { Icone } from "../components/ui/Icones";
+import { useRevelation } from "../hooks/useRevelation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ME JOINDRE — route `/contact` · maquette `#v-contact` (l. 1223-1243)
@@ -113,15 +114,20 @@ function poseIndexation(indexee: boolean) {
   poseMeta("name", "robots", "noindex, nofollow");
 }
 
-/* ── Révélation au défilement — `.rv` · § 1.4 du plan des pages ──────────────
-   `useRevelation` est repris À L'IDENTIQUE des lots voisins (accueil,
-   minecraft) : trois copies du même fichier, pour que la mise en commun soit
-   un simple changement de chemin d'import. Les blocs portent `.rv` dans le
-   JSX, le hook pose `.on`.
+/* ── Révélation au défilement — `src/hooks/useRevelation.ts` ────────────────
+   Les blocs portent `data-rv`, et JAMAIS la classe de révélation en dur : la
+   feuille de mouvement veut que le masque soit posé par le JavaScript, et par
+   lui seul. C'est ce qui a mis cette page en défaut. Le formulaire portait
+   cette classe dans son `className`, ce qui écrivait le masque
+   en dur ; l'observateur, monté une seule fois au montage de la route, ne
+   voyait pas le formulaire REVENIR après le message de confirmation. Le
+   formulaire renaissait donc masqué, et plus personne ne posait `.on` : il
+   devenait définitivement invisible.
 
-   Un `className` qui porte `.rv` reste CONSTANT d'un rendu à l'autre : React
-   ne réécrit un attribut que lorsque la valeur de la propriété change, donc
-   le `.on` posé à la main survit aux rendus du formulaire.               */
+   Deux verrous le rendent impossible aujourd'hui. Le formulaire ne porte plus
+   que `data-rv` : s'il n'est pris en charge par personne, il est simplement
+   VISIBLE. Et le crochet suit désormais les arrivées de nœuds, donc il le
+   reprend et le révèle sur place.                                          */
 
 /* ── Le formulaire ──────────────────────────────────────────────────────── */
 
@@ -137,6 +143,11 @@ const LIBELLE_OBJET = "L’objet, en une ligne";
 const MOTIF_VIDE = "Choisissez un motif";
 const MOTIF_AUTRE = "Un autre motif";
 
+/* L'intitulé du message de confirmation. Il sert DEUX fois — à l'écran, et
+   dans la région vive qui l'annonce — et c'est bien la même phrase : la
+   région ne doit rien dire d'autre que ce que le lecteur voit. */
+const TITRE_CONFIRMATION = "Message envoyé";
+
 const MOTIFS = [...contact.motifs, MOTIF_AUTRE];
 
 function encodeForm(donnees: Record<string, string>): string {
@@ -149,6 +160,30 @@ export default function Contact() {
   useRevelation();
   const [etat, setEtat] = useState<Etat>("repos");
   const [detail, setDetail] = useState("");
+
+  /* Le texte de la région vive. Il reste VIDE tant qu'il n'y a rien à dire :
+     la région, elle, est rendue en permanence — voir plus bas. */
+  const [annonce, setAnnonce] = useState("");
+  const confirmation = useRef<HTMLDivElement>(null);
+
+  /* ── Ce que devient le focus après l'envoi — socle § 0.28 ────────────────
+     Le formulaire disparaît, et avec lui le bouton qui portait le focus :
+     sans rien, le focus retombe sur `<body>` et le lecteur d'écran est
+     renvoyé en tête de document, loin de la réponse qu'il attendait. Il est
+     donc posé sur le conteneur du message, `tabIndex={-1}`, exactement comme
+     le § 0.28 le fait pour `<main>` au changement de route.
+
+     L'annonce passe, elle, par la région `role="status"` — et seulement une
+     fois le message rendu : une région vive insérée dans le DOM en même
+     temps que son texte n'est pas annoncée de façon fiable.              */
+  useEffect(() => {
+    if (etat !== "envoye") {
+      setAnnonce("");
+      return;
+    }
+    confirmation.current?.focus();
+    setAnnonce(TITRE_CONFIRMATION);
+  }, [etat]);
 
   useEffect(() => {
     document.title = TITRE;
@@ -196,36 +231,29 @@ export default function Contact() {
       <div className="wrap wrap--etroit">
 
         {/* ── Tête de page ────────────────────────────────────────────── */}
-        <div className="tete rv">
+        <div className="tete" data-rv>
           <p className="eyebrow">{contact.surtitre}</p>
           <h1 className="h2">{contact.titre}</h1>
           <p className="lede">{contact.lede}</p>
         </div>
 
         {/* ── Ce qui vaut la peine d'être écrit ───────────────────────── */}
-        <h2 className="h3 sous rv">
+        <h2 className="h3 sous" data-rv>
           {accueil.contact.titre}
         </h2>
 
         {/* `accueil.contact.lede` n'est PAS repris ici : à un mot près, c'est
             déjà `contact.lede`, posé quatre lignes plus haut dans la tête. */}
-        <ul className="liste rv">
+        <ul className="liste" data-rv>
           {contact.motifs.map((motif) => (
             <li key={motif}>
-              <svg
-                className="ico ico--16 ico--action"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="m5 12 5 5L19 7" />
-              </svg>
+              <Icone nom="coche" taille={16} ton="action" />
               <span>{motif}</span>
             </li>
           ))}
         </ul>
 
-        <div className="hero__b rv">
+        <div className="hero__b" data-rv>
           <a
             className="btn btn--fantome"
             href={discord.inviteUrl}
@@ -237,7 +265,7 @@ export default function Contact() {
         </div>
 
         {/* ── Les deux repères du panneau droit de l'accueil ──────────── */}
-        <div className="cartes rv mt-[var(--rythme-xs)]">
+        <div className="cartes mt-[var(--rythme-xs)]" data-rv>
           {contact.cartes.map((carte) => (
             <div className="carte" key={carte.titre}>
               <h3 className="carte-titre">{carte.titre}</h3>
@@ -247,13 +275,20 @@ export default function Contact() {
         </div>
 
         {/* ── Le formulaire ──────────────────────────────────────────── */}
-        <h2 className="h3 sous rv">
+        <h2 className="h3 sous" data-rv>
           {contact.ctaEcrire}
         </h2>
 
+        {/* La région vive, RENDUE EN PERMANENCE et hors du ternaire : c'est
+            la condition pour qu'elle soit annoncée. Elle reste vide tant
+            qu'il n'y a rien à dire. */}
+        <p className="sr-only" role="status">
+          {annonce}
+        </p>
+
         {etat === "envoye" ? (
-          <div className="encart" role="status">
-            <p className="encart__t">Message envoyé</p>
+          <div className="encart" ref={confirmation} tabIndex={-1}>
+            <p className="encart__t">{TITRE_CONFIRMATION}</p>
             <p className="corps">
               Il est bien arrivé. Je vous réponds moi-même, à l’adresse que vous venez
               d’indiquer.
@@ -276,7 +311,7 @@ export default function Contact() {
             data-netlify="true"
             data-netlify-honeypot="bot-field"
             aria-describedby="c-necessaires"
-            className="rv"
+            data-rv
           >
             {/* Contrat Netlify — ne pas retirer, ne pas renommer. */}
             <input type="hidden" name="form-name" value={NOM_FORMULAIRE} />

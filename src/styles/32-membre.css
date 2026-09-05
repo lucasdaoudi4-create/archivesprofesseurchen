@@ -161,6 +161,7 @@
    glyphe Patreon redessiné : il doit disparaître du JSX.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* VOULU : aucun composant ne l'emploie encore — sa hauteur de 52 px est normative au socle §0.26 et il attend l'espace membre, ce n'est pas du code mort. */
 .btn-patreon {
   display: inline-flex;
   align-items: center;
