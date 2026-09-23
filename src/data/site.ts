@@ -76,7 +76,11 @@ export const site = {
   themeColor: "#2A2F32",
   // Forme « mois seul » imposée pour une mise à jour de page (10.16).
   derniereMiseAJour: "septembre 2026",
-  derniereMiseAJourMachine: "2026-09",
+  /* Date COMPLÈTE, même si le texte lisible s'arrête au mois. Le
+     `<time dateTime>` des pages légales l'accepte plus précise que son
+     contenu, et le `<lastmod>` du sitemap la veut ainsi : `2026-09` est
+     valide au sens W3C, mais les moteurs préfèrent le jour. */
+  derniereMiseAJourMachine: "2026-09-23",
   baseline: "Une formation, un serveur, une communauté. Édité par LHM Studio.",
   description:
     "Une formation à la création vidéo par intelligence artificielle, un serveur Minecraft et une communauté Discord, réunis en un seul lieu.",
@@ -780,6 +784,8 @@ export interface Formation extends EnTeteSection {
   };
   encartSuite: CarteTexte;
   ctaPaliers: string;
+  /** Réservé au jour où le lecteur de module existe. Plus servi : les deux
+   *  boutons visent `liens.module01`, une ancre, et disent `ctaSommaire`. */
   ctaModule: string;
   /** Sur /formation, où « ouvrir le module » n’a nulle part où aller. */
   ctaSommaire: string;

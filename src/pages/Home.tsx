@@ -405,7 +405,7 @@ export default function Home() {
                     épargne un renvoi au visiteur, et `Layout` gère le défilement
                     vers l’ancre. */}
                 <Link className="btn" to={liens.module01}>
-                  {formation.ctaModule}{" "}
+                  {formation.ctaSommaire}{" "}
                   <span className="btn__f" aria-hidden="true">→</span>
                 </Link>
               </div>
