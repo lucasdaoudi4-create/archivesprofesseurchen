@@ -16,8 +16,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --audit-level=high
+
+      # `npm run build` porte désormais ses propres garde-fous :
+      #   · `prebuild`  — aucun `.js` compilé ne masque sa source `.ts` ;
+      #   · `postbuild` — le greffon `pagesStatiques` a bien produit les
+      #     pages par route, `_headers`, `robots.txt`, `sitemap.xml` et
+      #     `404.html`, et l'empreinte CSP correspond au script servi.
+      # Ils sont DANS le cycle npm et non ici, pour que le build échoue aussi
+      # sur le poste où l'on itère — c'est là que le masquage se produit, et
+      # la CI ne le verrait jamais : ces fichiers sont ignorés par git.
       - run: npm run build
-      # Garde-fous : aucun JS compilé à côté des sources, et les fichiers
-      # que le greffon `pagesStatiques` doit produire sont bien là.
+
+      # Ce contrôle-ci reste propre à la CI : il ne porte pas sur le disque
+      # mais sur ce qui est VERSIONNÉ. Un `.js` compilé commité par mégarde
+      # arriverait sur tous les postes ; `verifie-sources` ne verrait alors
+      # plus une anomalie locale, mais l'état normal du dépôt.
       - run: test -z "$(git ls-files 'src/**/*.js')"
-      - run: for f in _headers robots.txt sitemap.xml 404.html formation.html cgv.html; do test -f "dist/$f" || { echo "manque dist/$f"; exit 1; }; done

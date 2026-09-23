@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node outils/verifie-sources.mjs",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "postbuild": "node outils/verifie-dist.mjs",
+    "preview": "vite preview",
+    "verifie": "node outils/verifie-sources.mjs && node outils/verifie-dist.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
