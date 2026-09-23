@@ -95,10 +95,15 @@ export default function App() {
           path="/formation/module-01"
           element={<Navigate to="/formation" replace />}
         />
-        {/* Le 301 du § 0.27 depuis l'existant. */}
+        {/* Le 301 du § 0.27 depuis l'existant. Il vise `/formation` et non
+            `/laboratoire/paliers` : ce dernier est lui-même renvoyé sur
+            `/formation` juste au-dessus, et enchaîner deux renvois pour une
+            seule adresse coûte un aller-retour au visiteur — les robots, eux,
+            ne suivent pas indéfiniment les chaînes. Le jour où la page existe,
+            ce renvoi y revient et le renvoi temporaire disparaît. */}
         <Route
           path="/paliers"
-          element={<Navigate to="/laboratoire/paliers" replace />}
+          element={<Navigate to="/formation" replace />}
         />
 
         <Route path="/discord" element={<Discord />} />

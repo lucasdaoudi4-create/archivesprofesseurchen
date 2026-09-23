@@ -44,9 +44,16 @@
 
 # Permanent — le § 0.27 l'impose depuis l'existant. Il reste quand la page
 # de paliers sera écrite.
+# CHAÎNE ÉVITÉE : ce 301 visait `/laboratoire/paliers`, que la règle
+# suivante renvoie elle-même sur `/formation`. Le visiteur faisait donc deux
+# allers-retours (301 puis 302) pour une seule adresse, et les robots ne
+# suivent pas indéfiniment les chaînes. Il vise la destination réelle.
+#
+# À FAIRE le jour où `/laboratoire/paliers` existe : ce 301 y revient, et la
+# règle suivante disparaît — c'est elle qui est temporaire, pas celle-ci.
 [[redirects]]
   from = "/paliers"
-  to = "/laboratoire/paliers"
+  to = "/formation"
   status = 301
 
 # TEMPORAIRES — à retirer dès que les deux pages existent.

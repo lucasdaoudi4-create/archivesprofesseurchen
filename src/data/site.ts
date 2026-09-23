@@ -741,7 +741,19 @@ export const encartProduction: EncartProduction = {
 };
 
 /* Le sas de connexion. Texte normatif du 10-membre-addendum §10.17, qui
-   écrase la copie du §10.6 et celle de la maquette (voir points durs).      */
+   écrase la copie du §10.6 et celle de la maquette (voir points durs).
+
+   IL N'Y A PAS DE SAS. Ce site n'a ni connexion Patreon, ni session, ni
+   espace membre, ni route qui y mène : l'accès aux contenus se fait
+   entièrement chez Patreon, et les liens du site sont de simples liens
+   externes. De tout cet objet, UN SEUL champ est servi aujourd'hui —
+   `lienDonnees`, dans `FluxYouTube`. Les autres attendent la surface, dont
+   les styles sont parqués dans `src/styles/33-membre-differe.css`.
+
+   Le texte est conservé parce qu'il est NORMATIF : il ne se réinvente pas le
+   jour où l'écran existe, il se reprend tel quel. `enonceDonnees` reste
+   `null` : il demande le relevé des portées OAuth, qui n'a pas lieu d'être
+   tant qu'il n'y a pas d'OAuth.                                             */
 
 export interface Sas {
   titre: string;
