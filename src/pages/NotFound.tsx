@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { discord, meta, planAuSol, routes, site } from "../data/site";
+import { discord, planAuSol, routes } from "../data/site";
 import {
   TAILLES_PLANCHE_404,
   chemin,
@@ -10,6 +9,7 @@ import {
   secours,
 } from "../data/visuels";
 import Embleme from "../components/brand/Embleme";
+import useMetaPage from "../hooks/useMetaPage";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PAGE INTROUVABLE — `/404` et `path="*"` · gabarit `.syspage`
@@ -98,21 +98,7 @@ import Embleme from "../components/brand/Embleme";
    sert, dans `src/data/visuels.ts`, sous le nom `TAILLES_PLANCHE_404`. */
 
 export default function NotFound() {
-  useEffect(() => {
-    document.title = `${meta.introuvable.titre} · ${site.name}`;
-
-    // `meta.introuvable.indexee === false` — la seule page du site public
-    // dans ce cas. La balise est posée à l'entrée et retirée à la sortie :
-    // aucune autre route ne doit hériter du `noindex`.
-    const robots = document.createElement("meta");
-    robots.name = "robots";
-    robots.content = "noindex, nofollow";
-    document.head.appendChild(robots);
-
-    return () => {
-      robots.remove();
-    };
-  }, []);
+  useMetaPage("introuvable");
 
   return (
     <section className="syspage e404">

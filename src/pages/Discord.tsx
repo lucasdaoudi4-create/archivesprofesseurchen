@@ -1,10 +1,10 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { discord, meta, minecraft, routes, site } from "../data/site";
+import { discord, minecraft, routes } from "../data/site";
 import EtatCommunaute from "../components/discord/EtatCommunaute";
 import { reglesAcces } from "../components/minecraft/reglesAcces";
 import { Icone } from "../components/ui/Icones";
 import { useRevelation } from "../hooks/useRevelation";
+import useMetaPage from "../hooks/useMetaPage";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LA COMMUNAUTÉ — route `/discord` · maquette `#v-discord` (l. 1170-1191)
@@ -58,53 +58,6 @@ import { useRevelation } from "../hooks/useRevelation";
    `robots` est RETIRÉ quand la page est indexée, jamais laissé en place :
    sans cela, un passage par `/404` — qui pose `noindex` — laisserait la
    balise derrière lui pour toutes les routes suivantes.                  */
-function balise(nom: string): HTMLMetaElement {
-  const existante = document.head.querySelector<HTMLMetaElement>(`meta[name="${nom}"]`);
-  if (existante) return existante;
-  const creee = document.createElement("meta");
-  creee.setAttribute("name", nom);
-  document.head.appendChild(creee);
-  return creee;
-}
-
-function baliseOg(propriete: string): HTMLMetaElement {
-  const existante = document.head.querySelector<HTMLMetaElement>(
-    `meta[property="${propriete}"]`
-  );
-  if (existante) return existante;
-  const creee = document.createElement("meta");
-  creee.setAttribute("property", propriete);
-  document.head.appendChild(creee);
-  return creee;
-}
-
-function useMetaPage() {
-  useEffect(() => {
-    const fiche = meta.discord;
-    const titre = `${fiche.titre} · ${site.name}`;
-    const adresse = `${site.url}${routes.discord}`;
-
-    document.title = titre;
-    balise("description").setAttribute("content", fiche.description);
-    baliseOg("og:title").setAttribute("content", titre);
-    baliseOg("og:description").setAttribute("content", fiche.description);
-    baliseOg("og:url").setAttribute("content", adresse);
-
-    let canonique = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (!canonique) {
-      canonique = document.createElement("link");
-      canonique.setAttribute("rel", "canonical");
-      document.head.appendChild(canonique);
-    }
-    canonique.setAttribute("href", adresse);
-
-    if (fiche.indexee) {
-      document.head.querySelector('meta[name="robots"]')?.remove();
-    } else {
-      balise("robots").setAttribute("content", "noindex, nofollow");
-    }
-  }, []);
-}
 
 /* Le signe sortant du bouton — socle § 0.25, ligne « Lien externe » : le
    pictogramme est DANS le balisage, jamais en `::after` CSS, et le libellé
@@ -129,7 +82,7 @@ const INVITATION_SURTITRE = "Le serveur";
 const INVITATION_CTA = "Voir le serveur";
 
 export default function Discord() {
-  useMetaPage();
+  useMetaPage("discord");
   useRevelation();
 
   return (
@@ -144,7 +97,10 @@ export default function Discord() {
             <p className="lede">{discord.lede}</p>
           </div>
 
-          <EtatCommunaute />
+          {/* Sans identifiant de serveur, il n'y a aucune source : l'encart
+              affichait en permanence « Compteur indisponible », qui se lit
+              comme une panne. Il n'est monté que si une source existe. */}
+          {discord.guildId && <EtatCommunaute />}
 
           <ul className="liste max-w-[var(--me-corps-s)]" data-rv>
             {discord.salons.map((salon) => (

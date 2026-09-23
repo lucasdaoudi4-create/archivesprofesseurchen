@@ -1,16 +1,15 @@
-import { useEffect } from "react";
 import {
   blocReseaux,
   meta,
   patreon,
   reseaux,
   reseauxOrdre,
-  routes,
   site,
 } from "../data/site";
 import { LogoReseau } from "../components/ui/Icones";
 import FluxYouTube from "../components/reseaux/FluxYouTube";
 import { useRevelation } from "../hooks/useRevelation";
+import useMetaPage from "../hooks/useMetaPage";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LES RÉSEAUX — route `/reseaux` · gabarit « grille de cartes » (§ 0.27)
@@ -66,9 +65,6 @@ import { useRevelation } from "../hooks/useRevelation";
    32 px, un pas de la liste du § 0.13, là où 26 n'en est pas un.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const FICHE = meta.reseaux;
-const TITRE = `${FICHE.titre} · ${site.name}`;
-const CANONIQUE = `${site.url}${routes.reseaux}`;
 
 /* Données structurées — § 0.29 : `Organization` sur toutes les pages, une
    seule par page. C'est ici qu'elle compte le plus, parce que c'est la page
@@ -85,29 +81,6 @@ const ORGANISATION = {
   publisher: { "@type": "Organization", name: site.editeur },
 };
 
-/** Pose ou met à jour une balise `<meta>` du document. */
-function poserMeta(attribut: "name" | "property", nom: string, contenu: string) {
-  let balise = document.head.querySelector<HTMLMetaElement>(
-    `meta[${attribut}="${nom}"]`,
-  );
-  if (!balise) {
-    balise = document.createElement("meta");
-    balise.setAttribute(attribut, nom);
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("content", contenu);
-}
-
-/** Pose ou met à jour le `<link rel="canonical">`. Absolu, sans paramètre. */
-function poserCanonique(href: string) {
-  let balise = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!balise) {
-    balise = document.createElement("link");
-    balise.rel = "canonical";
-    document.head.appendChild(balise);
-  }
-  balise.href = href;
-}
 
 export default function Socials() {
   /* ── La révélation au défilement — `src/hooks/useRevelation.ts` ─────────
@@ -121,28 +94,8 @@ export default function Socials() {
      déjà `.rv` à `opacity:1`, sans passer par le JavaScript.           */
   useRevelation();
 
-  /* ── Le titre et les métadonnées, § 0.29 ────────────────────────────────
-     Le § 0.28 exige que le titre soit posé « par la page, EN AMONT » :
-     l'effet d'un enfant s'exécute avant celui de son parent, donc quand
-     `Layout` lit `document.title` pour l'annoncer, cette ligne est déjà
-     passée. Le site n'a aucun mécanisme de titre par page — `index.html`
-     n'en porte qu'un, celui de l'accueil ; il est posé ici, sans
-     dépendance ajoutée. */
-  useEffect(() => {
-    document.title = TITRE;
-    poserCanonique(CANONIQUE);
-    poserMeta("name", "description", FICHE.description);
-    poserMeta("name", "robots", FICHE.indexee ? "index, follow" : "noindex, nofollow");
-    poserMeta("property", "og:title", TITRE);
-    poserMeta("property", "og:description", FICHE.description);
-    poserMeta("property", "og:url", CANONIQUE);
-
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.textContent = JSON.stringify(ORGANISATION);
-    document.head.appendChild(script);
-    return () => script.remove();
-  }, []);
+  /* Titre, description, canonique et JSON-LD : `hooks/useMetaPage`. */
+  useMetaPage("reseaux", ORGANISATION);
 
   return (
     <div>
@@ -150,7 +103,7 @@ export default function Socials() {
       <section className="bande" aria-labelledby="t-reseaux">
         <div className="wrap">
           <div className="tete" data-rv>
-            <p className="eyebrow">{FICHE.titre}</p>
+            <p className="eyebrow">{meta.reseaux.titre}</p>
             <h1 className="h2" id="t-reseaux">
               {blocReseaux.titre}
             </h1>

@@ -256,6 +256,14 @@
   color: var(--texte);
 }
 
+/* Une CARTE posée dans un contexte acier peint `--surface-carte`
+   (acier-800), pas acier-900 : les 5,42 mesurés plus haut y tombent à
+   3,91:1, sous le seuil AA. acier-300 y fait 4,96:1 (6,89 sur acier-900). */
+.acier :is(.carte, .notice, .chap, .reseau, .serveur, .copyline, .livebox) {
+  --texte-secondaire:   var(--acier-300);
+  --texte-tertiaire:    var(--acier-300);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    CONTEXTE ÉMAIL — le bandeau bordeaux plein (le kit de la formation)
    ═══════════════════════════════════════════════════════════════════════════ */

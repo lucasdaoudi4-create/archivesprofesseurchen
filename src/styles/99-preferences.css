@@ -29,10 +29,7 @@
 
   /* Les états finaux sont posés, pas devinés. */
   .rv                      { opacity: 1; transform: none; }
-  .jauge__piste i          { transform: scaleY(1); }
   .sommaire a::before      { inline-size: 100%; }
-  .progression .bar i,
-  .jalons i                { transition: none; }
   .entree-page             { animation: none; opacity: 1; transform: none; }
 
   /* La barre d'attente indéterminée ne peut pas devenir statique sans
@@ -121,8 +118,6 @@
   .mention,
   .jeton                 { border: 1px solid currentColor; }
 
-  .jauge__piste i.f      { border: 1px solid CanvasText; }
-
   .enseigne,
   .halo                  { box-shadow: none; }
   .mat-verre             { backdrop-filter: none; }
@@ -151,6 +146,10 @@
   .mat-verre,
   .mat-papier,
   .mat-cuir              { background: Canvas; color: CanvasText; }
+  /* PAS de `forced-color-adjust:none` ici : la propriété est HÉRITÉE, et
+     posée sur ces classes elle rendait à la barre, au pied et aux bandes
+     leurs couleurs d'auteur — liens acier-400 sur Canvas blanc, 2,5:1. Le
+     fond passe à Canvas ; le texte suit le thème du système. */
 }
 
 /* ── Impression ───────────────────────────────────────────────────────────
@@ -161,10 +160,16 @@
   *                      { background: #fff !important; color: #000 !important;
                            box-shadow: none !important; }
 
+  /* Tout bloc pas encore révélé au défilement restait à `opacity:0` : sur
+     l'accueil, les pages 3 à 7 sortaient blanches. */
+  .rv, .entree-page      { opacity: 1 !important; transform: none !important;
+                           animation: none !important; }
+
+  .sitenav__burger,
+  .evitement             { display: none !important; }
+
   .enseigne,
-  .halo,
-  .voile,
-  .scrim                 { display: none; }
+  .halo                  { display: none; }
 
   .legende               { border: 1px solid #000; }
 
@@ -179,6 +184,6 @@
   .display, .h1, .h2,
   .h3, .h4               { break-after: avoid; }
 
-  .spec, .carte,
+  .carte,
   .encart                { break-inside: avoid; }
 }

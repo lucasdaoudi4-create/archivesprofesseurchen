@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { liens } from "../../data/site";
 import Marque from "../brand/Marque";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -92,10 +93,11 @@ import Marque from "../brand/Marque";
 
 /** Les sept liens de page. `fin` marque la racine, qui ne doit pas rester
  *  active sur toutes les routes. */
-const LIENS = [
+const LIENS: { to: string; libelle: string; fin?: boolean; ancre?: boolean }[] = [
   { to: "/", libelle: "Accueil", fin: true },
   { to: "/formation", libelle: "Formation" },
-  { to: "/laboratoire/paliers", libelle: "Paliers" },
+  // Ancre de `/formation` : rendu en simple `Link` (voir plus bas).
+  { to: liens.paliers, libelle: "Paliers", ancre: true },
   { to: "/minecraft", libelle: "Minecraft" },
   { to: "/discord", libelle: "Discord" },
   { to: "/reseaux", libelle: "Réseaux" },
@@ -104,13 +106,15 @@ const LIENS = [
 
 export default function Navbar() {
   const [ouvert, setOuvert] = useState(false);
-  const { pathname } = useLocation();
+  // `key` et non `pathname` : un lien d'ancre sur la même page
+  // (`/formation#titre-paliers` depuis `/formation`) doit aussi refermer.
+  const { key } = useLocation();
   const burger = useRef<HTMLButtonElement>(null);
 
   // Le menu déroulant ne survit pas à un changement de route.
   useEffect(() => {
     setOuvert(false);
-  }, [pathname]);
+  }, [key]);
 
   // Échappement : on referme, et le focus revient sur le bouton qui a
   // ouvert — sans quoi il repart en tête de document.
@@ -151,13 +155,31 @@ export default function Navbar() {
           className={ouvert ? "sitenav__l ouvert" : "sitenav__l"}
           id="menu-principal"
           aria-label="Navigation principale"
+          onBlur={(e) => {
+            // WCAG 2.2 · 2.4.11 — quand la tabulation quitte le menu ouvert,
+            // il se referme : le focus ne part jamais sur un élément caché
+            // sous le déroulant.
+            if (!ouvert) return;
+            const suivant = e.relatedTarget as Node | null;
+            if (suivant && e.currentTarget.parentElement?.contains(suivant)) return;
+            setOuvert(false);
+          }}
         >
-          {LIENS.map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.fin}>
-              {l.libelle}
-            </NavLink>
-          ))}
-          <Link className="sitenav__cta" to="/laboratoire/paliers">
+          {/* « Paliers » est un simple `Link` et non un `NavLink` : il vise
+              une ancre de `/formation`, et ne doit pas s'allumer en même
+              temps que « Formation ». */}
+          {LIENS.map((l) =>
+            l.ancre ? (
+              <Link key={l.to} to={l.to}>
+                {l.libelle}
+              </Link>
+            ) : (
+              <NavLink key={l.to} to={l.to} end={l.fin}>
+                {l.libelle}
+              </NavLink>
+            )
+          )}
+          <Link className="sitenav__cta" to={liens.paliers}>
             Rejoindre
           </Link>
         </nav>

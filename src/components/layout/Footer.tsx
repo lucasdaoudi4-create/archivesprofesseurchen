@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import Marque from "../brand/Marque";
-import { legal, routes, site } from "../../data/site";
+import { legal, liens, routes, site } from "../../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ARC · CMP — 43 · PIED DE PAGE DU SITE — `.sitefoot`
@@ -86,7 +86,7 @@ import { legal, routes, site } from "../../data/site";
 /** Colonne « Le lieu » — les cinq destinations du site. */
 const LE_LIEU = [
   { to: "/formation", libelle: "La formation" },
-  { to: "/laboratoire/paliers", libelle: "Les paliers" },
+  { to: liens.paliers, libelle: "Les paliers" },
   { to: "/minecraft", libelle: "L’Académie" },
   { to: "/discord", libelle: "Le Discord" },
   { to: "/reseaux", libelle: "Les réseaux" },

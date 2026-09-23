@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   blocPaliers,
   encartProduction,
@@ -7,6 +8,7 @@ import {
   paliers,
   paliersPayants,
   patreon,
+  liens,
 } from "../data/site";
 import { type CSSProperties } from "react";
 import {
@@ -22,7 +24,7 @@ import ComparatifPaliers from "../components/formation/ComparatifPaliers";
 import Faq from "../components/formation/Faq";
 import PictoSection from "../components/formation/PictoSection";
 import SommaireModule from "../components/formation/SommaireModule";
-import useMetaPage from "../components/formation/useMetaPage";
+import useMetaPage from "../hooks/useMetaPage";
 import { useRevelation } from "../hooks/useRevelation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -154,18 +156,21 @@ export default function Formation() {
                 ))}
               </div>
 
-              {/* Une ancre de page, pas un `Link` : la destination est sur
-                  CETTE page. Le bouton pointait sur `routes.module01`, que les
-                  deux tables de renvoi ramènent sur `/formation` — il
-                  rechargeait donc la page courante et remontait le visiteur en
-                  haut. Le § 0.20 décale déjà les ancres sous la barre collante. */}
+              {/* `liens.module01` vise `/formation#sommaire`, et la
+                  destination est sur CETTE page. Le bouton pointait sur
+                  `routes.module01`, que les deux tables de renvoi ramènent
+                  sur `/formation` : il rechargeait la page courante et
+                  remontait le visiteur en haut. Le libellé suit — il ne
+                  promet plus d'ouvrir un module qui n'existe pas, il annonce
+                  le sommaire. `Layout` gère le défilement vers l'ancre, et
+                  le § 0.20 la décale déjà sous la barre collante. */}
               <div className="hero__b">
-                <a className="btn" href="#sommaire">
+                <Link className="btn" to={liens.module01}>
                   {formation.ctaSommaire}
                   <span className="btn__f" aria-hidden="true">
                     →
                   </span>
-                </a>
+                </Link>
               </div>
             </div>
 

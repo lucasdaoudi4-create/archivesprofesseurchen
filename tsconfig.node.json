@@ -3,13 +3,24 @@
     "composite": true,
     "skipLibCheck": true,
     "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "strict": true
+    "strict": true,
+    // Sortie hors de src/ : sans outDir, `tsc -b` écrivait visuels.js à côté
+    // de visuels.ts, et Vite résout `.js` AVANT `.ts` — le dev servait alors
+    // une copie périmée des visuels.
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "outDir": "node_modules/.tmp/tsconfig.node"
   },
+  // `src/data/site.ts` l'est aussi : le greffon `pagesStatiques` y lit les
+  // titres et descriptions de chaque route.
   // `src/data/visuels.ts` est listé parce que `vite.config.ts` l'importe : le
   // greffon de préchargement lit les mêmes `srcset`, le même `media` et le
   // même `sizes` que les pages, plutôt que d'en recopier une version qui
   // pourrait diverger. Un projet `composite` doit lister tous ses fichiers.
-  "include": ["vite.config.ts", "src/data/visuels.ts"]
+  "include": ["vite.config.ts", "src/data/visuels.ts", "src/data/site.ts"]
 }

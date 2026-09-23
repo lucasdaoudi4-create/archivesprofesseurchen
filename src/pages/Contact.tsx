@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { accueil, contact, discord, meta, routes, site } from "../data/site";
+import { accueil, contact, discord, routes } from "../data/site";
 import { Icone } from "../components/ui/Icones";
 import { useRevelation } from "../hooks/useRevelation";
+import useMetaPage from "../hooks/useMetaPage";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ME JOINDRE — route `/contact` · maquette `#v-contact` (l. 1223-1243)
@@ -79,40 +80,7 @@ import { useRevelation } from "../hooks/useRevelation";
    enfant s'exécutent avant ceux de son parent : l'effet ci-dessous a écrit
    le titre quand la coquille vient le lire.                                */
 
-const TITRE = `${meta.contact.titre} · ${site.name}`;
-const CANONIQUE = `${site.url}${routes.contact}`;
 
-function poseMeta(attribut: "name" | "property", cle: string, valeur: string) {
-  const selecteur = `meta[${attribut}="${cle}"]`;
-  let balise = document.head.querySelector<HTMLMetaElement>(selecteur);
-  if (!balise) {
-    balise = document.createElement("meta");
-    balise.setAttribute(attribut, cle);
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("content", valeur);
-}
-
-function poseCanonique(href: string) {
-  let balise = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!balise) {
-    balise = document.createElement("link");
-    balise.setAttribute("rel", "canonical");
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("href", href);
-}
-
-/* La page est indexée (§ 0.27). On retire donc le `robots` qu'une page
-   non indexée — la page introuvable — aurait pu laisser derrière elle. */
-function poseIndexation(indexee: boolean) {
-  const balise = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
-  if (indexee) {
-    balise?.remove();
-    return;
-  }
-  poseMeta("name", "robots", "noindex, nofollow");
-}
 
 /* ── Révélation au défilement — `src/hooks/useRevelation.ts` ────────────────
    Les blocs portent `data-rv`, et JAMAIS la classe de révélation en dur : la
@@ -198,6 +166,14 @@ export default function Contact() {
      la région, elle, est rendue en permanence — voir plus bas. */
   const [annonce, setAnnonce] = useState("");
   const confirmation = useRef<HTMLDivElement>(null);
+  const erreur = useRef<HTMLDivElement>(null);
+
+  /* En cas d'échec, le bouton d'envoi était désactivé au moment de la
+     réponse : le focus retombait sur `<body>`. On le pose sur le message
+     d'erreur, comme pour la confirmation. */
+  useEffect(() => {
+    if (etat === "echec") erreur.current?.focus();
+  }, [etat]);
 
   /* ── Ce que devient le focus après l'envoi — socle § 0.28 ────────────────
      Le formulaire disparaît, et avec lui le bouton qui portait le focus :
@@ -218,15 +194,7 @@ export default function Contact() {
     setAnnonce(TITRE_CONFIRMATION);
   }, [etat]);
 
-  useEffect(() => {
-    document.title = TITRE;
-    poseMeta("name", "description", meta.contact.description);
-    poseMeta("property", "og:title", TITRE);
-    poseMeta("property", "og:description", meta.contact.description);
-    poseMeta("property", "og:url", CANONIQUE);
-    poseCanonique(CANONIQUE);
-    poseIndexation(meta.contact.indexee);
-  }, []);
+  useMetaPage("contact");
 
   const envoyer = async (evenement: FormEvent<HTMLFormElement>) => {
     evenement.preventDefault();
@@ -415,14 +383,14 @@ export default function Contact() {
                   n'est déclaré que sur `.corps a`, `.lede a` et `.prose a`. Sous
                   `.corps-s`, le lien ne serait plus qu'une couleur (SC 1.4.1). */}
               <span className="corps t-secondaire">
-                J’accepte que ces informations servent à me répondre, dans les conditions
-                décrites par la{" "}
+                J’ai bien noté que ces informations servent uniquement à me répondre,
+                dans les conditions décrites par la{" "}
                 <Link to={routes.confidentialite}>politique de confidentialité</Link>.
               </span>
             </label>
 
             {etat === "echec" && (
-              <div className="encart mt-[var(--sp-6)]" role="alert">
+              <div className="encart mt-[var(--sp-6)]" role="alert" ref={erreur} tabIndex={-1}>
                 <p className="encart__t">L’envoi a échoué</p>
                 <p className="corps">
                   Le message n’est pas parti{detail ? ` (${detail})` : ""}. Réessayez dans

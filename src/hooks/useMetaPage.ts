@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { meta, routes, site, type RouteKey } from "../../data/site";
+import { meta, routes, site, type RouteKey } from "../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MÉTADONNÉES DE PAGE — socle §0.29
@@ -22,6 +22,17 @@ import { meta, routes, site, type RouteKey } from "../../data/site";
      · `robots`, posé seulement sur une page non indexée, et RETIRÉ sinon —
        sans quoi un passage par `/404` laisserait un `noindex` collé à la
        page suivante.
+
+   C'est le SEUL endroit du site qui écrit ces balises. Six copies locales
+   existaient (accueil, Discord, réseaux, contact, pages légales, et ce
+   crochet) ; elles avaient divergé — `/minecraft` et `/404` gardaient la
+   canonique de l'accueil, les pages légales son `og:url`.
+
+   Une page non indexée perd sa canonique : une URL introuvable ne doit pas
+   se déclarer l'adresse de référence de quoi que ce soit.
+
+   `donnees` : l'objet JSON-LD de la page (une seule donnée structurée par
+   page, § 0.29), posé au montage et retiré au démontage.
 
    Ce qu'il ne touche pas : `theme-color`, `og:image`, `og:type`, `og:locale`,
    `og:site_name` et `twitter:card`, qui sont communs à tout le site et vivent
@@ -53,20 +64,38 @@ function poserCanonique(href: string) {
   lien.href = href;
 }
 
-export default function useMetaPage(cle: RouteKey) {
+function retirerCanonique() {
+  document.head.querySelector('link[rel="canonical"]')?.remove();
+}
+
+export default function useMetaPage(cle: RouteKey, donnees?: object) {
   useEffect(() => {
     const fiche = meta[cle];
     const titre = cle === "accueil" ? fiche.titre : `${fiche.titre} · ${site.name}`;
-    const canonique = `${site.url}${routes[cle]}`;
+    const canonique = `${site.url}${routes[cle] === "/" ? "/" : routes[cle]}`;
 
     document.title = titre;
     poserBalise("name", "description", fiche.description);
     poserBalise("property", "og:title", titre);
     poserBalise("property", "og:description", fiche.description);
-    poserBalise("property", "og:url", canonique);
-    poserCanonique(canonique);
 
-    if (fiche.indexee) retirerBalise("name", "robots");
-    else poserBalise("name", "robots", "noindex, nofollow");
+    if (fiche.indexee) {
+      poserBalise("property", "og:url", canonique);
+      poserCanonique(canonique);
+      retirerBalise("name", "robots");
+    } else {
+      poserBalise("property", "og:url", `${site.url}/`);
+      retirerCanonique();
+      poserBalise("name", "robots", "noindex, nofollow");
+    }
+
+    if (!donnees) return;
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(donnees);
+    document.head.appendChild(script);
+    return () => script.remove();
+    // `donnees` est une constante de module chez chaque appelant.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cle]);
 }
