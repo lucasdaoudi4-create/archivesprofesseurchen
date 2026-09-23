@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Attente from "./Attente";
+import FrontiereErreur from "./FrontiereErreur";
 import { cleDeRoute, titrePage } from "../../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -173,9 +174,19 @@ export default function Layout() {
 
             `key={pathname}` est sur `<main>`, donc l'animation d'entrée
             rejoue quand la page arrive, pas quand l'attente se monte. */}
-        <Suspense fallback={<Attente />}>
-          <Outlet />
-        </Suspense>
+        {/* LA FRONTIÈRE ENVELOPPE L'ATTENTE, et pas l'inverse : c'est le
+            chargement du morceau qui peut échouer, donc l'échec naît SOUS
+            le `Suspense`. Une frontière posée à l'intérieur ne le verrait
+            jamais passer.
+
+            `key={pathname}` la réinitialise à chaque changement de route :
+            une frontière n'oublie pas son erreur toute seule, et sans cette
+            clé l'échec d'une page resterait affiché sur la suivante. */}
+        <FrontiereErreur key={pathname}>
+          <Suspense fallback={<Attente />}>
+            <Outlet />
+          </Suspense>
+        </FrontiereErreur>
       </main>
 
       <Footer />
