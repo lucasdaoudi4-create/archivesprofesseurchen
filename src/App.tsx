@@ -1,13 +1,37 @@
+import { lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
-import Formation from "./pages/Formation";
-import Discord from "./pages/Discord";
-import Minecraft from "./pages/Minecraft";
-import Socials from "./pages/Socials";
-import Contact from "./pages/Contact";
-import LegalPage from "./pages/LegalPage";
-import NotFound from "./pages/NotFound";
+
+/* ── CE QUI ARRIVE AU PREMIER CHARGEMENT, ET CE QUI ATTEND ────────────────
+   `Home` est importé normalement : c'est la page d'arrivée de la très grande
+   majorité des visiteurs, et la différer coûterait un aller-retour réseau
+   supplémentaire sur le seul écran où la vitesse se remarque.
+
+   Les huit autres sont chargées à la demande. Elles ne se valent pas : les
+   trois pages légales forment à elles seules la moitié du poids des pages,
+   pour un trafic marginal — les faire porter par l'accueil était le plus
+   mauvais des échanges.
+
+   MESURÉ AVANT : un seul morceau de 280 ko (88,7 ko compressés), dont 70 ko
+   de pages. Le cadre — React, React-DOM, le routeur — pèse les deux tiers du
+   reste et ne se découpe pas : ce découpage-ci ne prétend pas y toucher.
+
+   LA FRONTIÈRE D'ATTENTE est dans `Layout`, autour de l'`Outlet` : la barre
+   et le pied restent à l'écran pendant le chargement.
+
+   CE QUE ÇA IMPOSE AILLEURS — `Layout` ne peut plus lire `document.title`
+   pour annoncer un changement de page : le temps que le morceau arrive, le
+   titre est encore celui de la page qu'on quitte. Il le déduit désormais du
+   chemin (`cleDeRoute`). Voir le pavé de `Layout.tsx`.                    */
+
+const Formation = lazy(() => import("./pages/Formation"));
+const Discord = lazy(() => import("./pages/Discord"));
+const Minecraft = lazy(() => import("./pages/Minecraft"));
+const Socials = lazy(() => import("./pages/Socials"));
+const Contact = lazy(() => import("./pages/Contact"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LE ROUTEUR — socle § 0.27 · Plan de site, routes, slugs, redirections
@@ -80,6 +104,10 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   return (
     <Routes>
+      {/* La frontière d'attente est SOUS la coquille : la barre de
+          navigation et le pied de page restent à l'écran pendant qu'arrive
+          le morceau d'une page. Les envelopper ferait clignoter tout le
+          document à chaque navigation. */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/formation" element={<Formation />} />

@@ -112,3 +112,23 @@
 .t-secondaire { color: var(--texte-secondaire); }
 .t-tertiaire  { color: var(--texte-tertiaire); }
 .t-accent     { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA RÉSERVE D'UNE PAGE QUI ARRIVE — `.page-attente`
+
+   Le conteneur que `<Suspense>` monte le temps qu'arrive le morceau d'une
+   route paresseuse. Il ne dessine rien : il RÉSERVE la hauteur d'un écran de
+   contenu, pour que le pied de page ne remonte pas se coller sous la barre
+   puis redescende une fraction de seconde plus tard. Ce mouvement-là est un
+   décalage de mise en page, et le § 0.30 le compte comme tel.
+
+   `100svh` et non `100vh` : sur un téléphone, la barre d'adresse rétractable
+   rend `vh` plus grand que la surface réellement visible, ce qui ajouterait
+   une bande vide sous le pli. Le repli en `vh` sert les navigateurs qui
+   ignorent l'unité.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page-attente {
+  min-block-size: calc(100vh - var(--h-nav));
+  min-block-size: calc(100svh - var(--h-nav));
+}

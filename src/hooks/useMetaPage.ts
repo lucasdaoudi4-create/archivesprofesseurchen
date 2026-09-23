@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { meta, routes, site, type RouteKey } from "../data/site";
+import { meta, routes, site, titrePage, type RouteKey } from "../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MÉTADONNÉES DE PAGE — socle §0.29
@@ -71,7 +71,7 @@ function retirerCanonique() {
 export default function useMetaPage(cle: RouteKey, donnees?: object) {
   useEffect(() => {
     const fiche = meta[cle];
-    const titre = cle === "accueil" ? fiche.titre : `${fiche.titre} · ${site.name}`;
+    const titre = titrePage(cle);
     const canonique = `${site.url}${routes[cle] === "/" ? "/" : routes[cle]}`;
 
     document.title = titre;

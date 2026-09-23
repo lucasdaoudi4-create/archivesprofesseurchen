@@ -118,6 +118,44 @@ export const routes: Record<RouteKey, string> = {
   introuvable: "/404",
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE TITRE D'UNE PAGE, ET LA CLÉ D'UN CHEMIN — une règle, un endroit
+
+   LA RÈGLE DU TITRE était écrite trois fois : dans `useMetaPage` (le
+   document au montage), dans `outils/tete-de-page.ts` (le HTML servi aux
+   robots) et, avant sa fusion, dans `Home.tsx`. Trois copies d'un `? :` qui
+   tient sur une ligne — c'est peu, et c'est exactement le genre de ligne qui
+   diverge sans qu'on s'en aperçoive, parce que les deux premières ne se
+   lisent jamais côte à côte : l'une s'observe dans l'onglet, l'autre dans
+   l'aperçu d'un lien partagé.
+
+   L'ACCUEIL N'EST PAS SUFFIXÉ. Le § 0.29 veut « {Titre de page} · Les
+   Archives du Professeur Chen », mais la racine porte déjà le nom du site
+   comme titre : le suffixer donnerait « Les Archives du Professeur Chen ·
+   Les Archives du Professeur Chen ».
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export function titrePage(cle: RouteKey): string {
+  const fiche = meta[cle];
+  return cle === "accueil" ? fiche.titre : `${fiche.titre} · ${site.name}`;
+}
+
+/* La table inverse de `routes`. Elle sert à `Layout`, qui doit connaître le
+   titre d'une page AVANT que cette page soit montée — voir le pavé de
+   `Layout.tsx` sur l'annonce de changement de route. Un chemin inconnu rend
+   `introuvable`, ce que le routeur fait déjà de son côté avec `path="*"`. */
+const CLE_PAR_CHEMIN = new Map(
+  (Object.entries(routes) as [RouteKey, string][]).map(([cle, chemin]) => [chemin, cle]),
+);
+
+export function cleDeRoute(chemin: string): RouteKey {
+  // Une barre oblique finale ne fait pas une autre page : /contact/ === /contact.
+  // La racine, elle, EST "/" et ne se rogne pas.
+  let normalise = chemin;
+  while (normalise.length > 1 && normalise.endsWith("/")) normalise = normalise.slice(0, -1);
+  return CLE_PAR_CHEMIN.get(normalise) ?? "introuvable";
+}
+
 /** Cibles de LIEN — ce que les boutons visent réellement tant que
  *  `/laboratoire/paliers` et `/formation/module-01` ne sont que des renvois
  *  vers `/formation` (voir `App.tsx`). Pointer un lien sur un renvoi coûtait

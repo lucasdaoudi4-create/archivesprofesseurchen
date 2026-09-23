@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Attente from "./Attente";
+import { cleDeRoute, titrePage } from "../../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LA COQUILLE — socle § 0.28 · Navigation applicative
@@ -69,6 +71,10 @@ import Footer from "./Footer";
    (§ 0.29). La coquille ne fait que le LIRE pour l'annoncer.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/** Au-delà, on renonce à viser l'ancre : le visiteur a commencé à lire, et
+ *  un défilement surprise serait pire que pas de défilement. */
+const ECHEANCE_ANCRE = 2000;
+
 export default function Layout() {
   const { pathname, hash, key } = useLocation();
   const principal = useRef<HTMLElement>(null);
@@ -79,28 +85,66 @@ export default function Layout() {
     const changeDeRoute = dernierChemin.current !== pathname;
     dernierChemin.current = pathname;
 
-    // ANCRE CIBLÉE (`/formation#titre-paliers`) — sur une navigation
-    // applicative, le navigateur ne défile pas tout seul : le routeur pousse
-    // l'URL sans charger de document. On vise donc la cible nous-mêmes, une
-    // image plus tard, quand la page d'arrivée est peinte. Au montage
-    // (arrivée directe), le navigateur a déjà fait ce travail.
+    /* ── ANCRE CIBLÉE (`/formation#sommaire`) ────────────────────────────
+       Sur une navigation applicative, le navigateur ne défile pas tout seul :
+       le routeur pousse l'URL sans charger de document. On vise donc la cible
+       nous-mêmes. Au montage (arrivée directe par l'URL), le navigateur a
+       déjà fait ce travail.
+
+       IL A FALLU ATTENDRE PLUS D'UNE IMAGE. Ce code ne regardait qu'une fois,
+       à l'image suivante, et cela suffisait tant que la page d'arrivée était
+       montée en même temps que l'URL changeait. Depuis que les routes sont
+       paresseuses, elle ne l'est plus : le morceau arrive par une promesse,
+       donc APRÈS l'image. `getElementById` rendait `null`, la fonction
+       repartait, et le visiteur restait en haut d'une page dont il avait
+       demandé le milieu — mesuré au navigateur : cible à 1158 px, défilement
+       à 0. Le focus ne partait nulle part non plus, ce qui casse le § 0.28
+       pour qui navigue au clavier.
+
+       On regarde donc à chaque image jusqu'à ce que la cible existe, avec une
+       échéance. `ECHEANCE_ANCRE` n'est pas une durée de chargement : c'est le
+       moment où l'on renonce, parce qu'au-delà le visiteur a commencé à lire
+       et qu'un défilement surprise serait pire que pas de défilement du tout.
+       Une ancre qui n'existe pas (`#nimporte-quoi`) tombe dans le même cas et
+       ne coûte que quelques images.                                          */
     if (hash && key !== "default") {
       const id = decodeURIComponent(hash.slice(1));
-      const image = requestAnimationFrame(() => {
+      const echeance = performance.now() + ECHEANCE_ANCRE;
+      let image = 0;
+
+      const viser = () => {
         const cible = document.getElementById(id);
-        if (!cible) return;
+        if (!cible) {
+          if (performance.now() < echeance) image = requestAnimationFrame(viser);
+          return;
+        }
         cible.scrollIntoView({ block: "start" });
         if (!cible.hasAttribute("tabindex")) cible.setAttribute("tabindex", "-1");
         cible.focus({ preventScroll: true });
-      });
-      if (changeDeRoute) setAnnonce(document.title);
+      };
+
+      image = requestAnimationFrame(viser);
+      if (changeDeRoute) setAnnonce(titrePage(cleDeRoute(pathname)));
       return () => cancelAnimationFrame(image);
     }
 
     if (!changeDeRoute) return;
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     principal.current?.focus({ preventScroll: true });
-    setAnnonce(document.title);
+    /* ── CE QUI EST ANNONCÉ, ET POURQUOI PAS `document.title` ────────────
+       Cette ligne lisait `document.title`, en comptant sur une règle
+       d'ordonnancement de React : les effets d'un enfant s'exécutent avant
+       ceux de son parent, donc la page avait posé son titre quand la
+       coquille venait le lire (§ 0.28, règle 2).
+
+       CETTE RÈGLE NE TIENT PLUS DEPUIS QUE LES ROUTES SONT PARESSEUSES. Le
+       temps que le morceau de la page arrive, c'est la surface d'attente qui
+       est montée, pas la page : `document.title` porte encore le titre de la
+       page qu'on QUITTE, et c'est lui qui serait annoncé au lecteur d'écran.
+
+       Le titre est donc déduit du chemin, par la même table que le reste du
+       site. Il ne dépend plus de ce qui est monté, ni de quand.               */
+    setAnnonce(titrePage(cleDeRoute(pathname)));
   }, [pathname, hash, key]);
 
   return (
@@ -122,7 +166,16 @@ export default function Layout() {
         key={pathname}
         className="entree-page"
       >
-        <Outlet />
+        {/* La frontière d'attente est ICI, et pas plus haut : la barre de
+            navigation, la région d'annonce et le pied de page restent montés
+            pendant qu'arrive le morceau d'une page paresseuse. Les englober
+            ferait clignoter tout le document à chaque navigation.
+
+            `key={pathname}` est sur `<main>`, donc l'animation d'entrée
+            rejoue quand la page arrive, pas quand l'attente se monte. */}
+        <Suspense fallback={<Attente />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <Footer />

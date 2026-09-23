@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { meta, routes, site, type RouteKey } from "../src/data/site";
+import { meta, routes, site, titrePage, type RouteKey } from "../src/data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    UNE TÊTE DE PAGE PAR ROUTE, LES EN-TÊTES HTTP, ROBOTS ET SITEMAP
@@ -50,7 +50,7 @@ export const echapper = (texte: string) =>
 
 export function poserTete(html: string, cle: RouteKey): string {
   const fiche = meta[cle];
-  const titre = echapper(cle === "accueil" ? fiche.titre : `${fiche.titre} · ${site.name}`);
+  const titre = echapper(titrePage(cle));
   const description = echapper(fiche.description);
   const adresse = `${site.url}${routes[cle]}`;
   const remplacer = (motif: RegExp, par: string) => {
