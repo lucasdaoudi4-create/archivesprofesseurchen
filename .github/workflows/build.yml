@@ -27,6 +27,11 @@ jobs:
       # la CI ne le verrait jamais : ces fichiers sont ignorés par git.
       - run: npm run build
 
+      # Les tests portent sur ce qui casse en SILENCE : la tête de page par
+      # route, l’empreinte CSP du script en ligne, et le doublet Netlify du
+      # formulaire de contact. Aucun des trois ne fait échouer un build.
+      - run: npm test
+
       # Ce contrôle-ci reste propre à la CI : il ne porte pas sur le disque
       # mais sur ce qui est VERSIONNÉ. Un `.js` compilé commité par mégarde
       # arriverait sur tous les postes ; `verifie-sources` ne verrait alors

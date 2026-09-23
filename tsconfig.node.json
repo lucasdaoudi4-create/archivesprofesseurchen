@@ -22,5 +22,5 @@
   // greffon de préchargement lit les mêmes `srcset`, le même `media` et le
   // même `sizes` que les pages, plutôt que d'en recopier une version qui
   // pourrait diverger. Un projet `composite` doit lister tous ses fichiers.
-  "include": ["vite.config.ts", "src/data/visuels.ts", "src/data/site.ts"]
+  "include": ["vite.config.ts", "src/data/visuels.ts", "src/data/site.ts", "outils/tete-de-page.ts"]
 }
