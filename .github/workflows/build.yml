@@ -17,19 +17,24 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
 
-      # `npm run build` porte désormais ses propres garde-fous :
+      # `--max-warnings 0` : un avertissement toléré devient un avertissement
+      # permanent, que plus personne ne lit.
+      - run: npm run lint
+
+      # `npm run build` porte ses propres garde-fous :
       #   · `prebuild`  — aucun `.js` compilé ne masque sa source `.ts` ;
-      #   · `postbuild` — le greffon `pagesStatiques` a bien produit les
-      #     pages par route, `_headers`, `robots.txt`, `sitemap.xml` et
-      #     `404.html`, et l'empreinte CSP correspond au script servi.
+      #   · `postbuild` — le greffon `pagesStatiques` a bien produit les pages
+      #     par route, `_headers`, `robots.txt`, `sitemap.xml` et `404.html`,
+      #     et l'empreinte CSP correspond au script servi.
       # Ils sont DANS le cycle npm et non ici, pour que le build échoue aussi
       # sur le poste où l'on itère — c'est là que le masquage se produit, et
       # la CI ne le verrait jamais : ces fichiers sont ignorés par git.
       - run: npm run build
 
       # Les tests portent sur ce qui casse en SILENCE : la tête de page par
-      # route, l’empreinte CSP du script en ligne, et le doublet Netlify du
-      # formulaire de contact. Aucun des trois ne fait échouer un build.
+      # route, l'empreinte CSP du script en ligne, le doublet Netlify du
+      # formulaire de contact, et la clé de route dont dépend l'annonce de
+      # changement de page. Aucun des quatre ne fait échouer un build.
       - run: npm test
 
       # Ce contrôle-ci reste propre à la CI : il ne porte pas sur le disque

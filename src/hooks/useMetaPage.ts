@@ -69,6 +69,19 @@ function retirerCanonique() {
 }
 
 export default function useMetaPage(cle: RouteKey, donnees?: object) {
+  /* ── POURQUOI LA SÉRIALISATION A LIEU ICI, ET PAS DANS L'EFFET ──────────
+     L'effet ne dépendait que de `cle`, et un commentaire affirmait que
+     `donnees` était « une constante de module chez chaque appelant » — avec
+     un `eslint-disable` pour le faire taire, dans un dépôt qui n'avait pas
+     ESLint. C'était vrai des deux appelants du jour, et de personne d'autre :
+     un appelant qui passerait un objet construit dans le rendu aurait vu ses
+     données structurées figées à leur première valeur, sans le moindre signe.
+
+     La chaîne, elle, se compare PAR VALEUR. L'effet se rejoue quand les
+     données changent vraiment, jamais quand seule leur identité change.
+     L'invariante n'a plus à être affirmée : elle n'existe plus.            */
+  const charge = donnees ? JSON.stringify(donnees) : null;
+
   useEffect(() => {
     const fiche = meta[cle];
     const titre = titrePage(cle);
@@ -89,13 +102,11 @@ export default function useMetaPage(cle: RouteKey, donnees?: object) {
       poserBalise("name", "robots", "noindex, nofollow");
     }
 
-    if (!donnees) return;
+    if (!charge) return;
     const script = document.createElement("script");
     script.type = "application/ld+json";
-    script.textContent = JSON.stringify(donnees);
+    script.textContent = charge;
     document.head.appendChild(script);
     return () => script.remove();
-    // `donnees` est une constante de module chez chaque appelant.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cle]);
+  }, [cle, charge]);
 }
