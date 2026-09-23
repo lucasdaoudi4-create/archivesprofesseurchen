@@ -119,10 +119,20 @@
    CONTENEUR — .wrap remplace .container-narrow et .container-wide
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.wrap          { width: min(var(--w-standard), 92vw); margin-inline: auto; }
-.wrap--plateau { width: min(var(--w-plateau),  94vw); margin-inline: auto; }
-.wrap--etroit  { width: min(var(--w-etroit),   92vw); margin-inline: auto; }
-.wrap--fiche   { width: min(var(--w-fiche),    92vw); margin-inline: auto; }
+/* LE JETON DE MARGE DE PAGE ÉTAIT DÉCLARÉ ET LU NULLE PART.
+   `--pad-page: clamp(16px, 4vw, 56px)` vit trente lignes plus haut ; aucun
+   sélecteur du dépôt ne le lisait, et les quatre conteneurs employaient un
+   `92vw` hérité du Module 01. La différence ne se voit qu'aux extrêmes, mais
+   c'est là qu'elle compte : à 320 px de viewport, `92vw` laisse 12,8 px de
+   marge de chaque côté, quand le jeton en garantit 16 — sa borne basse. De
+   400 px à 1240 px, les deux formes donnent le même nombre au pixel près ;
+   au-delà, c'est le plafond du conteneur qui gagne dans les deux cas.
+   Autrement dit : on rebranche le jeton sans rien déplacer, sauf là où il
+   protège. */
+.wrap          { width: min(var(--w-standard), 100% - 2 * var(--pad-page)); margin-inline: auto; }
+.wrap--plateau { width: min(var(--w-plateau),  100% - 2 * var(--pad-page)); margin-inline: auto; }
+.wrap--etroit  { width: min(var(--w-etroit),   100% - 2 * var(--pad-page)); margin-inline: auto; }
+.wrap--fiche   { width: min(var(--w-fiche),    100% - 2 * var(--pad-page)); margin-inline: auto; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LES CINQ MATIÈRES, CODÉES — ARC · MAT — 01 à 05

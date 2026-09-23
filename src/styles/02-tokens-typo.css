@@ -138,7 +138,22 @@
   text-wrap: pretty;
 }
 
-.corps      { font-family: var(--f-corps); font-size: var(--fs-corps);    line-height: var(--lh-corps); max-inline-size: var(--me-corps);   text-wrap: pretty; }
+/* LE PLAFOND DUR MANQUAIT, ET LA MESURE SORTAIT DE SA PLAGE.
+   Le § 4.3.2 donne DEUX valeurs à `TYP — 18`, pas une : « 65ch, plafond
+   40rem », et le code prêt à coller du chapitre l'écrit littéralement —
+   `max-width: min(var(--me-corps), 40rem)`. Seul le `65ch` avait été repris.
+
+   L'écart n'est pas théorique. `ch` mesure la chasse du ZÉRO, qui est large
+   en Space Grotesk ; 65ch ne fait donc pas 65 signes de texte courant.
+   Mesuré au navigateur sur /cgv à 1440 px, en métriques de police réelles :
+   84 à 89 signes par ligne dans une boîte de 708 px. Or le § 0.31 annonce
+   tenir le critère AAA 1.4.8 — « largeur de ligne ≤ 80 signes » — « par
+   construction ». Il ne le tenait pas.
+
+   40rem vaut 640 px, ce qui ramène la même ligne à 79 signes. Les deux
+   valeurs de la charte sont calibrées ensemble : c'est le `min()` qui les
+   fait tenir, pas la première seule. */
+.corps      { font-family: var(--f-corps); font-size: var(--fs-corps);    line-height: var(--lh-corps); max-inline-size: min(var(--me-corps), 40rem); text-wrap: pretty; }
 .corps-s    { font-family: var(--f-corps); font-size: var(--fs-corps-s);  line-height: 1.55;            max-inline-size: var(--me-corps-s); }
 .corps-xs   { font-family: var(--f-corps); font-size: var(--fs-corps-xs); line-height: 1.5; }
 
@@ -157,6 +172,12 @@
 .eyebrow {
   font-family: var(--f-mono);
   font-size: var(--fs-mono-s);
+  /* § 5.6 bis de l'addendum 05, règle explicite : « Tout libellé mono d'une
+     seule ligne — surtitre, étiquette, code de référence, catégorie — porte
+     `line-height: 1.2`. Sans cette ligne, les distances de 5.7.3 se lisent
+     2,5 px de trop. » La boîte du surtitre mesurait 18,15 px pour 11 px de
+     texte, et repoussait le titre d'autant. */
+  line-height: var(--lh-serre);
   letter-spacing: var(--ls-xl);
   text-transform: uppercase;
   color: var(--accent);

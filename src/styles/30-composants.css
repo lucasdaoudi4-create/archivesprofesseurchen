@@ -500,15 +500,13 @@
   transform: none;
 }
 
-.btn:active {
-  transform: scale(.98);
-  transition-duration: var(--dur-declic);
-}
-
-.btn:active .btn__f {
-  transform: translateX(var(--dist-poussee));
-  transition-duration: var(--dur-declic);
-}
+/* LE DÉCLIC EST DÉCLARÉ PLUS BAS, APRÈS LE BLOC `@media (hover: hover)`.
+   Motif : `.btn:active` et `.btn:hover` ont la MÊME spécificité (0,2,0), et
+   c'est donc l'ordre qui tranche. Déclaré ici, `:active` perdait contre le
+   `:hover` de la section 26 sur tout appareil à pointeur fin — c'est-à-dire
+   sur tout ordinateur, et précisément au moment du clic, puisqu'on survole
+   forcément ce qu'on clique. Le retour au clic du bouton principal du site
+   était donc mort partout où il compte. Voir la fin de la section 26. */
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -911,18 +909,26 @@ button.legende {
     color var(--tr-bascule);
 }
 
-.sommaire.rempli > .chap {
-  transition-delay: calc(var(--amorce-sommaire) + var(--chap-rang, 0) * var(--pas-bloc));
-}
+/* ── L'ÉCHELONNEMENT DES HUIT LIGNES A ÉTÉ RETIRÉ, ET IL N'ÉCHELONNAIT RIEN
+   Le sommaire portait `transition-delay: calc(--amorce-sommaire + rang ×
+   --pas-bloc)` sur chaque `.chap`, avec huit règles de rang pour le nourrir.
+   Deux raisons de le retirer, et la seconde suffit à elle seule :
 
-.sommaire > .chap:nth-child(1) { --chap-rang: 0; }
-.sommaire > .chap:nth-child(2) { --chap-rang: 1; }
-.sommaire > .chap:nth-child(3) { --chap-rang: 2; }
-.sommaire > .chap:nth-child(4) { --chap-rang: 3; }
-.sommaire > .chap:nth-child(5) { --chap-rang: 4; }
-.sommaire > .chap:nth-child(6) { --chap-rang: 5; }
-.sommaire > .chap:nth-child(7) { --chap-rang: 6; }
-.sommaire > .chap:nth-child(n+8) { --chap-rang: 7; }   /* plafond : 560 ms */
+   1. IL RETARDAIT LE SURVOL. Le délai était posé sur la `transition` de
+      l'élément, qui ne déclare que des propriétés d'INTERACTION —
+      `border-color`, `transform`, `background-color`, `color`. La huitième
+      ligne mettait donc 260 + 7 × 80 = 820 ms à réagir au curseur. Une ligne
+      de sommaire qui répond presque une seconde après le pointeur ne se lit
+      pas comme un instrument : elle se lit comme une page qui rame.
+
+   2. IL NE STAGEAIT AUCUNE ENTRÉE. `.rempli` ne change RIEN sur `.chap` —
+      vérifié : la classe ne touche que `.sommaire::before { inline-size:
+      100% }`. Il n'y avait donc aucune propriété à échelonner. Le retard
+      était du coût pur.
+
+   Le remplissage du filet, lui, garde son amorce : il appartient à
+   l'instrument (« le relevé se remplit, il n'apparaît pas »), pas à
+   l'interaction, et il vit sur `::before`, qui n'a pas d'état de survol. */
 
 .chap__n {
   min-inline-size: 11ch;
@@ -1107,6 +1113,50 @@ button.legende {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   15 bis · BARRE D'ATTENTE INDÉTERMINÉE — `.attente` · ARC · MOT — 11
+
+   ELLE MANQUAIT, ET SON ABSENCE SE VOYAIT À DEUX ENDROITS. Le chapitre 09
+   la déclare comme « la seule animation en boucle de tout le système » et lui
+   donne son code ; `04-tokens-motion.css` porte déjà son `@keyframes balayage`
+   et `99-preferences.css` sa compensation sous `prefers-reduced-motion`. Mais
+   la règle `.attente` elle-même n'existait nulle part : le keyframe ne servait
+   à rien, et la compensation visait une classe que le dépôt ne déclare pas —
+   le même défaut que `.voile`, `.scrim`, `.enseigne` et `.halo`, déjà corrigé.
+
+   CE QU'ELLE REMPLACE, ET CE QU'ELLE N'EST PAS. Le § 9.6 est catégorique :
+   « Pas de squelette de contenu qui scintille, pas de roue qui tourne, pas de
+   points qui sautent. » Ce composant est donc la SEULE façon conforme de dire
+   qu'une requête est en cours. Deux pixels de haut, un segment de 32 % qui
+   balaie en 1100 ms, et rien d'autre.
+
+   LES TROIS SEUILS sont dans le composant qui l'emploie, pas ici : rien avant
+   600 ms (« un indicateur qui apparaît et disparaît fait plus de bruit que
+   l'attente elle-même »), la barre entre 600 ms et 8 s, un message d'échec et
+   un bouton « Réessayer » au-delà. Le CSS ne connaît que l'apparence.
+
+   `--ease-continu` est `linear`, et le chapitre 09 le réserve à ce seul
+   composant : « Uniquement la barre d'attente indéterminée. Nulle part
+   ailleurs. »
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.attente {
+  position: relative;
+  block-size: 2px;
+  overflow: hidden;
+  background: var(--blanc-200);   /* § — Module 01 : --white-3 */
+}
+
+.attente::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  inline-size: 32%;
+  background: var(--bordeaux-600);   /* § — Module 01 : --burgundy-2 */
+  animation: balayage 1100ms var(--ease-continu) infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
    16 · FICHE DE SERVEUR — `.serveur` · ARC · CMP — 46 · socle § 0.25
    Forme courte : l'adresse copiable et son intitulé. `.serveur__adresse`
    est un champ en lecture seule, donc un contrôle : le socle § 0.9 le
@@ -1205,6 +1255,22 @@ button.legende {
   overflow: hidden;
   border: var(--trait-filet) solid var(--bordure);
   border-radius: var(--r-3);
+  /* LE RATIO EST SUR LE CADRE, PAS SEULEMENT SUR L'IMAGE — et c'est ce qui
+     supprime le plus gros décalage de mise en page du site.
+
+     L'image portait bien `aspect-ratio: var(--ar-portrait)` et ses attributs
+     `width`/`height`. Mais elle est en `loading="lazy"` et en
+     `inline-size: 100%` DANS une piste de grille dimensionnée par son
+     contenu : tant qu'elle n'a pas chargé, sa largeur se résout à zéro,
+     donc sa hauteur aussi. Mesuré au navigateur sur profil mobile bridé :
+     le cadre fait 2 px avant le chargement et 358 px après — 356 px de saut,
+     qui poussent tout ce qui suit. CLS relevé à 0,2936 quand le § 0.30
+     plafonne à 0,05.
+
+     Posé sur le CADRE, le ratio réserve la boîte à partir de la largeur de
+     la colonne, qui est connue dès la première mise en page. L'image n'a
+     alors plus rien à décider. */
+  aspect-ratio: var(--ar-portrait);
   /* L'aplat du narrateur (§ 7.13.5). Il tient aussi la boîte avant que le
      ratio de l'image ne soit connu : le cadre n'est jamais un trou blanc
      sur la surface claire. */
@@ -2326,6 +2392,27 @@ button.legende {
   }
 }
 
+/* ── LE DÉCLIC — APRÈS LE SURVOL, ET C'EST TOUT L'INTÉRÊT ─────────────────
+   `.btn:active` vit ici, hors du média et APRÈS lui, parce que sa
+   spécificité est la même que celle de `.btn:hover` : à égalité, c'est
+   l'ordre de déclaration qui gagne. Déclaré avec le reste du composant
+   (section 5), il était écrasé par le survol sur tout pointeur fin, et le
+   bouton ne répondait plus au clic.
+
+   Le § 9.2 donne `--dur-declic` (120 ms) à l'état `:active` : c'est la
+   durée la plus courte de l'échelle, parce que « ce qui répond à son clic
+   est immédiat ». Le `transform` du déclic remplace celui du survol, il ne
+   s'y ajoute pas — l'instrument s'enfonce, il ne se met pas à voyager. */
+.btn:active {
+  transform: scale(.98);
+  transition-duration: var(--dur-declic);
+}
+
+.btn:active .btn__f {
+  transform: translateX(var(--dist-poussee));
+  transition-duration: var(--dur-declic);
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    27 · RESPONSIVE — trois paliers, ceux du chapitre 05
@@ -2488,7 +2575,18 @@ button.legende {
 
   /* Le portrait de l'atelier ne s'étale pas sur toute la colonne : un
      portrait carré de 384px de large suffit, et il se centre. */
+  /* `inline-size: 100%` EST LA LIGNE QUI SUPPRIME LE DÉCALAGE. `margin-inline:
+     auto` sur un élément de grille annule l'étirement par défaut et ramène la
+     boîte à son contenu — or son contenu, c'est une image en `loading="lazy"`
+     dans un `<picture display:contents>` : rien, tant qu'elle n'a pas chargé.
+     Mesuré : le cadre faisait 2 × 2 px avant le chargement et 358 px après.
+     Le ratio posé sur le cadre ne pouvait rien réserver, puisqu'il n'avait
+     aucune largeur d'où déduire une hauteur. Avec une largeur explicite, la
+     boîte est pleine dès la première mise en page, le plafond de 24rem la
+     borne, et les marges automatiques la centrent — le tout sans que l'image
+     ait son mot à dire. */
   .atelier__p {
+    inline-size: 100%;
     max-inline-size: min(100%, 24rem);
     margin-inline: auto;
   }

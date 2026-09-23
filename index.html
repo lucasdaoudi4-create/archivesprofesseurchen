@@ -71,6 +71,20 @@
          téléchargement de la feuille. -->
     <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/fraunces-roman.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- SPACE MONO EST AU-DESSUS DE LA LIGNE DE FLOTTAISON, ET IL N'ÉTAIT PAS
+         PRÉCHARGÉ. Il porte le surtitre, les DEUX boutons du héros et la
+         plaque de légende de la photo : trois éléments du premier écran. Sans
+         préchargement, il n'est découvert qu'après la feuille de style, et son
+         échange (`font-display: swap`) décale la rangée de boutons. Mesuré
+         avant : CLS 0,0907 sur un profil mobile bridé, dont un décalage de
+         0,0141 attribué à `.hero__b`. Le § 0.30 plafonne à 0,05.
+
+         Les trois faces préchargées pèsent 103,6 ko, sous la cible de 110 ko
+         du même §. C'est aussi pourquoi Fraunces italique — 79,6 ko pour la
+         seule ligne de sous-titre du héros — reste NON préchargé : l'ajouter
+         porterait le premier rendu à 183 ko, soit 45 % au-dessus du plafond.
+         Un décalage d'une ligne coûte moins cher qu'un budget doublé. -->
+    <link rel="preload" href="/fonts/space-mono-400.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <div id="root"></div>

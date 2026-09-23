@@ -34,6 +34,23 @@
   margin-block-end: var(--rythme-sechead);
 }
 
+/* LE CHAPÔ COLLAIT AU TITRE, SUR LES SIX EN-TÊTES DU SITE. Mesuré au
+   navigateur : 0 px entre le bas du `h2` et le haut du `.lede`, avec
+   `margin-top: 0px` calculé. La table révisée du § 5.7.3 (addendum 05)
+   arbitre pourtant cette distance et elle seule : « Titre → chapô :
+   `--sp-4`, 16 px », soit 22,0 à 23,2 px d'écart OPTIQUE une fois la
+   correction de demi-interligne appliquée.
+
+   Le titre et le chapô formaient donc un seul pavé, et la hiérarchie que
+   l'échelle typographique construit — 50 px de Fraunces contre 19 px de
+   Space Grotesk — était défaite par l'absence d'un pas de trame. C'est le
+   défaut le plus visible du rythme vertical, et il est sur toutes les pages.
+
+   La règle vise le chapô DANS une tête, pas tous les `.lede` : celui du
+   héros vit dans un panneau, pas dans un en-tête de section, et il a déjà
+   son `--sp-6` propre (`.hero__p`). */
+.tete > .lede { margin-block-start: var(--sp-4); }
+
 /* ── Sous-titre de rang 3 dans un long bloc ───────────────────────────────
    Ne touche à aucune propriété typographique : le titre reste `.h3`.
    Cet utilitaire ne pose que le filet et le rythme qui le précèdent.   */

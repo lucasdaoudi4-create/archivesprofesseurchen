@@ -63,8 +63,13 @@ import { useEffect } from "react";
    (socle § 0.16).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/** Le seuil de la maquette validée : un bloc se révèle dès qu'il entre à 12 %. */
-const SEUIL = 0.12;
+/* Le seuil est celui du chapitre 09, pas celui de la maquette. Le § 9.6 le
+   donne en toutes lettres pour le pattern de révélation : « Déclencheur.
+   Franchissement de 15 % de visibilité, une seule fois. » La maquette validée
+   portait 0.12 ; l'écart ne se voit pas sur un grand bloc, mais il se voit sur
+   une bande basse — elle part trois points trop tôt, avant d'être vraiment
+   entrée dans le cadre. C'est le chapitre propriétaire qui arbitre. */
+const SEUIL = 0.15;
 
 /** Le marqueur que le JSX pose, et le seul contrat de balisage du mécanisme. */
 const MARQUEUR = "[data-rv]";

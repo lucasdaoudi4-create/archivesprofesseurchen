@@ -770,6 +770,8 @@ export interface Formation extends EnTeteSection {
   encartSuite: CarteTexte;
   ctaPaliers: string;
   ctaModule: string;
+  /** Sur /formation, où « ouvrir le module » n’a nulle part où aller. */
+  ctaSommaire: string;
   ctaContenu: string;
 }
 
@@ -802,6 +804,16 @@ export const formation: Formation = {
 
   ctaPaliers: "Rejoindre les Archives — dès 8,50\u00A0€",
   ctaModule: "Ouvrir le module",
+  /*
+   * SUR /formation, « Ouvrir le module » NE POUVAIT RIEN OUVRIR. Le bouton
+   * pointait sur `/formation/module-01`, que `App.tsx` et `netlify.toml`
+   * renvoient tous deux sur `/formation` : le visiteur cliquait l’action
+   * principale de la page et rechargeait la page où il était déjà — en
+   * perdant sa position de défilement au passage. Tant que le lecteur de
+   * module n’est pas écrit, le bouton dit ce qu’il fait vraiment : il
+   * descend au sommaire des huit chapitres, qui est sur la même page.
+   */
+  ctaSommaire: "Voir les huit chapitres",
   ctaContenu: "Ce que contient la formation",
 };
 
@@ -1109,8 +1121,25 @@ export const legal: Legal = {
    */
   piedGenerationDecor:
     "Les visuels de cette page — le laboratoire, le narrateur, les planches de décor — sont générés par intelligence artificielle avec les outils présentés dans la formation. Aucun décor construit, aucune équipe, aucun studio loué.",
+  /*
+   * FORMULATION IMPOSÉE MOT POUR MOT par le chapitre 02 § 13.3, « obligatoire
+   * sur toute page où l’emblème apparaît, et sur tout support commercial ».
+   *
+   * Ce champ portait « Site non affilié à Nintendo, Game Freak ou The Pokémon
+   * Company. » — la formulation de la maquette, que le § 13.3 ne reprend pas.
+   * Le pied de page, lui, servait déjà la bonne, mais en dur : les deux se
+   * contredisaient donc, et la source de vérité était la mauvaise des deux.
+   * C’est la source qui est corrigée, et le pied qui la lit désormais.
+   *
+   * À SIGNALER — le § 13.3 nomme UN ayant droit là où la maquette en nommait
+   * trois, et ajoute en échange l’attribution des marques. Sur un site
+   * commercial dont la question de propriété intellectuelle n’est pas
+   * tranchée (07-imagerie § 7.14), le choix des ayants droit nommés relève
+   * d’un conseil juridique, pas d’une charte graphique. La charte est suivie
+   * ici parce qu’elle arbitre ; l’écart est signalé, pas tranché.
+   */
   piedNonAffiliation:
-    "Site non affilié à Nintendo, Game Freak ou The Pokémon Company.",
+    "Site non affilié à The Pokémon Company. Pokémon™ et les noms associés sont des marques de leurs ayants droit.",
   /** Label obligatoire au-dessus de toute jauge (§10.1 ④). */
   labelReleve: "Relevé — appréciation personnelle",
   /** Mention obligatoire sur toute image servant de preuve (§10.1 ⑤). */

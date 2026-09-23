@@ -96,7 +96,11 @@ body {
 p:not(.lede, .corps, .corps-s, .corps-xs, .citation,
       .meta, .legal, .eyebrow, .label, .code-arc, .legende) {
   margin-block-end: var(--sp-4);
-  max-inline-size: var(--me-corps);
+  /* Le plafond dur du § 4.3.2, au même titre que sur `.corps` : « 65ch,
+     plafond 40rem ». `ch` mesure la chasse du zéro, large en Space Grotesk,
+     et 65ch rendait 84 à 89 signes de texte courant — au-dessus des 80 que
+     le § 0.31 annonce tenir en AAA (1.4.8). 40rem ramène la ligne à 79. */
+  max-inline-size: min(var(--me-corps), 40rem);
 }
 
 p { text-wrap: pretty; }

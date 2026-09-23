@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import {
   blocPaliers,
   encartProduction,
@@ -8,7 +7,6 @@ import {
   paliers,
   paliersPayants,
   patreon,
-  routes,
 } from "../data/site";
 import { type CSSProperties } from "react";
 import {
@@ -64,8 +62,9 @@ import { useRevelation } from "../hooks/useRevelation";
    ── CE QUI EST VIVANT ICI ────────────────────────────────────────────────
 
    Le lien Patreon, et lui seul. Aucun relevé, aucun compteur, aucune API.
-   Les deux boutons internes visent des routes déclarées dans `site.ts` :
-   `routes.module01` pour « Ouvrir le module ». Voir « À signaler ».
+   Le bouton de la notice est une ANCRE de page (`#sommaire`), pas un lien de
+   route : `routes.module01` était renvoyé sur `/formation` par les deux tables
+   de renvoi, donc il rechargeait cette page. Voir « À signaler ».
 
    ── LA PLANCHE DE LA NOTICE ──────────────────────────────────────────────
 
@@ -155,13 +154,18 @@ export default function Formation() {
                 ))}
               </div>
 
+              {/* Une ancre de page, pas un `Link` : la destination est sur
+                  CETTE page. Le bouton pointait sur `routes.module01`, que les
+                  deux tables de renvoi ramènent sur `/formation` — il
+                  rechargeait donc la page courante et remontait le visiteur en
+                  haut. Le § 0.20 décale déjà les ancres sous la barre collante. */}
               <div className="hero__b">
-                <Link className="btn" to={routes.module01}>
-                  {formation.ctaModule}
+                <a className="btn" href="#sommaire">
+                  {formation.ctaSommaire}
                   <span className="btn__f" aria-hidden="true">
                     →
                   </span>
-                </Link>
+                </a>
               </div>
             </div>
 
@@ -229,10 +233,10 @@ export default function Formation() {
             </div>
           </div>
 
-          <h3 className="h3 sous" id="sommaire" data-rv>
+          <h3 className="h3 sous" id="sommaire">
             Le sommaire du module
           </h3>
-          <p className="corps" data-rv>
+          <p className="corps">
             {module01.duree}
           </p>
 
@@ -265,7 +269,7 @@ export default function Formation() {
             <p className="lede">{blocPaliers.lede}</p>
           </div>
 
-          <h3 className="h3 sous" data-rv>
+          <h3 className="h3 sous">
             {blocPaliers.titre}
           </h3>
 
@@ -277,11 +281,11 @@ export default function Formation() {
 
           {/* « Sans engagement », en toutes lettres sous les trois montants
               (Amendement 1 §A1.1). */}
-          <p className="meta mt-[var(--sp-4)]" data-rv>
+          <p className="meta mt-[var(--sp-4)]">
             {patreon.mentionEngagement}
           </p>
 
-          <h3 className="h3 sous" data-rv>
+          <h3 className="h3 sous">
             {blocPaliers.titreComparatif}
           </h3>
 
@@ -301,7 +305,7 @@ export default function Formation() {
               dans `site.ts` ; aucune n'est réécrite ici, et aucune n'est
               écartée — voir l'en-tête de `Faq.tsx` pour le relevé des
               vérifications. */}
-          <h3 className="h3 sous" data-rv>
+          <h3 className="h3 sous">
             Les questions fréquentes
           </h3>
 
@@ -309,7 +313,7 @@ export default function Formation() {
             <Faq />
           </div>
 
-          <div className="hero__b mt-[var(--sp-8)]" data-rv>
+          <div className="hero__b mt-[var(--sp-8)]">
             <a className="btn" href={patreon.url} target="_blank" rel="noopener">
               {formation.ctaPaliers}
               <span className="btn__f" aria-hidden="true">

@@ -417,8 +417,11 @@ export default function Home() {
           </div>
 
           {/* ── Le module ouvert aujourd'hui ── */}
-          <h3 className="h3 sous" data-rv>{formation.sousTitreModules}</h3>
-          <p className="corps-s t-secondaire" data-rv>{formation.introModules}</p>
+          {/* Ni le titre ni son chapô ne portent `data-rv` : le § 9.6 réserve la
+              révélation à un BLOC entier et l'interdit « sur un paragraphe isolé ».
+              Ils appartiennent à la notice qui suit, et ils entrent avec la bande. */}
+          <h3 className="h3 sous">{formation.sousTitreModules}</h3>
+          <p className="corps-s t-secondaire">{formation.introModules}</p>
 
           {/* `mt-[var(--sp-8)]` et non `mt-8` : l'échelle numérique de
               Tailwind diverge de celle de la charte à partir du rang 7 —
@@ -445,7 +448,12 @@ export default function Home() {
               </div>
 
               <div className="hero__b">
-                <Link className="btn" to={routes.module01}>
+                {/* `routes.formation`, et non `routes.module01` : ce dernier
+                    est renvoyé sur `/formation` par `App.tsx` ET par
+                    `netlify.toml`. Viser la destination réelle épargne au
+                    visiteur un renvoi, et au lecteur d'écran l'annonce du titre
+                    de la page qu'il vient de quitter. */}
+                <Link className="btn" to={routes.formation}>
                   {formation.ctaModule}{" "}
                   <span className="btn__f" aria-hidden="true">→</span>
                 </Link>
@@ -542,7 +550,7 @@ export default function Home() {
               Sans portrait publiable, le split n'a plus qu'une colonne : on
               retire la colonne d'image plutôt que d'y poser une plaque et la
               signature « Le narrateur », qui nommerait un absent. */}
-          <h3 className="h3 sous" data-rv>{formation.atelier.titre}</h3>
+          <h3 className="h3 sous">{formation.atelier.titre}</h3>
           {portraitPhoto ? (
             <div className="atelier split" data-rv>
               <div
@@ -595,10 +603,14 @@ export default function Home() {
           {/* ── Trois paliers, une progression ──
               L'ancre `#b-paliers` est portée par le titre, pas par une
               section : c'est là que mène le premier bouton du hero. */}
-          <h3 className="h3 sous" data-rv id="b-paliers">
+          {/* Même règle : un titre seul n'est pas un bloc. Et celui-ci porte
+              l'ancre `#b-paliers`, visée par le bouton du héros — un bloc masqué
+              en attendant son franchissement de seuil serait une cible d'ancre
+              invisible à l'arrivée. */}
+          <h3 className="h3 sous" id="b-paliers">
             {blocPaliers.titre}
           </h3>
-          <p className="corps-s t-secondaire" data-rv>{blocPaliers.ledeAccueil}</p>
+          <p className="corps-s t-secondaire">{blocPaliers.ledeAccueil}</p>
 
           {/* L'aveu, dit AVANT l'abonnement et pas après. */}
           <div className="encart mt-6" data-rv>
@@ -671,7 +683,7 @@ export default function Home() {
             })}
           </div>
 
-          <div className="hero__b" data-rv>
+          <div className="hero__b">
             <Link className="btn" to={routes.paliers}>
               {blocPaliers.ctaComparer}{" "}
               <span className="btn__f" aria-hidden="true">→</span>
@@ -712,7 +724,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="hero__b" data-rv>
+          <div className="hero__b">
             <Link className="btn" to={routes.minecraft}>
               Voir l’adresse du serveur{" "}
               <span className="btn__f" aria-hidden="true">→</span>

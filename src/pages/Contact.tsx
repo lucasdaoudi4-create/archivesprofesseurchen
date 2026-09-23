@@ -148,6 +148,39 @@ const MOTIF_AUTRE = "Un autre motif";
    région ne doit rien dire d'autre que ce que le lecteur voit. */
 const TITRE_CONFIRMATION = "Message envoyé";
 
+/* ── LA CAUSE DE L'ÉCHEC, DITE EN FRANÇAIS ────────────────────────────────
+   L'encart d'échec interpolait `erreur.message` tel quel. Or ce message
+   n'est pas écrit par ce site : il est écrit par le navigateur, en anglais,
+   et il n'est pas une phrase. Le visiteur lisait « Le message n'est pas
+   parti (Failed to fetch). » — un texte technique, dans une langue qui n'est
+   pas celle du site, au moment précis où il a besoin d'être rassuré.
+
+   Le § 6.1 des fondations impose le vouvoiement et une langue tenue ; un
+   message d'erreur doit nommer LE PROBLÈME et LA RÉPARATION, pas le code de
+   la panne. Les trois causes que ce formulaire peut réellement rencontrer
+   sont donc dites, et rien d'autre n'est inventé : ce qu'on ne sait pas
+   nommer ne reçoit pas de parenthèse du tout.                            */
+
+/** Le serveur a répondu, mais il a refusé. Porte le statut, pour le dire. */
+class ReponseRefusee extends Error {
+  constructor(readonly statut: number) {
+    super(`HTTP ${statut}`);
+    this.name = "ReponseRefusee";
+  }
+}
+
+function causeLisible(erreur: unknown): string {
+  if (erreur instanceof ReponseRefusee) {
+    // 4xx : le formulaire ou son contrat Netlify. 5xx : l'hébergeur.
+    return erreur.statut >= 500
+      ? "le service d’envoi n’a pas répondu"
+      : "le formulaire a été refusé";
+  }
+  // `fetch` ne rejette que sur une panne réseau — hors ligne, DNS, coupure.
+  if (erreur instanceof TypeError) return "la connexion s’est interrompue";
+  return "";
+}
+
 const MOTIFS = [...contact.motifs, MOTIF_AUTRE];
 
 function encodeForm(donnees: Record<string, string>): string {
@@ -217,12 +250,12 @@ export default function Contact() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: encodeForm(charge),
       });
-      if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
+      if (!reponse.ok) throw new ReponseRefusee(reponse.status);
       formulaire.reset();
       setEtat("envoye");
     } catch (erreur) {
       setEtat("echec");
-      setDetail(erreur instanceof Error ? erreur.message : "");
+      setDetail(causeLisible(erreur));
     }
   };
 

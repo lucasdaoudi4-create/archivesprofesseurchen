@@ -112,8 +112,7 @@
      il ne fait plus qu'assombrir l'affiche, on le retire.                 */
   .legende,
   .pl-meta               { background: Canvas; color: CanvasText;
-                           border: 1px solid CanvasText;
-                           forced-color-adjust: none; }
+                           border: 1px solid CanvasText; }
   .pl-veil               { display: none; }
 
   .etat,
@@ -130,15 +129,28 @@
 
   :focus-visible         { outline-color: Highlight; }
 
-  /* Les dégradés de matière ne survivent pas au mode forcé : on les
-     remplace par la couleur système correspondante.                   */
+  /* ── LES MATIÈRES PASSENT AUX COULEURS SYSTÈME, SANS COUPER LE MODE ────
+     Les dégradés de matière ne survivent pas au mode forcé : on les remplace
+     par la couleur système correspondante. La forme RACCOURCIE suffit pour
+     cela — `background: Canvas` remet `background-image` à `none` et pose la
+     couleur du système dans le même geste.
+
+     `forced-color-adjust: none` a donc été RETIRÉ de ces six règles, et il
+     fallait le retirer : la propriété est HÉRITÉE. Posée sur `.mat-panneau`,
+     elle coupait le mode de couleurs forcées pour tout le sous-arbre — c'est
+     le panneau du héros, donc le titre, le chapô et les deux boutons. Sur un
+     thème à contraste élevé sombre, le fond devenait `Canvas` (noir) pendant
+     que le texte gardait `--texte-secondaire` (#3A4145) : mesuré 2,02:1 sur
+     le chapô et 1,92:1 sur le bouton fantôme, quand le § 0.31 vise 4,5:1 sur
+     l'intégralité du site. La propriété n'était de toute façon nécessaire à
+     rien ici — elle ne sert qu'à CONSERVER des couleurs hors palette système,
+     ce que ces règles ne demandent pas. */
   .mat-panneau,
   .mat-email,
   .mat-acier,
   .mat-verre,
   .mat-papier,
-  .mat-cuir              { background: Canvas; color: CanvasText;
-                           forced-color-adjust: none; }
+  .mat-cuir              { background: Canvas; color: CanvasText; }
 }
 
 /* ── Impression ───────────────────────────────────────────────────────────

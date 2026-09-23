@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Marque from "../brand/Marque";
+import { legal, routes, site } from "../../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ARC · CMP — 43 · PIED DE PAGE DU SITE — `.sitefoot`
@@ -86,7 +87,7 @@ import Marque from "../brand/Marque";
 const LE_LIEU = [
   { to: "/formation", libelle: "La formation" },
   { to: "/laboratoire/paliers", libelle: "Les paliers" },
-  { to: "/minecraft", libelle: "L'Académie" },
+  { to: "/minecraft", libelle: "L’Académie" },
   { to: "/discord", libelle: "Le Discord" },
   { to: "/reseaux", libelle: "Les réseaux" },
 ];
@@ -99,8 +100,22 @@ const INFORMATIONS = [
   { to: "/confidentialite", libelle: "Confidentialité" },
 ];
 
+/* ── OÙ LA MENTION LONGUE DU § 7.14 EST DUE ───────────────────────────────
+   « Toute page qui présente le décor ou le narrateur porte une mention
+   explicite. » Ce sont les quatre routes qui montent une photo : l'accueil
+   (héros, notice, atelier), la notice de `/formation`, l'affiche du lecteur
+   de `/reseaux`, et la planche de la 404. Partout ailleurs, c'est la mention
+   générale — elle ne s'y AJOUTE pas, elle y remplace la longue. */
+const ROUTES_A_VISUELS = new Set<string>([
+  routes.accueil,
+  routes.formation,
+  routes.reseaux,
+  routes.introuvable,
+]);
+
 export default function Footer() {
   const annee = new Date().getFullYear();
+  const { pathname } = useLocation();
 
   return (
     <footer className="sitefoot acier mat-acier">
@@ -143,27 +158,38 @@ export default function Footer() {
         {/* `.legal` porte la mesure de 74ch, l'interligne et la couleur ;
             `.sitefoot__legal` ne pose que le filet et le rythme. La
             gouttière entre les quatre mentions est de la mise en page. */}
+        {/* ── LES MENTIONS SONT LUES, PLUS RECOPIÉES ───────────────────────
+            Les trois premières étaient écrites en dur ici alors que
+            `src/data/site.ts` les déclare — et, recopiées à la main, elles
+            avaient dérivé de leur source. Trois écarts, dont deux comptent :
+
+              · l'affiliation avait perdu « de facilité d'usage » dans
+                l'énumération des appréciations, et posait une espace
+                insécable ordinaire devant le point-virgule là où le § 4.7
+                impose la fine (` `) ;
+              · la non-affiliation ne nommait QUE The Pokémon Company, quand
+                la source nomme « Nintendo, Game Freak ou The Pokémon
+                Company » — une mention légale qui cite moins d'ayants droit
+                que ce que l'éditeur a décidé de citer ;
+              · la mention de génération disait « ce site » là où la source
+                dit « cette page », et le § 7.14 impose sa formulation MOT
+                POUR MOT.
+
+            Ce dernier point n'est pas qu'une recopie : `site.ts` déclare DEUX
+            mentions et dit laquelle sert quand — « Elle remplace
+            `piedGeneration` sur ces pages-là — elle ne s'y ajoute pas ». La
+            version longue appartient aux pages qui MONTRENT le décor ou le
+            narrateur (§ 7.14) ; les autres portent la mention générale. Le
+            pied lit donc la route pour choisir, au lieu de servir la version
+            longue partout — y compris sur `/contact`, qui ne montre rien. */}
         <div className="sitefoot__legal grid gap-4">
+          <p className="legal">{legal.piedAffiliation}</p>
           <p className="legal">
-            Communication commerciale — certains liens de ce site sont des liens
-            affiliés. Leur utilisation peut me permettre de percevoir une
-            commission, sans coût supplémentaire pour vous. Les appréciations de
-            qualité et de modération correspondent à mon expérience personnelle
-            au moment de la publication&nbsp;; les modèles et leurs règles
-            évoluent vite. Dernière mise à jour&nbsp;: septembre 2026.
+            {ROUTES_A_VISUELS.has(pathname) ? legal.piedGenerationDecor : legal.piedGeneration}
           </p>
+          <p className="legal">{legal.piedNonAffiliation}</p>
           <p className="legal">
-            Les visuels de ce site — le laboratoire, le narrateur, les planches
-            de décor — sont générés par intelligence artificielle avec les
-            outils présentés dans la formation. Aucun décor construit, aucune
-            équipe, aucun studio loué.
-          </p>
-          <p className="legal">
-            Site non affilié à The Pokémon Company. Pokémon™ et les noms
-            associés sont des marques de leurs ayants droit.
-          </p>
-          <p className="legal">
-            ©&nbsp;{annee} Les Archives du Professeur Chen&nbsp;·&nbsp;LHM Studio
+            ©&nbsp;{annee} {site.name}&nbsp;·&nbsp;{site.editeur}
           </p>
         </div>
       </div>
