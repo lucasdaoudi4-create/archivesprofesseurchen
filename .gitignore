@@ -24,6 +24,10 @@ dist-ssr
 *.tsbuildinfo
 vite.config.d.ts
 vite.config.js
+# Garde-fou : aucun JS compilé ne doit revenir à côté des sources TS.
+src/**/*.js
+src/**/*.d.ts
+!src/vite-env.d.ts
 
 # Masters des visuels — 127 Mo de PNG 8192px fournis par l'auteur.
 # Seules les dérivées optimisées de public/img/ sont versionnées (2 Mo).

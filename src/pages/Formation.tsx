@@ -8,7 +8,7 @@ import {
   paliers,
   paliersPayants,
   patreon,
-  routes,
+  liens,
 } from "../data/site";
 import { type CSSProperties } from "react";
 import {
@@ -24,7 +24,7 @@ import ComparatifPaliers from "../components/formation/ComparatifPaliers";
 import Faq from "../components/formation/Faq";
 import PictoSection from "../components/formation/PictoSection";
 import SommaireModule from "../components/formation/SommaireModule";
-import useMetaPage from "../components/formation/useMetaPage";
+import useMetaPage from "../hooks/useMetaPage";
 import { useRevelation } from "../hooks/useRevelation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -156,7 +156,7 @@ export default function Formation() {
               </div>
 
               <div className="hero__b">
-                <Link className="btn" to={routes.module01}>
+                <Link className="btn" to={liens.module01}>
                   {formation.ctaModule}
                   <span className="btn__f" aria-hidden="true">
                     →

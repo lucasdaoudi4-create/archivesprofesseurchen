@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
-import { discord, meta, minecraft, site } from "../data/site";
+import { useCallback, useState } from "react";
+import { discord, minecraft } from "../data/site";
 import FicheServeur from "../components/minecraft/FicheServeur";
 import { reglesAcces } from "../components/minecraft/reglesAcces";
 import { Icone } from "../components/ui/Icones";
 import { useRevelation } from "../hooks/useRevelation";
+import useMetaPage from "../hooks/useMetaPage";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PAGE MINECRAFT — route `/minecraft` · maquette `#v-minecraft` (l. 1144-1168)
@@ -106,10 +107,7 @@ export default function Minecraft() {
   // chaque rendu de cette page ne relance l'annonce.
   const annoncer = useCallback((texte: string) => setAnnonce(texte), []);
 
-  useEffect(() => {
-    // § 0.29 · « {Titre de page} · Les Archives du Professeur Chen ».
-    document.title = `${meta.minecraft.titre} · ${site.name}`;
-  }, []);
+  useMetaPage("minecraft");
 
   return (
     <>

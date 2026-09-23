@@ -39,7 +39,15 @@ const colonnes = paliersPayants.filter(estPayant);
 
 export default function ComparatifPaliers() {
   return (
-    <div className="tableau tableau--paliers" data-rv>
+    // Conteneur défilant sous 620 px : il doit être atteignable au clavier
+    // (WCAG 2.1.1), comme les tableaux des pages légales.
+    <div
+      className="tableau tableau--paliers"
+      data-rv
+      role="region"
+      aria-label={blocPaliers.legendeComparatif}
+      tabIndex={0}
+    >
       <table>
         <caption className="sr-only">{blocPaliers.legendeComparatif}</caption>
 

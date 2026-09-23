@@ -1,5 +1,5 @@
 /* Les Archives du Professeur Chen — point d'entrée CSS de l'application.
-   Quatre lignes, et rien d'autre : la charte d'un côté, Tailwind de l'autre.
+   Deux lignes, et rien d'autre : la charte d'un côté, Tailwind de l'autre.
 
    ORDRE. L'@import précède les trois directives, et c'est obligatoire :
    une règle @import doit venir avant toute autre règle (hors @charset et
@@ -16,6 +16,7 @@
 
 @import "./styles/arc.css";
 
-@tailwind base;
-@tailwind components;
+/* `@tailwind base` et `@tailwind components` sont retirés : le préflight est
+   déjà coupé (`tailwind.config.js`), et la couche de base ne produisait plus
+   que les variables `--tw-*` — 2,3 ko qu'aucun utilitaire employé ne lit. */
 @tailwind utilities;

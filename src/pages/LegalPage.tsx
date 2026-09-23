@@ -1,5 +1,6 @@
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import useMetaPage from "../hooks/useMetaPage";
 import {
   site,
   routes,
@@ -9,10 +10,10 @@ import {
   patreon,
   paliers,
   paliersPayants,
-  sas,
   minecraft,
   discord,
   type RouteKey,
+  liens,
 } from "../data/site";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -173,53 +174,6 @@ function Tableau({ legende, children }: { legende: string; children: ReactNode }
 
 /* ═════════════════════════ MÉTADONNÉES DE PAGE ═══════════════════════════ */
 
-function poserMetaNom(nom: string, contenu: string) {
-  let balise = document.head.querySelector<HTMLMetaElement>(`meta[name="${nom}"]`);
-  if (!balise) {
-    balise = document.createElement("meta");
-    balise.setAttribute("name", nom);
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("content", contenu);
-}
-
-function poserMetaPropriete(propriete: string, contenu: string) {
-  let balise = document.head.querySelector<HTMLMetaElement>(
-    `meta[property="${propriete}"]`,
-  );
-  if (!balise) {
-    balise = document.createElement("meta");
-    balise.setAttribute("property", propriete);
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("content", contenu);
-}
-
-function poserCanonical(href: string) {
-  let balise = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!balise) {
-    balise = document.createElement("link");
-    balise.setAttribute("rel", "canonical");
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("href", href);
-}
-
-/**
- * Pose le titre AVANT que `Layout.tsx` ne le lise : les effets d'un enfant
- * s'exécutent avant ceux de son parent (§ 0.28, règle 2).
- */
-function useMetaPage(cle: RouteKey) {
-  useEffect(() => {
-    const fiche = meta[cle];
-    const titre = `${fiche.titre} · ${site.name}`;
-    document.title = titre;
-    poserMetaNom("description", fiche.description);
-    poserMetaPropriete("og:title", titre);
-    poserMetaPropriete("og:description", fiche.description);
-    poserCanonical(`${site.url}${routes[cle]}`);
-  }, [cle]);
-}
 
 /* ═════════════════════════ 1 · MENTIONS LÉGALES ══════════════════════════ */
 
@@ -351,8 +305,7 @@ function MentionsLegales() {
       </p>
       <p>
         Les marques, noms et logos cités appartiennent à leurs titulaires
-        respectifs. Site non affilié à The Pokémon Company. Pokémon™ et les noms
-        associés sont des marques de leurs ayants droit.
+        respectifs. {legal.piedNonAffiliation}
       </p>
 
       <h2 className="h3 sous">Les visuels de ce site</h2>
@@ -452,11 +405,14 @@ function ConditionsDeVente() {
       </Tableau>
       <p className="meta mt-4">{patreon.mentionEngagement}</p>
       <p className="mt-6">
-        <AComplet quoi="régime de TVA applicable, et mention « TTC » ou « HT » à porter à côté de chaque montant." />
+        Les montants sont indiqués hors taxes. Patreon calcule la TVA applicable
+        dans le pays du membre, l’ajoute au montant du palier, l’encaisse et la
+        reverse&nbsp;; le total à payer est affiché par Patreon avant la
+        validation de la souscription.
       </p>
       <p>
         Le détail de ce que chaque palier ouvre est présenté sur la page{" "}
-        <Link to={routes.paliers}>Les paliers</Link>. Les montants peuvent être
+        <Link to={liens.paliers}>Les paliers</Link>. Les montants peuvent être
         modifiés&#8239;; une modification ne s’applique jamais rétroactivement à
         une période déjà réglée.
       </p>
@@ -488,26 +444,65 @@ function ConditionsDeVente() {
 
       <h2 className="h3 sous">Durée, renouvellement et résiliation</h2>
       <p>
-        L’abonnement est mensuel et se reconduit par Patreon. Vous pouvez le
-        mettre en pause ou y mettre fin à tout moment depuis votre compte
-        Patreon, sans avoir à m’en avertir&nbsp;:{" "}
-        {patreon.mentionEngagement.toLowerCase()}.
+        L’abonnement est mensuel, sans engagement, et se reconduit par Patreon.
+        Vous pouvez y mettre fin à tout moment depuis votre compte Patreon, sans
+        avoir à m’en avertir.
       </p>
       <p>
-        L’accès reste ouvert jusqu’au terme de la période déjà réglée. Ensuite,
-        votre fiche de membre revient à l’état de visiteur&#8239;; vos relevés de
-        progression sont conservés et ne sont supprimés que si vous le demandez.
+        L’accès reste ouvert jusqu’au terme de la période déjà réglée.
       </p>
 
       <h2 className="h3 sous">Droit de rétractation</h2>
       <p>
-        Un abonnement à un contenu numérique fourni sans support matériel relève
-        d’un régime particulier&nbsp;: le délai de rétractation de quatorze jours
-        s’applique, sauf renoncement exprès du consommateur au moment de la
-        souscription, dans les formes prévues par le code de la consommation.
+        Si vous souscrivez en tant que consommateur, vous disposez d’un délai de
+        quatorze jours à compter de la souscription pour vous rétracter, sans
+        avoir à justifier votre décision ni à payer de pénalité (articles
+        L221-18 et suivants du code de la consommation).
       </p>
       <p>
-        <AComplet quoi="régime de rétractation effectivement retenu, formulaire type de rétractation, et texte exact du renoncement recueilli lors de la souscription. À faire valider par un conseil juridique." />
+        La souscription se faisant sur Patreon, ce site ne recueille pas votre
+        accord exprès pour une exécution immédiate ni votre renoncement au droit
+        de rétractation. Ce droit reste donc entier pendant les quatorze jours,
+        même si vous avez déjà consulté les contenus.
+      </p>
+      <p>
+        Pour l’exercer, adressez-moi avant l’expiration du délai une déclaration
+        dénuée d’ambiguïté par le{" "}
+        <Link to={routes.contact}>formulaire de contact</Link>, en reprenant par
+        exemple le modèle ci-dessous. Toutes les sommes versées vous sont
+        remboursées au plus tard quatorze jours après la réception de votre
+        demande, par le même moyen de paiement.
+      </p>
+      <div className="encart">
+        <p className="encart__t">Modèle de rétractation</p>
+        <p>
+        «&nbsp;À l’attention de {IDENTITE.editeur}&nbsp;: je vous notifie par la
+        présente ma rétractation du contrat portant sur l’abonnement au palier
+        [nom du palier], souscrit le [date] avec le compte Patreon [pseudonyme].
+        Nom&nbsp;: […] — Date&nbsp;: […]&nbsp;»
+        </p>
+      </div>
+
+      <h2 className="h3 sous">Garantie légale de conformité</h2>
+      <p>
+        Les contenus de la formation sont des contenus numériques soumis à la
+        garantie légale de conformité des articles L224-25-12 et suivants du
+        code de la consommation. Pour un abonnement, elle couvre tout défaut de
+        conformité qui apparaît pendant la durée de fourniture.
+      </p>
+      <p>
+        En cas de défaut, signalez-le par le{" "}
+        <Link to={routes.contact}>formulaire de contact</Link>. Vous avez droit
+        à la mise en conformité du contenu sans frais et dans un délai
+        raisonnable, et, à défaut, à une réduction du prix ou à la résolution du
+        contrat.
+      </p>
+
+      <h2 className="h3 sous">Membres mineurs</h2>
+      <p>
+        Patreon exige que tout membre ait au moins dix-huit ans ou dispose de
+        l’autorisation d’un parent ou d’un tuteur. Un mineur ne peut donc
+        souscrire qu’avec l’accord de son représentant légal.
       </p>
 
       <h2 className="h3 sous">Réclamation et médiation de la consommation</h2>
@@ -579,177 +574,93 @@ function Confidentialite() {
       <h2 className="h3 sous">Ce que vous m’envoyez vous-même</h2>
       <p>
         Le formulaire de la page <Link to={routes.contact}>Contact</Link>{" "}
-        recueille votre nom, votre adresse électronique, l’objet de votre message
-        et le message lui-même. Ces données servent uniquement à vous répondre,
-        et la base légale est votre consentement, que vous donnez en envoyant le
-        message. Les envois sont reçus par le service de formulaires de
-        l’hébergeur, {IDENTITE.hebergeur}.
-      </p>
-      <p>
-        Le formulaire d’inscription à la lettre d’information ne recueille que
-        votre adresse électronique, sur la base de votre consentement. Vous
-        pouvez le retirer à tout moment, et le lien de désinscription figure dans
-        chaque envoi.
+        recueille votre nom, votre adresse électronique, le motif et l’objet de
+        votre message, et le message lui-même. Ces données servent uniquement à
+        vous répondre. La base légale est mon intérêt légitime à traiter les
+        demandes qui me sont adressées. Les envois sont reçus par le service de
+        formulaires de l’hébergeur, {IDENTITE.hebergeur}.
       </p>
       <p>
         Un champ caché sert à écarter les envois automatisés. Il n’est jamais
-        rempli par une personne, et son contenu n’est pas conservé.
+        rempli par une personne.
       </p>
 
       <h2 className="h3 sous">Les traceurs déposés sur votre appareil</h2>
       <p>
-        Aucun cookie non essentiel n’est déposé avant votre clic. Il n’y a sur ce
-        site ni mesure d’audience, ni régie publicitaire, ni bouton de partage
-        qui vous suivrait d’un site à l’autre.
-      </p>
-      <Tableau legende="Inventaire des traceurs déposés par le site, leur finalité, leur base légale et leur durée">
-        <thead>
-          <tr>
-            <th scope="col">Nom</th>
-            <th scope="col">Finalité</th>
-            <th scope="col">Base légale</th>
-            <th scope="col">Durée</th>
-            <th scope="col">Catégorie</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">
-              <code>arc_session</code>
-            </th>
-            <td>Session de connexion Patreon</td>
-            <td>Exécution du contrat</td>
-            <td>Session, puis 30&nbsp;jours</td>
-            <td>Strictement nécessaire</td>
-          </tr>
-          <tr>
-            <th scope="row">
-              <code>arc_consent</code>
-            </th>
-            <td>Mémoriser votre choix de consentement</td>
-            <td>Obligation légale</td>
-            <td>6&nbsp;mois</td>
-            <td>Strictement nécessaire</td>
-          </tr>
-          <tr>
-            <th scope="row">
-              <code>arc_progression</code>
-            </th>
-            <td>Chapitres lus, cases cochées</td>
-            <td>Exécution du contrat</td>
-            <td>Compte actif, puis 12&nbsp;mois</td>
-            <td>Strictement nécessaire</td>
-          </tr>
-          <tr>
-            <th scope="row">Cookies YouTube</th>
-            <td>Lecture d’une vidéo intégrée</td>
-            <td>Votre consentement</td>
-            <td>Fixée par YouTube</td>
-            <td>Soumis au consentement</td>
-          </tr>
-        </tbody>
-      </Tableau>
-      <p className="mt-6">
-        <code>arc_session</code> et <code>arc_progression</code> ne sont posés
-        que si vous vous connectez avec Patreon&#8239;; <code>arc_consent</code>{" "}
-        n’est posé qu’au moment où vous exprimez votre choix. Tant que vous
-        restez visiteur et que vous ne choisissez rien, ce site ne dépose rien
-        sur votre appareil.
+        Ce site ne dépose aucun cookie et n’écrit rien dans le stockage de votre
+        navigateur. Il n’y a ni mesure d’audience, ni régie publicitaire, ni
+        bouton de partage qui vous suivrait d’un site à l’autre. Aucun bandeau
+        de consentement n’est donc nécessaire.
       </p>
       <p>
-        Les vidéos sont servies par le domaine sans cookie de YouTube et ne sont
-        chargées qu’après votre consentement. Tant que vous ne l’avez pas donné,
-        aucune requête ne part vers YouTube.
+        Les vidéos de la page <Link to={routes.reseaux}>Réseaux</Link> sont
+        servies par le domaine youtube-nocookie.com et ne sont chargées que
+        lorsque vous cliquez sur le lecteur. Tant que vous ne cliquez pas, aucune
+        requête ne part vers YouTube. Après votre clic, YouTube peut déposer ses
+        propres traceurs, selon sa politique de confidentialité.
       </p>
 
       <h2 className="h3 sous">Les appels vers des services tiers</h2>
       <p>
-        Deux pages du site interrogent un service extérieur pour afficher un état
-        en direct. Ces appels partent de votre navigateur, ce qui expose votre
-        adresse IP au service interrogé.
+        L’état du serveur Minecraft — {minecraft.nom} — est relevé, sur
+        l’accueil et sur la page Minecraft, auprès du service{" "}
+        <code>api.mcsrvstat.us</code>. L’appel part de votre navigateur&nbsp;: il
+        transmet votre adresse IP à ce service, qui est une donnée personnelle.
+        Aucune autre donnée ne lui est envoyée. La base légale est mon intérêt
+        légitime à afficher l’état du serveur.
       </p>
-      <ul>
-        <li>
-          L’état du serveur Minecraft — {minecraft.nom} — est relevé auprès du
-          service <code>api.mcsrvstat.us</code>, qui renvoie le nombre de
-          joueurs connectés. Aucune donnée personnelle ne lui est transmise.
-        </li>
-        <li>
-          Le compteur de membres du Discord est fourni par le widget de Discord.
-          Il reste désactivé tant que l’identifiant du serveur n’est pas
-          renseigné, et aucun chiffre n’est affiché sans source branchée.
-        </li>
-      </ul>
+      <p>
+        Le compteur du Discord n’est pas branché&nbsp;: aucune requête ne part
+        vers Discord depuis ce site.
+      </p>
 
-      <h2 className="h3 sous">L’espace membre et Patreon</h2>
+      <h2 className="h3 sous">Patreon</h2>
       <p>
-        La connexion se fait sur le site de Patreon. Aucun mot de passe ne
-        transite par ce site, et je n’en crée aucun.
-      </p>
-      <p>
-        {sas.enonceDonnees ?? (
-          <AComplet quoi="énoncé unique des données conservées pour un membre. Il ne peut être écrit qu’après le relevé des portées OAuth de Patreon, et le même texte doit être repris mot pour mot sur l’écran de connexion, sur la fiche de membre et ici." />
-        )}
-      </p>
-      <p>
-        En l’état des décisions de la charte, les données conservées pour un
-        membre sont son identifiant Patreon, son pseudonyme, l’adresse de son
-        avatar, le palier calculé, le statut de l’abonnement, la date de fin de
-        période, la date de la dernière synchronisation et la progression dans
-        les modules. Aucune adresse électronique n’est conservée, sauf pour une
-        fonction qui en dépend.
-      </p>
-      <p>
-        Vous pouvez demander l’effacement de ces données depuis votre fiche de
-        membre. Il est exécuté sous trente jours et reste sans effet sur votre
-        abonnement Patreon, que vous seul pouvez résilier.
+        Ce site n’a pas d’espace membre et ne vous demande aucune connexion. La
+        souscription, le paiement et l’accès aux contenus se font sur Patreon,
+        qui traite vos données en tant que responsable de traitement, selon sa
+        propre politique de confidentialité.
       </p>
 
       <h2 className="h3 sous">Les sous-traitants et les transferts hors Union européenne</h2>
       <ul>
         <li>
-          <b>{IDENTITE.hebergeur}</b> — hébergement du site et réception des
-          formulaires. États-Unis, sur clauses contractuelles types.
+          <b>Netlify, Inc.</b> (États-Unis) — hébergement du site et réception
+          des formulaires. Transfert encadré par le cadre de protection des
+          données UE–États-Unis (Data Privacy Framework), auquel Netlify est
+          certifié, et par les clauses contractuelles types de la Commission
+          européenne.
         </li>
         <li>
-          <b>Patreon</b> — authentification et lecture du palier. États-Unis, sur
-          clauses contractuelles types.
+          <b>api.mcsrvstat.us</b> — relevé de l’état du serveur Minecraft&nbsp;;
+          reçoit votre adresse IP.
         </li>
         <li>
-          <b>Google Ireland / YouTube</b> — lecture des vidéos intégrées, après
-          votre consentement seulement.
-        </li>
-        <li>
-          <b>api.mcsrvstat.us</b> — état du serveur Minecraft. Aucune donnée
-          personnelle transmise&#8239;; l’appel expose votre adresse IP au
-          service.
-        </li>
-        <li>
-          <b>Discord</b> — widget de la communauté. Même remarque, et désactivé
-          tant que l’identifiant du serveur n’est pas renseigné.
+          <b>Google / YouTube</b> — lecture des vidéos, seulement après votre
+          clic sur le lecteur.
         </li>
       </ul>
-      <p className="mt-6">
-        <AComplet quoi="dénominations sociales exactes et pays d’établissement des cinq sous-traitants, avec la date du relevé et le fondement du transfert retenu pour chacun." />
-      </p>
 
       <h2 className="h3 sous">Combien de temps les données sont conservées</h2>
       <ul>
         <li>
-          Messages reçus par le formulaire de contact&nbsp;:{" "}
-          <AComplet quoi="durée de conservation des messages, à fixer et à écrire ici." />
+          Messages reçus par le formulaire de contact&nbsp;: trois ans après
+          notre dernier échange, puis supprimés.
         </li>
         <li>
-          Adresse inscrite à la lettre d’information&nbsp;: jusqu’à votre
-          désinscription.
-        </li>
-        <li>Session de connexion&nbsp;: la session, puis trente jours.</li>
-        <li>Choix de consentement&nbsp;: six mois.</li>
-        <li>
-          Progression dans les modules&nbsp;: tant que le compte est actif, puis
-          douze mois.
+          Adresse IP transmise au relevé du serveur Minecraft&nbsp;: ce site
+          n’en conserve aucune.
         </li>
       </ul>
+
+      <h2 className="h3 sous">Les mineurs</h2>
+      <p>
+        Le site s’adresse aussi à un jeune public. Aucun compte n’y est créé et
+        il ne recueille que ce que vous écrivez dans le formulaire de contact.
+        Si vous avez moins de quinze ans, demandez à un parent de vous
+        accompagner avant de m’écrire. Un parent peut me demander à tout moment
+        l’effacement d’un message envoyé par son enfant.
+      </p>
 
       <h2 className="h3 sous">Vos droits</h2>
       <p>
@@ -774,9 +685,10 @@ function Confidentialite() {
         Le site est servi en HTTPS et impose une politique de sécurité du contenu
         qui n’autorise que ses propres ressources&nbsp;: les fontes sont
         hébergées ici, aucune icône n’est appelée à un tiers, et les seules
-        connexions sortantes autorisées sont celles de Patreon, de Discord et du
-        relevé du serveur Minecraft. Le cadre vidéo de YouTube n’est autorisé
-        qu’après votre consentement.
+        connexions sortantes autorisées sont celles du relevé du serveur
+        Minecraft et du widget Discord. Le lecteur vidéo de YouTube n’est
+        autorisé qu’à partir du domaine youtube-nocookie.com, et ne se charge
+        qu’après votre clic.
       </p>
 
       <h2 className="h3 sous">Les modifications de cette page</h2>
@@ -821,14 +733,12 @@ const TROUS: Record<Kind, number> = {
     null /* téléphone */,
     IDENTITE.directeurPublication,
     IDENTITE.hebergeurAdresse,
-    EMAIL_PUBLIC,
   ].filter((v) => v === null).length,
-  /* Rôles éditeur/Patreon · TVA · rétractation · médiateur · responsabilité ·
-     date d'entrée en vigueur. Six rédactions juridiques, aucune donnée. */
-  cgv: 6,
-  /* Coordonnées et DPO · sous-traitants relevés · durée des messages reçus,
-     plus l'énoncé unique des données tant que `sas.enonceDonnees` est vide. */
-  confidentialite: 3 + (sas.enonceDonnees === null ? 1 : 0),
+  /* Rôles éditeur/Patreon · médiateur · responsabilité · date d'entrée en
+     vigueur. Quatre rédactions juridiques, aucune donnée. */
+  cgv: 4,
+  /* Coordonnées postales du responsable du traitement. */
+  confidentialite: 1,
 };
 
 export default function LegalPage({ kind }: { kind: Kind }) {

@@ -70,23 +70,38 @@ import Footer from "./Footer";
    ═══════════════════════════════════════════════════════════════════════════ */
 
 export default function Layout() {
-  const { pathname } = useLocation();
+  const { pathname, hash, key } = useLocation();
   const principal = useRef<HTMLElement>(null);
   const dernierChemin = useRef(pathname);
   const [annonce, setAnnonce] = useState("");
 
   useEffect(() => {
-    // Le garde compare les chemins plutôt que de compter les passages :
-    // `StrictMode` déclenche deux fois l'effet de montage en développement,
-    // et un simple drapeau « premier passage » laisserait donc filer le
-    // second. Ici, tant que le chemin n'a pas changé, il ne se passe rien.
-    if (dernierChemin.current === pathname) return;
+    const changeDeRoute = dernierChemin.current !== pathname;
     dernierChemin.current = pathname;
 
+    // ANCRE CIBLÉE (`/formation#titre-paliers`) — sur une navigation
+    // applicative, le navigateur ne défile pas tout seul : le routeur pousse
+    // l'URL sans charger de document. On vise donc la cible nous-mêmes, une
+    // image plus tard, quand la page d'arrivée est peinte. Au montage
+    // (arrivée directe), le navigateur a déjà fait ce travail.
+    if (hash && key !== "default") {
+      const id = decodeURIComponent(hash.slice(1));
+      const image = requestAnimationFrame(() => {
+        const cible = document.getElementById(id);
+        if (!cible) return;
+        cible.scrollIntoView({ block: "start" });
+        if (!cible.hasAttribute("tabindex")) cible.setAttribute("tabindex", "-1");
+        cible.focus({ preventScroll: true });
+      });
+      if (changeDeRoute) setAnnonce(document.title);
+      return () => cancelAnimationFrame(image);
+    }
+
+    if (!changeDeRoute) return;
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     principal.current?.focus({ preventScroll: true });
     setAnnonce(document.title);
-  }, [pathname]);
+  }, [pathname, hash, key]);
 
   return (
     <>

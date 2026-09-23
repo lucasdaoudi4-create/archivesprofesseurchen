@@ -71,6 +71,9 @@
          téléchargement de la feuille. -->
     <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/fraunces-roman.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Space Mono sert la barre de navigation, au-dessus de la ligne de flottaison
+         sur toutes les pages : 17 ko, découverte sinon après la feuille. -->
+    <link rel="preload" href="/fonts/space-mono-400.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <div id="root"></div>
@@ -80,10 +83,6 @@
       <input type="email" name="email" />
       <input type="text" name="object" />
       <textarea name="message"></textarea>
-      <input type="text" name="bot-field" />
-    </form>
-    <form name="newsletter" data-netlify="true" netlify-honeypot="bot-field" hidden>
-      <input type="email" name="email" />
       <input type="text" name="bot-field" />
     </form>
     <script type="module" src="/src/main.tsx"></script>

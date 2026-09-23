@@ -269,7 +269,16 @@ export default function FicheServeur({ reprise, onAnnonce, onReessayer }: Props)
             (section 20) : un clic la sélectionne en entier, ce qui garde la
             copie manuelle possible même sans le bouton. */}
         <div className="copyline">
-          <span className="copyline__val">{minecraft.ip}</span>
+          {/* Sous 400 px l'adresse déborde et défile : la zone doit être
+              atteignable au clavier (WCAG 2.1.1). */}
+          <span
+            className="copyline__val"
+            tabIndex={0}
+            role="group"
+            aria-label="Adresse du serveur"
+          >
+            {minecraft.ip}
+          </span>
 
           {pressePapiersDispo ? (
             <button

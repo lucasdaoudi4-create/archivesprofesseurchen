@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { legal, liens } from "../../data/site";
 import Marque from "../brand/Marque";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -85,7 +86,7 @@ import Marque from "../brand/Marque";
 /** Colonne « Le lieu » — les cinq destinations du site. */
 const LE_LIEU = [
   { to: "/formation", libelle: "La formation" },
-  { to: "/laboratoire/paliers", libelle: "Les paliers" },
+  { to: liens.paliers, libelle: "Les paliers" },
   { to: "/minecraft", libelle: "L'Académie" },
   { to: "/discord", libelle: "Le Discord" },
   { to: "/reseaux", libelle: "Les réseaux" },
@@ -158,10 +159,7 @@ export default function Footer() {
             outils présentés dans la formation. Aucun décor construit, aucune
             équipe, aucun studio loué.
           </p>
-          <p className="legal">
-            Site non affilié à The Pokémon Company. Pokémon™ et les noms
-            associés sont des marques de leurs ayants droit.
-          </p>
+          <p className="legal">{legal.piedNonAffiliation}</p>
           <p className="legal">
             ©&nbsp;{annee} Les Archives du Professeur Chen&nbsp;·&nbsp;LHM Studio
           </p>

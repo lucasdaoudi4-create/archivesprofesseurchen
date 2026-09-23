@@ -114,6 +114,17 @@ export const routes: Record<RouteKey, string> = {
   introuvable: "/404",
 };
 
+/** Cibles de LIEN — ce que les boutons visent réellement tant que
+ *  `/laboratoire/paliers` et `/formation/module-01` ne sont que des renvois
+ *  vers `/formation` (voir `App.tsx`). Pointer un lien sur un renvoi coûtait
+ *  une redirection à chaque clic et, depuis `/formation`, rechargeait la page
+ *  où l'on se trouvait déjà. Le jour où les deux pages existent, ces deux
+ *  lignes redeviennent `routes.paliers` et `routes.module01`. */
+export const liens = {
+  paliers: "/formation#titre-paliers",
+  module01: "/formation#sommaire",
+} as const;
+
 export interface Redirection {
   de: string;
   vers: string;
@@ -148,13 +159,13 @@ export const meta: Record<RouteKey, Meta> = {
     titre: "Module 01 — La boîte à outils",
     description:
       "Module 01 — La boîte à outils\u00A0: huit chapitres pour choisir ses instruments et savoir à quel moment on les sort de la boîte.",
-    indexee: true,
+    indexee: false,
   },
   paliers: {
     titre: "Les paliers",
     description:
-      "Trois paliers d’accès à la formation, de 8,50\u00A0€ à 89,50\u00A0€ par mois sur Patreon, sans engagement et avec mise en pause à tout moment.",
-    indexee: true,
+      "Trois paliers d’accès à la formation, de 8,50\u00A0€ à 89,50\u00A0€ par mois sur Patreon, sans engagement et résiliables à tout moment.",
+    indexee: false,
   },
   minecraft: {
     titre: "L’Académie du Professeur Chen",
@@ -211,14 +222,14 @@ export const meta: Record<RouteKey, Meta> = {
 export const navLinks: Lien[] = [
   { to: routes.accueil, label: "Accueil" },
   { to: routes.formation, label: "Formation" },
-  { to: routes.paliers, label: "Paliers" },
+  { to: liens.paliers, label: "Paliers" },
   { to: routes.minecraft, label: "Minecraft" },
   { to: routes.discord, label: "Discord" },
   { to: routes.reseaux, label: "Réseaux" },
   { to: routes.contact, label: "Contact" },
 ];
 
-export const navCta: Lien = { to: routes.paliers, label: "Rejoindre" };
+export const navCta: Lien = { to: liens.paliers, label: "Rejoindre" };
 
 export const lienEvitement = "Aller au contenu";
 
@@ -266,7 +277,7 @@ export const pied: Pied = {
       titre: "Le lieu",
       liens: [
         { to: routes.formation, label: "La formation" },
-        { to: routes.paliers, label: "Les paliers" },
+        { to: liens.paliers, label: "Les paliers" },
         { to: routes.minecraft, label: "L’Académie" },
         { to: routes.discord, label: "Le Discord" },
         { to: routes.reseaux, label: "Les réseaux" },
@@ -455,7 +466,7 @@ export const patreon: Patreon = {
   url: "https://patreon.com/LesArchivesduProfesseurChen",
   boutonLibelle: "Se connecter avec Patreon",
   logo: null,
-  mentionEngagement: "Sans engagement · pause à tout moment",
+  mentionEngagement: "Sans engagement · résiliable à tout moment · TVA de votre pays ajoutée par Patreon",
 };
 
 export type PalierKey = "visiteur" | "dresseur" | "champion" | "maitre";
@@ -636,7 +647,7 @@ export const blocPaliers: BlocPaliers = {
   lede:
     "On entre en Jeune Dresseur, on apprend la méthode complète en Champion d’Arène, et on fait relire son propre travail en Maître de la Ligue. L’accès passe par Patreon, sans engagement.",
   ledeAccueil:
-    "On entre en Jeune Dresseur, on apprend la méthode complète en Champion d’Arène, et on fait relire son propre travail en Maître de la Ligue. L’accès passe par Patreon, sans engagement — vous pouvez mettre en pause à tout moment.",
+    "On entre en Jeune Dresseur, on apprend la méthode complète en Champion d’Arène, et on fait relire son propre travail en Maître de la Ligue. L’accès passe par Patreon, sans engagement — vous pouvez résilier à tout moment.",
   pictogramme: "pic-incubation",
   ctaCarte: "Rejoindre ce palier",
   ctaComparer: "Comparer les trois paliers",
@@ -910,7 +921,7 @@ export const faq: QuestionReponse[] = [
   },
   {
     q: "Comment l’accès fonctionne-t-il\u202F?",
-    a: "L’accès passe par Patreon. Vous choisissez un palier mensuel, et l’accès aux modules suit votre palier Patreon. Sans engagement\u00A0: vous pouvez mettre en pause à tout moment.",
+    a: "L’accès passe par Patreon. Vous choisissez un palier mensuel, et l’accès aux modules suit votre palier Patreon. Sans engagement\u00A0: vous pouvez résilier à tout moment depuis votre compte Patreon. Les montants sont hors TVA\u00A0: Patreon ajoute celle de votre pays au paiement.",
   },
   {
     q: "Qu’est-ce qui est ouvert aujourd’hui\u202F?",
@@ -1109,8 +1120,11 @@ export const legal: Legal = {
    */
   piedGenerationDecor:
     "Les visuels de cette page — le laboratoire, le narrateur, les planches de décor — sont générés par intelligence artificielle avec les outils présentés dans la formation. Aucun décor construit, aucune équipe, aucun studio loué.",
+  // Une seule formulation, lue par le pied de page ET par les mentions
+  // légales. La première phrase est celle du § 13.3 ; la dernière est la
+  // mention que les règles d’usage de Mojang attendent de tout serveur.
   piedNonAffiliation:
-    "Site non affilié à Nintendo, Game Freak ou The Pokémon Company.",
+    "Site non affilié à The Pokémon Company, Nintendo, Game Freak, Mojang ou Microsoft. Pokémon™ et les noms associés sont des marques de leurs ayants droit. L’Académie n’est pas un produit ni un service officiel Minecraft, et n’est ni approuvée par Mojang ou Microsoft, ni associée à eux.",
   /** Label obligatoire au-dessus de toute jauge (§10.1 ④). */
   labelReleve: "Relevé — appréciation personnelle",
   /** Mention obligatoire sur toute image servant de preuve (§10.1 ⑤). */
@@ -1127,7 +1141,10 @@ export const legal: Legal = {
       directeurPublication: null,
       emailContact: null,
       hebergeur: "Netlify",
-      hebergeurAdresse: null,
+      // Relevé le 23 septembre 2026 sur netlify.com/privacy. Netlify ne
+      // publie pas de numéro de téléphone : l’adresse électronique en tient lieu.
+      hebergeurAdresse:
+        "Netlify, Inc., 101 2nd Street, San Francisco, CA 94105, États-Unis — privacy@netlify.com",
     },
     cgv: {
       titre: "Conditions de vente",

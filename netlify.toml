@@ -2,6 +2,11 @@
   command = "npm run build"
   publish = "dist"
 
+# ── En-têtes de sécurité ─────────────────────────────────────────────────
+# Ils sont écrits au build dans `dist/_headers` (greffon `pagesStatiques`,
+# `vite.config.ts`) parce que la CSP autorise le script en ligne de
+# préchargement par son empreinte SHA-256, calculée sur le HTML produit.
+
 # ── En-têtes de cache ────────────────────────────────────────────────────
 # Netlify pose déjà `immutable` sur `/assets/*`, que Vite nomme par
 # empreinte. Il ne le pose PAS sur `public/`, qu'il recopie tel quel : les
@@ -29,9 +34,8 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # ── Renvois — socle § 0.27 ───────────────────────────────────────────────
-# L'ORDRE COMPTE : Netlify applique la première règle qui correspond, et la
-# règle attrape-tout du bas correspond à tout. Toute nouvelle règle se pose
-# donc AVANT elle.
+# L'ORDRE COMPTE : Netlify applique la première règle qui correspond. Il n'y
+# a plus d'attrape-tout : une URL inconnue reçoit `404.html` en vrai 404.
 #
 # Ces règles ne voient que les chargements de page complets. Une navigation
 # interne (`<Link>`) est résolue par le routeur, jamais par le réseau : les
@@ -60,14 +64,55 @@
   to = "/formation"
   status = 302
 
-# ── Application à page unique ────────────────────────────────────────────
-# Toujours en dernier.
-#
-# À SIGNALER : cette règle répond 200 sur TOUTE URL inconnue, y compris
-# celles qui doivent être introuvables. `NotFound` pose bien son `noindex`
-# (§ 0.29), mais le statut HTTP reste 200. Le corriger demande d'énumérer
-# les routes valides ici, ce qui n'est pas une décision de recette.
+# ── Pages servies ────────────────────────────────────────────────────────
+# Le build écrit un HTML par route (`vite.config.ts`, greffon
+# `pagesStatiques`) : même application, mais une tête de page propre à la
+# route, pour les robots et les aperçus de lien qui n'exécutent pas JS.
+# Netlify les sert déjà sans règle ; les réécritures ci-dessous ne font que
+# couvrir aussi la variante avec barre oblique finale.
+
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/formation"
+  to = "/formation.html"
   status = 200
+
+[[redirects]]
+  from = "/minecraft"
+  to = "/minecraft.html"
+  status = 200
+
+[[redirects]]
+  from = "/discord"
+  to = "/discord.html"
+  status = 200
+
+[[redirects]]
+  from = "/reseaux"
+  to = "/reseaux.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/mentions-legales"
+  to = "/mentions-legales.html"
+  status = 200
+
+[[redirects]]
+  from = "/cgv"
+  to = "/cgv.html"
+  status = 200
+
+[[redirects]]
+  from = "/confidentialite"
+  to = "/confidentialite.html"
+  status = 200
+
+# ── Page introuvable ─────────────────────────────────────────────────────
+# PLUS D'ATTRAPE-TOUT EN 200. Toute URL qui ne correspond ni à un fichier ni
+# à une règle reçoit `404.html` (écrit au build, `noindex`, sans canonique)
+# avec un VRAI statut 404 : c'est le comportement natif de Netlify. L'appli
+# React s'y monte et rend `NotFound`, comme avant.

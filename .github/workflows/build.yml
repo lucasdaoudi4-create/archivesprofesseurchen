@@ -1,0 +1,23 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run build
+      # Garde-fous : aucun JS compilé à côté des sources, et les fichiers
+      # que le greffon `pagesStatiques` doit produire sont bien là.
+      - run: test -z "$(git ls-files 'src/**/*.js')"
+      - run: for f in _headers robots.txt sitemap.xml 404.html formation.html cgv.html; do test -f "dist/$f" || { echo "manque dist/$f"; exit 1; }; done

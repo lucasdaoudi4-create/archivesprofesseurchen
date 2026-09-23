@@ -1,4 +1,4 @@
-import { Fragment, useEffect, type CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import {
   accueil,
@@ -20,6 +20,7 @@ import {
   reseauxOrdre,
   routes,
   site,
+  liens,
 } from "../data/site";
 import {
   CADRAGE_COLONNE,
@@ -41,6 +42,7 @@ import PanneauMatiere from "../components/accueil/PanneauMatiere";
 import EtatServeur from "../components/accueil/EtatServeur";
 import { Ecusson, Icone, LogoReseau } from "../components/ui/Icones";
 import { useRevelation } from "../hooks/useRevelation";
+import useMetaPage from "../hooks/useMetaPage";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    L'ACCUEIL — route `/` · la page la plus normée du site
@@ -113,72 +115,21 @@ import { useRevelation } from "../hooks/useRevelation";
    `[id]{scroll-margin-top}` (§ 0.20) les décale déjà sous la barre collante.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Métadonnées de page — socle § 0.29 ───────────────────────────────────
-   Le site n'a aucun mécanisme de titre par page : `index.html` en porte un
-   seul. Or `Layout.tsx` ANNONCE `document.title` à chaque changement de
-   route (§ 0.28) — sans titre par page, revenir sur l'accueil annoncerait le
-   titre de la page qu'on quitte. La page pose donc le sien, en amont, comme
-   le § 0.28 le suppose.
-
-   Aucune dépendance ajoutée pour cela : quatre lignes de DOM suffisent, et
-   `react-helmet-async` pèserait plus que la fonction qu'il rendrait.        */
-
-function poserMeta(attribut: "name" | "property", cle: string, contenu: string): void {
-  const selecteur = `meta[${attribut}="${cle}"]`;
-  let balise = document.head.querySelector<HTMLMetaElement>(selecteur);
-  if (!balise) {
-    balise = document.createElement("meta");
-    balise.setAttribute(attribut, cle);
-    document.head.appendChild(balise);
-  }
-  balise.setAttribute("content", contenu);
-}
-
-function poserCanonique(href: string): void {
-  let lien = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!lien) {
-    lien = document.createElement("link");
-    lien.setAttribute("rel", "canonical");
-    document.head.appendChild(lien);
-  }
-  lien.setAttribute("href", href);
-}
-
-function useMetadonneesAccueil(): void {
-  useEffect(() => {
-    const { titre, description } = meta.accueil;
-
-    document.title = titre;
-    poserMeta("name", "description", description);
-    poserMeta("property", "og:title", titre);
-    poserMeta("property", "og:description", description);
-    poserMeta("property", "og:url", `${site.url}/`);
-    poserCanonique(`${site.url}/`);
-
-    // Une seule donnée structurée par page (§ 0.29). Sur l'accueil c'est
-    // `Organization` : le nom, l'adresse, la marque, et les comptes tenus
-    // ailleurs. Aucun chiffre, aucune note, aucun avis — rien qui ne soit
-    // vérifiable depuis le site lui-même.
-    const donnees = document.createElement("script");
-    donnees.type = "application/ld+json";
-    donnees.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: site.name,
-      url: site.url,
-      logo: `${site.url}/favicon.svg`,
-      description: meta.accueil.description,
-      sameAs: [
-        ...reseauxOrdre.map((cle) => reseaux[cle].url),
-        patreon.url,
-      ],
-      parentOrganization: { "@type": "Organization", name: site.editeur },
-    });
-    document.head.appendChild(donnees);
-
-    return () => donnees.remove();
-  }, []);
-}
+/* Une seule donnée structurée par page (§ 0.29). Sur l'accueil c'est
+   `Organization` : le nom, l'adresse, la marque, et les comptes tenus
+   ailleurs. Aucun chiffre, aucune note, aucun avis — rien qui ne soit
+   vérifiable depuis le site lui-même. Titre, description, canonique :
+   `hooks/useMetaPage`. */
+const DONNEES_ACCUEIL = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: site.name,
+  url: site.url,
+  logo: `${site.url}/favicon.svg`,
+  description: meta.accueil.description,
+  sameAs: [...reseauxOrdre.map((cle) => reseaux[cle].url), patreon.url],
+  parentOrganization: { "@type": "Organization", name: site.editeur },
+};
 
 /* Les trois plaques de palier — socle § 0.26 et contrat de balisage de
    `32-membre.css`. Le rang 01 prend sa couleur du CSS ; les rangs 02 et 03
@@ -222,7 +173,7 @@ const PLAQUE: Record<number, string> = {
    token que le balisage pose encore est `--aplat`, lu de `visuels.ts`.   */
 
 export default function Home() {
-  useMetadonneesAccueil();
+  useMetaPage("accueil", DONNEES_ACCUEIL);
   useRevelation();
 
   return (
@@ -445,7 +396,7 @@ export default function Home() {
               </div>
 
               <div className="hero__b">
-                <Link className="btn" to={routes.module01}>
+                <Link className="btn" to={liens.module01}>
                   {formation.ctaModule}{" "}
                   <span className="btn__f" aria-hidden="true">→</span>
                 </Link>
@@ -661,7 +612,7 @@ export default function Home() {
                         <span className="sr-only"> (nouvel onglet)</span>{" "}
                         <span className="btn__f" aria-hidden="true">→</span>
                       </a>
-                      <Link className="meta text-center" to={routes.paliers}>
+                      <Link className="meta text-center" to={liens.paliers}>
                         {blocPaliers.ctaComparer}
                       </Link>
                     </div>
@@ -672,7 +623,7 @@ export default function Home() {
           </div>
 
           <div className="hero__b" data-rv>
-            <Link className="btn" to={routes.paliers}>
+            <Link className="btn" to={liens.paliers}>
               {blocPaliers.ctaComparer}{" "}
               <span className="btn__f" aria-hidden="true">→</span>
             </Link>

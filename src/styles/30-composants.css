@@ -1069,6 +1069,10 @@ button.legende {
 
 .champ {
   display: grid;
+  /* `minmax(0,1fr)` : sans elle, la piste prend la largeur intrinsèque du
+     `<select>` — celle de son option la plus longue, 433 px — et la page
+     défilait latéralement à 375 px. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-2);
   margin-block-end: var(--sp-5);
 }
@@ -1084,6 +1088,8 @@ button.legende {
 .champ input,
 .champ select,
 .champ textarea {
+  min-width: 0;
+  max-width: 100%;
   padding: var(--sp-3);
   border: var(--trait-filet) solid var(--bordure-forte);
   border-radius: var(--r-2);
@@ -2176,6 +2182,7 @@ button.legende {
   grid-template-columns: 1fr 1fr;
   align-items: center;
   min-block-size: calc(100vh - var(--h-nav));
+  min-block-size: calc(100svh - var(--h-nav));
   overflow: hidden;
 }
 
@@ -2541,7 +2548,9 @@ button.legende {
 
   /* Sous la planche, le relevé du plan n'est plus servi à sa largeur
      maximale de 32rem : l'échelle du viewBox tombe, et la compensation
-     monte pour la rattraper. 1,20 est le plafond du dessin — au-delà,
-     « LES RÉSEAUX » sort de la pièce 03. Voir le pavé de la section 18. */
-  .plan__svg { --plan-compense: 1.2; }
+     monte pour la rattraper. Mesuré à 375 px, 1,20 faisait déjà toucher
+     « LES RÉSEAUX » aux murs de la pièce 03, sortir « ME JOINDRE » du
+     cercle 04 et coller « LE SERVEUR » au disque 02 : 1,05 les rentre tous
+     avec une marge. Voir le pavé de la section 18. */
+  .plan__svg { --plan-compense: 1.05; }
 }
